@@ -1,0 +1,8 @@
+-- Create a simple test table
+CREATE TABLE test_table (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- note DELETE THIS AFTER ADDING NORMAL MIGRATIONS

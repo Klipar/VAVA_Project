@@ -1,0 +1,34 @@
+services:
+  rabbit_db:
+    image: postgres:15
+    container_name: rabbit_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: vava_project
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - vava_net
+
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: rabbit_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - rabbit_db
+    networks:
+      - vava_net
+
+volumes:
+  db_data:
+
+networks:
+  vava_net:
+    driver: bridge
