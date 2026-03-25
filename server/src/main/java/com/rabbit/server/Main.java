@@ -11,11 +11,22 @@ import java.net.InetSocketAddress;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
+
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        try (Connection conn = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/vava_project", "user", "password")) {
+        Dotenv dotenv = Dotenv.load(); // object for reading data from dot env file
+
+        String ip = dotenv.get("DB_IP");
+        String port = dotenv.get("DB_PORT");
+        String user = dotenv.get("DB_USER");
+        String pass = dotenv.get("DB_PASS");
+        String name = dotenv.get("DB_NAME");
+
+        String url = String.format("jdbc:postgresql://%s:%s/%s", ip, port, name);
+
+        try (Connection conn = DriverManager.getConnection(url, user, pass)) {
             new MigrationRunner(conn).runMigrations();
         } catch (Exception e) {
             e.printStackTrace();

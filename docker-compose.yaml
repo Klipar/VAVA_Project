@@ -1,13 +1,15 @@
+version: "3.8"
+
 services:
   rabbit_db:
     image: postgres:15
     container_name: rabbit_db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: vava_project
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "127.0.0.1:5432:5432"
+      - "${DB_IP}:${DB_PORT}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
@@ -17,10 +19,10 @@ services:
     image: dpage/pgadmin4:7
     container_name: rabbit_pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
     ports:
-      - "127.0.0.1:8080:80"
+      - "${DB_IP}:8080:80"
     depends_on:
       - rabbit_db
     networks:
