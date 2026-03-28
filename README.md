@@ -1,6 +1,9 @@
 # Rabbit
 ![rabbit](https://i.redd.it/tddknk8yc98g1.jpeg)
 
+Create a `.env` file in this folder. Copy all data from `.env.example`.
+If needed, you can change it, but it should already work.
+
 ## commands to start project:
 ### Run `Database`
 for running database you need `docket` and `docker-compose`. Install them and using docker-compose run containers.
