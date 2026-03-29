@@ -2,10 +2,11 @@ package com.rabbit.server.service;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
-import java.io.*;
 import java.sql.*;
 import java.util.*;
-import java.nio.file.*;
+
+import com.rabbit.server.database.MigrationRunner;
+
 
 public class DatabaseService {
 
@@ -19,6 +20,12 @@ public class DatabaseService {
     private DatabaseService() {
         loadConfig();
         loadDriver();
+
+        try (Connection conn = getConnection()) {
+           new MigrationRunner(conn).runMigrations();
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
     }
 
     private void loadConfig() {

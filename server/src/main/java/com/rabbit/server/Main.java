@@ -9,26 +9,9 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 import com.rabbit.server.handler.TaskHandler;
-import io.github.cdimascio.dotenv.Dotenv;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Dotenv dotenv = Dotenv.load(); // object for reading data from dot env file
-
-        String ip = dotenv.get("DB_IP");
-        String port = dotenv.get("DB_PORT");
-        String user = dotenv.get("DB_USER");
-        String pass = dotenv.get("DB_PASS");
-        String name = dotenv.get("DB_NAME");
-
-        String url = String.format("jdbc:postgresql://%s:%s/%s", ip, port, name);
-
-//        try (Connection conn = DriverManager.getConnection(url, user, pass)) {
-//            new MigrationRunner(conn).runMigrations();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
         // Create HTTP server on port 6969
         HttpServer server = HttpServer.create(new InetSocketAddress(6969), 0);
         TaskHandler taskHandler = new TaskHandler();
