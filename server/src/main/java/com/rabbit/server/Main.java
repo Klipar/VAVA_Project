@@ -1,5 +1,4 @@
 package com.rabbit.server;
-import com.rabbit.server.database.MigrationRunner;
 
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
@@ -9,9 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-
+import com.rabbit.server.handler.TaskHandler;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Main {
@@ -34,6 +31,12 @@ public class Main {
 
         // Create HTTP server on port 6969
         HttpServer server = HttpServer.create(new InetSocketAddress(6969), 0);
+        TaskHandler taskHandler = new TaskHandler();
+
+        server.createContext("/tasks/",        taskHandler.getAll());    // GET  /tasks/{projectId}
+        server.createContext("/tasks/create",  taskHandler.create());    // POST /tasks/{projectId}/create
+        server.createContext("/tasks/update",  taskHandler.update());    // PUT  /tasks/{taskId}/update
+        server.createContext("/tasks/delete",  taskHandler.delete());    // DELETE /tasks/{taskId}/delete
 
         server.createContext("/swagger", new SwaggerHandler());
         server.createContext("/openapi.json", new OpenApiHandler());
@@ -95,38 +98,6 @@ public class Main {
             exchange.sendResponseHeaders(200, response.length());
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response.getBytes());
-            }
-        }
-    }
-
-    static class OpenApiHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String spec = """
-            {
-                "openapi": "3.0.0",
-                "info": {
-                    "title": "Rabbit API",
-                    "version": "1.0.0"
-                },
-                "servers": [{"url": "http://localhost:6969"}],
-                "paths": {
-                    "/hello": {
-                        "get": {
-                            "summary": "Hello endpoint",
-                            "responses": {
-                                "200": {"description": "Success"}
-                            }
-                        }
-                    }
-                }
-            }
-        """;
-
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(200, spec.length());
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(spec.getBytes());
             }
         }
     }

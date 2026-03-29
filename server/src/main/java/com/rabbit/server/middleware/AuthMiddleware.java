@@ -10,16 +10,6 @@ public class AuthMiddleware {
 
     private ConcurrentHashMap<String, TokenEntry> tokens = new ConcurrentHashMap<>();
 
-    private static class TokenEntry {
-        final int userId;
-        volatile long lastAccessedAt;
-
-        TokenEntry(int userId) {
-            this.userId = userId;
-            this.lastAccessedAt = System.currentTimeMillis();
-        }
-    }
-
     private AuthMiddleware() {}
 
     public static AuthMiddleware getInstanse() {
@@ -29,6 +19,16 @@ public class AuthMiddleware {
             }
         }
         return instanse;
+    }
+
+    private static class TokenEntry {
+        final int userId;
+        volatile long lastAccessedAt;
+
+        TokenEntry(int userId) {
+            this.userId = userId;
+            this.lastAccessedAt = System.currentTimeMillis();
+        }
     }
 
     public String createToken(int userId) {
