@@ -26,14 +26,17 @@ public class Main {
 
         String url = String.format("jdbc:postgresql://%s:%s/%s", ip, port, name);
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass)) {
-            new MigrationRunner(conn).runMigrations();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try (Connection conn = DriverManager.getConnection(url, user, pass)) {
+//            new MigrationRunner(conn).runMigrations();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         // Create HTTP server on port 6969
         HttpServer server = HttpServer.create(new InetSocketAddress(6969), 0);
+
+        server.createContext("/swagger", new SwaggerHandler());
+        server.createContext("/openapi.json", new OpenApiHandler());
 
         // Define /hello endpoint
         server.createContext("/hello", new HelloHandler());
@@ -59,6 +62,71 @@ public class Main {
                 os.close();
             } else {
                 exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+            }
+        }
+    }
+
+    static class SwaggerHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String response = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>API Documentation</title>
+                <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+            </head>
+            <body>
+                <div id="swagger-ui"></div>
+                <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+                <script>
+                    window.onload = () => {
+                        window.ui = SwaggerUIBundle({
+                            url: "/openapi.json",
+                            dom_id: "#swagger-ui",
+                        });
+                    };
+                </script>
+            </body>
+            </html>
+        """;
+
+            exchange.getResponseHeaders().set("Content-Type", "text/html");
+            exchange.sendResponseHeaders(200, response.length());
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.getBytes());
+            }
+        }
+    }
+
+    static class OpenApiHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String spec = """
+            {
+                "openapi": "3.0.0",
+                "info": {
+                    "title": "Rabbit API",
+                    "version": "1.0.0"
+                },
+                "servers": [{"url": "http://localhost:6969"}],
+                "paths": {
+                    "/hello": {
+                        "get": {
+                            "summary": "Hello endpoint",
+                            "responses": {
+                                "200": {"description": "Success"}
+                            }
+                        }
+                    }
+                }
+            }
+        """;
+
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, spec.length());
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(spec.getBytes());
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.rabbit.server.service;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -20,32 +22,15 @@ public class DatabaseService {
     }
 
     private void loadConfig() {
-        try {
-            Path path = Paths.get(".env");
-            List<String> lines = Files.readAllLines(path);
-            Map<String, String> config = new HashMap<>();
+        Dotenv dotenv = Dotenv.load();
 
-            for (String line : lines) {
-                if (line.trim().isEmpty() || line.startsWith("#")) {
-                    continue;
-                }
-                String[] parts = line.split("=", 2);
-                if (parts.length == 2) {
-                    config.put(parts[0].trim(), parts[1].trim());
-                }
-            }
+        String dbHost = dotenv.get("DB_IP");
+        String dbPort = dotenv.get("DB_PORT");
+        String dbName = dotenv.get("DB_NAME");
+        this.dbUser = dotenv.get("DB_USER");
+        this.dbPassword = dotenv.get("DB_PASS");
 
-            String dbHost = config.get("DB_IP");
-            String dbPort = config.get("DB_PORT");
-            String dbName = config.get("DB_NAME");
-            this.dbUser = config.get("DB_USER");
-            this.dbPassword = config.get("DB_PASS");
-
-            this.dbUrl = String.format("jdbc:postgresql://%s:%s/%s", dbHost, dbPort, dbName);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load .env file", e);
-        }
+        this.dbUrl = String.format("jdbc:postgresql://%s:%s/%s", dbHost, dbPort, dbName);
     }
 
     private void loadDriver() {
