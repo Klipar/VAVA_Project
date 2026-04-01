@@ -28,6 +28,16 @@ services:
     networks:
       - vava_net
 
+  ai-service:
+    build: ./model
+    container_name: ai_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./model:/app
+    networks:
+      - vava_net
+
 volumes:
   db_data:
 

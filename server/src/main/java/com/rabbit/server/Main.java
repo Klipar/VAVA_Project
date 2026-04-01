@@ -9,17 +9,21 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 import com.rabbit.server.handler.TaskHandler;
+import com.rabbit.server.handler.AiHandler;
 
 public class Main {
     public static void main(String[] args) throws IOException {
         // Create HTTP server on port 6969
         HttpServer server = HttpServer.create(new InetSocketAddress(6969), 0);
         TaskHandler taskHandler = new TaskHandler();
+        AiHandler aiHandler = new AiHandler();
 
         server.createContext("/tasks/",        taskHandler.getAll());    // GET  /tasks/{projectId}
         server.createContext("/tasks/create",  taskHandler.create());    // POST /tasks/{projectId}/create
         server.createContext("/tasks/update",  taskHandler.update());    // PUT  /tasks/{taskId}/update
         server.createContext("/tasks/delete",  taskHandler.delete());    // DELETE /tasks/{taskId}/delete
+
+        server.createContext("/ai/suggest", aiHandler.suggest());  // POST /ai/suggest
 
         server.createContext("/swagger", new SwaggerHandler());
         server.createContext("/openapi.json", new OpenApiHandler());
