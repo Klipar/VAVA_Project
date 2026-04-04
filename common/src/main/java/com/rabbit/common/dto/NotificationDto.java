@@ -17,6 +17,7 @@ public class NotificationDto implements JsonSerializable {
     private Long id;
     private String message;
     private LocalDateTime created_at;
+    private boolean isRead;
 
     @Override
     public String toJson() {
