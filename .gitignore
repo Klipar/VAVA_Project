@@ -34,3 +34,4 @@ docker-data/
 
 # Compiled files
 *.class
+model/__pycache__
