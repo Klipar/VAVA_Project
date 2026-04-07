@@ -103,6 +103,7 @@ public class TaskHandler {
         String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
         return auth.getUserId(authHeader.substring(7));
+
     }
 
     private int extractId(String path, int segment) {
