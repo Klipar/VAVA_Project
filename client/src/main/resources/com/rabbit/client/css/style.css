@@ -1,0 +1,38 @@
+#sidebarContainer {
+    -fx-background-color: #051020;
+    -fx-pref-width: 260px;
+}
+
+.sidebar-button {
+    -fx-background-color: #1a2533;
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 8;
+    -fx-padding: 12 15 12 15;
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #2d3a4d;
+}
+
+.sidebar-button:pressed {
+    -fx-background-color: #0f172a;
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.language-button {
+    -fx-background-color: #1a2533;
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 8;
+    -fx-padding: 10 15 10 15;
+}
+
+.sidebar-button .graphic-container {
+    -fx-padding: 0 10 0 0;
+}

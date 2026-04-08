@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.Label?>
+
+<BorderPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rabbit.client.ui.controllers.MainController">
+    <left>
+        <fx:include fx:id="sidebar" source="sidebar.fxml" />
+    </left>
+    <center>
+        <StackPane>
+            <Label text="Default content, may be something go wrong... \(-_-)/" style="-fx-text-fill: white;"/>
+        </StackPane>
+    </center>
+</BorderPane>

@@ -1,13 +1,16 @@
 package com.rabbit.common.dto;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.common.enums.UserRole;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 /**
  * Data Transfer Object for user information.
@@ -18,7 +21,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserDto implements JsonSerializable {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private Long id;                     // unique user identifier (no setter - only set via constructor)
     private String name;                 // real name
@@ -45,6 +50,14 @@ public class UserDto implements JsonSerializable {
             return OBJECT_MAPPER.writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize UserDto to JSON", e);
+        }
+    }
+
+    public static UserDto fromJson(String json) {
+        try {
+            return OBJECT_MAPPER.readValue(json, UserDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to deserialize UserDto from JSON", e);
         }
     }
 }
