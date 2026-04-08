@@ -1,5 +1,7 @@
 package com.rabbit.client.ui.controllers;
 
+import java.util.ResourceBundle;
+
 import com.rabbit.client.Config;
 import com.rabbit.common.dto.UserDto;
 import com.rabbit.common.enums.UserRole;
@@ -10,6 +12,7 @@ import javafx.scene.layout.VBox;
 
 public class SidebarController {
     @FXML private VBox menuItemsContainer;
+    @FXML private Button change_language;
 
     private MainController mainController;
 
@@ -21,18 +24,27 @@ public class SidebarController {
         menuItemsContainer.getChildren().clear();
         UserDto user = Config.getInstance().getUser();
 
+        ResourceBundle rb = Config.getInstance().getBundle();
 
-        createButton("HOME PAGE", "home-view.fxml");
-        createButton("MY PROJECTS", "projects-view.fxml");
+
+        createButton(rb.getString("home_page"), "home-view.fxml");
+        createButton(rb.getString("my_projects_"), "projects-view.fxml");
 
         if (user.getRole() != UserRole.MANAGER)
-            createButton("MY TASKS", "my-tasks-view.fxml");
+            createButton(rb.getString("my_tasks"), "my-tasks-view.fxml");
 
         if (user.getRole() == UserRole.MANAGER || user.getRole() == UserRole.TEAM_LEADER)
-            createButton("ADMIN PANEL", "admin-view.fxml");
+            createButton(rb.getString("admin_panel"), "admin-view.fxml");
 
-        createButton("NOTIFICATIONS", "notifications-view.fxml");
-        createButton("PROFILE", "profile-view.fxml");
+        createButton(rb.getString("notifications"), "notifications-view.fxml");
+        createButton(rb.getString("profile"), "profile-view.fxml");
+
+        change_language.setOnAction(event -> {
+            if (mainController != null) {
+                System.out.println("Change language!!!");
+                // mainController.loadView();
+            }
+        });
     }
 
     private void createButton(String text, String fxmlName) {

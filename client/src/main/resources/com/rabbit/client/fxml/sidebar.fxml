@@ -13,7 +13,7 @@
                 <Insets bottom="20.0" left="15.0" right="15.0" top="20.0" />
             </padding>
         </VBox>
-        <Button maxWidth="1.7976931348623157E308" text="LANGUAGE" styleClass="sidebar-button">
+        <Button maxWidth="1.7976931348623157E308" fx:id="change_language" text="LANGUAGE" styleClass="sidebar-button">
             <VBox.margin>
                 <Insets bottom="20.0" left="15.0" right="15.0" />
             </VBox.margin>
