@@ -78,27 +78,3 @@ public class NotificationRepository {
         return new NotificationDto(id, message, created_at);
     }
 }
-
-class Main {
-    public static void main(String[] args) throws SQLException {
-        DatabaseService dbService = DatabaseService.getInstance();
-        NotificationRepository repo = new NotificationRepository(dbService);
-
-        NotificationDto dto = new NotificationDto(
-                null,
-                "Succesful notification test",
-                LocalDateTime.now()
-        );
-
-        Long insertedId = repo.save(dto);
-        System.out.println("Inserted ID: " + insertedId);
-
-        Optional<NotificationDto> result = repo.findMessageById(2L);
-
-        List<NotificationDto> allNotifications = repo.findAll();
-        for (NotificationDto n : allNotifications) {
-            System.out.println(n.getId() + ": " + n.getMessage() + " at " + n.getCreated_at());
-        }
-    }
-}
-

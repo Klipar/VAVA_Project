@@ -1,21 +1,21 @@
 package com.rabbit.server.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.rabbit.common.dto.UserDto;
-import com.rabbit.common.enums.UserRole;
-import com.rabbit.server.middleware.AuthMiddleware;
-import com.rabbit.server.service.UserService;
-import com.rabbit.server.repository.UserRepository;
-import com.rabbit.server.service.DatabaseService;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbit.common.dto.SuccessAuthDto;
+import com.rabbit.common.dto.UserDto;
+import com.rabbit.common.enums.UserRole;
+import com.rabbit.server.middleware.AuthMiddleware;
+import com.rabbit.server.repository.UserRepository;
+import com.rabbit.server.service.UserService;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 public class UserHandler {
 
@@ -81,6 +81,7 @@ public class UserHandler {
     }
 
     // POST /projects/{projectId}/users/create
+    @SuppressWarnings("unchecked")
     public HttpHandler createUser() {
         return exchange -> {
             if (!exchange.getRequestMethod().equals("POST")) {
@@ -97,10 +98,10 @@ public class UserHandler {
             try {
                 long projectId = extractId(exchange.getRequestURI().getPath(), 2);
 
-                // Отримуємо роль творця з бази даних
+                // Retrieve the creator role from the database
                 UserRole creatorRole = getUserRole(creatorId.longValue());
 
-                // Парсимо тіло запиту
+                // Parse the request body
                 Map<String, Object> requestBody = mapper.readValue(exchange.getRequestBody(), Map.class);
 
                 UserDto userDto = new UserDto();
@@ -172,10 +173,8 @@ public class UserHandler {
             try {
                 long targetUserId = extractId(exchange.getRequestURI().getPath(), 2);
 
-                // Видаляємо зв'язки з проектами перед видаленням юзера
                 service.removeUserFromAllProjects(targetUserId);
 
-                // Видаляємо юзера
                 service.deleteUser(targetUserId, requestingUserId.longValue());
 
                 send(exchange, 200, "{\"message\":\"User deleted successfully\"}");
@@ -208,7 +207,7 @@ public class UserHandler {
                 long projectId = extractId(path, 2);
                 long userId = extractId(path, 4);
 
-                // Перевірка чи користувач має права додавати юзера до проекту
+                // Check whether the user has permission to add a user to the project
                 UserRole requesterRole = getUserRole(requestingUserId.longValue());
                 if (requesterRole != UserRole.MANAGER && requesterRole != UserRole.TEAM_LEADER) {
                     send(exchange, 403, "{\"error\":\"Only Manager or Team Leader can add users to project\"}");
@@ -244,7 +243,7 @@ public class UserHandler {
                 long projectId = extractId(path, 2);
                 long userId = extractId(path, 4);
 
-                // Тільки сам користувач може видалити себе з проекту
+                // Only the user themselves can remove themselves from the project
                 if (userId != requestingUserId.longValue()) {
                     send(exchange, 403, "{\"error\":\"You can only remove yourself from project\"}");
                     return;
@@ -275,7 +274,6 @@ public class UserHandler {
     }
 
     private UserRole getUserRole(Long userId) {
-        // Отримуємо роль користувача з бази даних
         return service.getUser(userId).getRole();
     }
 
@@ -286,5 +284,34 @@ public class UserHandler {
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(bytes);
         }
+    }
+
+    // POST /users/login
+    @SuppressWarnings("unchecked")
+    public HttpHandler loginUser() {
+        return exchange -> {
+            if (!exchange.getRequestMethod().equals("POST")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            try {
+                Map<String, Object> requestBody = mapper.readValue(exchange.getRequestBody(), Map.class);
+
+                String token = service.loginUser(
+                    requestBody.get("email").toString(),
+                    requestBody.get("password").toString()
+                );
+
+                if (token == null)
+                    send(exchange, 401, "{\"error\":\"Invalid credentials\"}");
+
+                send(exchange, 201, mapper.writeValueAsString(new SuccessAuthDto(token)));
+            } catch (IllegalArgumentException e) {
+                send(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
+            } catch (Exception e) {
+                send(exchange, 500, "{\"error\":\"Internal server error\"}");
+            }
+        };
     }
 }

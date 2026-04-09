@@ -2,12 +2,13 @@ package com.rabbit.server.service;
 
 import com.rabbit.common.dto.UserDto;
 import com.rabbit.common.enums.UserRole;
+import com.rabbit.server.middleware.AuthMiddleware;
 import com.rabbit.server.repository.UserRepository;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public class UserService {
     private final UserRepository userRepository;
@@ -95,6 +96,17 @@ public class UserService {
         userRepository.removeUserFromAllProjects(userId);
     }
 
+    public String loginUser(String email, String password){
+        Optional<UserDto> optionalUser = userRepository.findByEmailAndPassword(
+            email,
+            hashPassword(password)
+        );
+
+        if (optionalUser.isEmpty())
+            return null;
+
+        return AuthMiddleware.getInstanse().createToken(optionalUser.get().getId().intValue());
+    }
 
     private String hashPassword(String password) {
         try {
