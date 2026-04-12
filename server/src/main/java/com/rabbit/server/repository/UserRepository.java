@@ -24,6 +24,7 @@ public class UserRepository {
 
     /**
      * Get UserDTO by ID.
+     *
      * @param id user ID
      * @return Optional containing UserDTO if found
      */
@@ -44,6 +45,7 @@ public class UserRepository {
 
     /**
      * Get all users from a specific project.
+     *
      * @param projectId project ID
      * @return list of UserDto
      */
@@ -64,6 +66,7 @@ public class UserRepository {
 
     /**
      * Update user information.
+     *
      * @param userDto user with updated data
      */
     public void update(UserDto userDto) {
@@ -81,6 +84,7 @@ public class UserRepository {
 
     /**
      * Delete user by ID.
+     *
      * @param id user ID
      */
     public void deleteById(Long id) {
@@ -94,6 +98,7 @@ public class UserRepository {
 
     /**
      * Find user by email.
+     *
      * @param email user email
      * @return Optional containing UserDTO if found
      */
@@ -112,7 +117,8 @@ public class UserRepository {
 
     /**
      * Get UserDTO by username (email) and password.
-     * @param email user's email (username)
+     *
+     * @param email    user's email (username)
      * @param password hashed password
      * @return Optional containing UserDTO if credentials match
      */
@@ -133,6 +139,7 @@ public class UserRepository {
 
     /**
      * Get UserDTO by password.
+     *
      * @param password hashed password
      * @return Optional containing UserDTO if found
      */
@@ -153,7 +160,8 @@ public class UserRepository {
 
     /**
      * Save UserDTO to database.
-     * @param userDto UserDTO object (without id)
+     *
+     * @param userDto  UserDTO object (without id)
      * @param password hashed password
      * @return generated user ID
      */
@@ -176,7 +184,8 @@ public class UserRepository {
 
     /**
      * Add user to project.
-     * @param userId user ID
+     *
+     * @param userId    user ID
      * @param projectId project ID
      */
     public void addUserToProject(Long userId, Long projectId) {
@@ -191,9 +200,10 @@ public class UserRepository {
 
     /**
      * Add user to project with specific role.
-     * @param userId user ID
+     *
+     * @param userId    user ID
      * @param projectId project ID
-     * @param role role in project ('master' or 'slave')
+     * @param role      role in project ('master' or 'slave')
      */
     public void addUserToProjectWithRole(Long userId, Long projectId, String role) {
         String sql = "INSERT INTO user_project (project_id, user_id, role) VALUES (?, ?, CAST(? AS project_user_role))";
@@ -206,7 +216,8 @@ public class UserRepository {
 
     /**
      * Remove user from specific project.
-     * @param userId user ID
+     *
+     * @param userId    user ID
      * @param projectId project ID
      */
     public void removeUserFromProject(Long userId, Long projectId) {
@@ -220,6 +231,7 @@ public class UserRepository {
 
     /**
      * Remove user from all projects.
+     *
      * @param userId user ID
      */
     public void removeUserFromAllProjects(Long userId) {
@@ -233,7 +245,8 @@ public class UserRepository {
 
     /**
      * Check if user belongs to project.
-     * @param userId user ID
+     *
+     * @param userId    user ID
      * @param projectId project ID
      * @return true if user belongs to project
      */
@@ -253,6 +266,7 @@ public class UserRepository {
 
     /**
      * Get all project IDs for a user.
+     *
      * @param userId user ID
      * @return list of project IDs
      */
