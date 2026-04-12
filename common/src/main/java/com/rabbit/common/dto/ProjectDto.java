@@ -3,8 +3,7 @@ package com.rabbit.common.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,6 +12,6 @@ public class ProjectDto {
     private int id;
     private String title;
     private String description;
-    private Timestamp deadline;
+    private LocalDateTime deadline;
     private String status;
 }
