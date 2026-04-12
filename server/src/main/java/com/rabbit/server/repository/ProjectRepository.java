@@ -4,6 +4,7 @@ import com.rabbit.common.dto.ProjectDto;
 import com.rabbit.server.service.DatabaseService;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,15 +27,21 @@ public class ProjectRepository {
                 .findFirst();
     }
 
-    public void create(ProjectDto dto) throws SQLException {
-        db.update("""
+    public void create(ProjectDto dto, int creatorId) throws SQLException {
+        List<Map<String, Object>> result = db.query("""
             INSERT INTO project (title, description, deadline, status)
             VALUES (?, ?, ?, ?::project_status)
+            RETURNING id
         """,
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getDeadline(),
                 dto.getStatus()
+        );
+        int projectId = (int) result.getFirst().get("id");
+        db.update(
+                "INSERT INTO user_project (user_id, project_id, role) VALUES (?, ?, 'master'::project_user_role)",
+                creatorId, projectId
         );
     }
 
@@ -59,12 +66,19 @@ public class ProjectRepository {
         return db.update("DELETE FROM project WHERE id = ?", projectId) > 0;
     }
 
+    public boolean isProjectAdmin(int userId, int projectId) throws SQLException {
+        return !db.query(
+                "SELECT 1 FROM user_project WHERE user_id = ? AND project_id = ? AND role = 'master'",
+                userId, projectId
+        ).isEmpty();
+    }
+
     private ProjectDto mapToDto(Map<String, Object> row) {
         ProjectDto dto = new ProjectDto();
         dto.setId((int) row.get("id"));
         dto.setTitle((String) row.get("title"));
         dto.setDescription((String) row.get("description"));
-        dto.setDeadline((java.sql.Timestamp) row.get("deadline"));
+        dto.setDeadline((LocalDateTime) row.get("deadline"));
         dto.setStatus(row.get("status").toString());
         return dto;
     }

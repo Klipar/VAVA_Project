@@ -69,7 +69,7 @@ public class TaskRepository {
 
     public boolean isProjectAdmin(int userId, int projectId) throws SQLException {
         return !db.query(
-                "SELECT 1 FROM user_project WHERE user_id = ? AND project_id = ? AND role = 'admin'",
+                "SELECT 1 FROM user_project WHERE user_id = ? AND project_id = ? AND role = 'master'",
                 userId, projectId
         ).isEmpty();
     }
