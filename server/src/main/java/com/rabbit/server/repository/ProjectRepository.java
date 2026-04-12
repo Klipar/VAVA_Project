@@ -4,6 +4,7 @@ import com.rabbit.common.dto.ProjectDto;
 import com.rabbit.server.service.DatabaseService;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +79,8 @@ public class ProjectRepository {
         dto.setId((int) row.get("id"));
         dto.setTitle((String) row.get("title"));
         dto.setDescription((String) row.get("description"));
-        dto.setDeadline((LocalDateTime) row.get("deadline"));
+        Timestamp ts = (Timestamp) row.get("deadline");
+        dto.setDeadline(ts != null ? ts.toLocalDateTime() : null);
         dto.setStatus(row.get("status").toString());
         return dto;
     }

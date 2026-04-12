@@ -64,7 +64,8 @@ public class NotificationRepository {
         dto.setMessage((String) row.get("message"));
         Timestamp ts = (Timestamp) row.get("created_at");
         if (ts != null) dto.setCreated_at(ts.toLocalDateTime());
-        if (row.containsKey("is_read")) dto.setRead((Boolean) row.get("is_read"));
+        Object isRead = row.get("is_read");
+        if (isRead != null) dto.setRead((Boolean) isRead);
         return dto;
     }
 }
