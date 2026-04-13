@@ -110,6 +110,12 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Get UserDTO by username (email) and password.
+     * @param email user's email (username)
+     * @param password hashed password
+     * @return Optional containing UserDTO if credentials match
+     */
     public Optional<UserDto> findByEmailAndPassword(String email, String passwordHash) {
         String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE email = ? AND password_hash = ?";
         try {
@@ -125,6 +131,32 @@ public class UserRepository {
         }
     }
 
+    /**
+     * Get UserDTO by password.
+     * @param password_hash hashed password
+     * @return Optional containing UserDTO if found
+     */
+    public Optional<UserDto> findByPassword(String password_hash) {
+        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE password_hash = ?";
+        try {
+            List<Map<String, Object>> results = dbService.query(sql, password_hash);
+
+            if (results.isEmpty()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(mapToUserDto(results.get(0)));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find user by password_hash", e);
+        }
+    }
+
+    /**
+     * Save UserDTO to database.
+     * @param userDto UserDTO object (without id)
+     * @param password hashed password
+     * @return generated user ID
+     */
     public Long save(UserDto userDto, String passwordHash) {
         String sql = "INSERT INTO users (name, nickname, email, password_hash, role) VALUES (?, ?, ?, ?, CAST(? AS user_role))";
 
@@ -148,6 +180,7 @@ public class UserRepository {
      * @param projectId project ID
      */
     public void addUserToProject(Long userId, Long projectId) {
+        // Use the correct syntax for enums in PostgreSQL
         String sql = "INSERT INTO users_projects (project_id, user_id, role) VALUES (?, ?, CAST(? AS project_user_role))";
         try {
             dbService.update(sql, projectId, userId, "slave");
