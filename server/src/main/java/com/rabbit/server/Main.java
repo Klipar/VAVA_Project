@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 import com.rabbit.server.handler.AiHandler;
+import com.rabbit.server.handler.NotificationHandler;
+import com.rabbit.server.handler.ProjectHandler;
 import com.rabbit.server.handler.TaskHandler;
 import com.rabbit.server.handler.UserHandler;
 import com.rabbit.server.repository.UserRepository;
@@ -26,6 +28,8 @@ public class Main {
         TaskHandler taskHandler = new TaskHandler();
         AiHandler aiHandler = new AiHandler();
         UserHandler userHandler = new UserHandler(userRepository);
+        ProjectHandler projectHandler = new ProjectHandler();
+        NotificationHandler notificationHandler = new NotificationHandler();
 
         // ============ TASK ENDPOINTS ============
         server.createContext("/tasks/", taskHandler.getAll());        // GET  /tasks/{projectId}
@@ -37,7 +41,6 @@ public class Main {
         server.createContext("/ai/suggest", aiHandler.suggest());     // POST /ai/suggest
 
         // ============ USER ENDPOINTS ============
-        // We use a single shared context for all user endpoints
         server.createContext("/users", (exchange) -> {
             String path = exchange.getRequestURI().getPath();
             String method = exchange.getRequestMethod();
@@ -55,6 +58,7 @@ public class Main {
                 else if (path.matches("/users/\\d+/delete$") && method.equals("DELETE")) {
                     userHandler.deleteUser().handle(exchange);
                 }
+                // POST /users/login
                 else if (path.matches("/users/login") && method.equals("POST")) {
                     userHandler.loginUser().handle(exchange);
                 }
@@ -67,27 +71,74 @@ public class Main {
             }
         });
 
-        // ============ PROJECT-USER ENDPOINTS ============
+        // ============ PROJECT AND PROJECT-USER ENDPOINTS ============
         server.createContext("/projects", (exchange) -> {
             String path = exchange.getRequestURI().getPath();
             String method = exchange.getRequestMethod();
 
             try {
+                // GET /projects - all projects
+                if (path.equals("/projects") && method.equals("GET")) {
+                    projectHandler.getAll().handle(exchange);
+                }
+                // GET /projects/{projectId}
+                else if (path.matches("/projects/\\d+$") && method.equals("GET")) {
+                    projectHandler.getAll().handle(exchange);
+                }
+                // POST /projects/create
+                else if (path.equals("/projects/create") && method.equals("POST")) {
+                    projectHandler.create().handle(exchange);
+                }
+                // PUT /projects/{projectId}/update
+                else if (path.matches("/projects/\\d+/update$") && method.equals("PUT")) {
+                    projectHandler.update().handle(exchange);
+                }
+                // DELETE /projects/{projectId}/delete
+                else if (path.matches("/projects/\\d+/delete$") && method.equals("DELETE")) {
+                    projectHandler.delete().handle(exchange);
+                }
                 // GET /projects/{projectId}/users
-                if (path.matches("/projects/\\d+/users$") && method.equals("GET")) {
+                else if (path.matches("/projects/\\d+/users$") && method.equals("GET")) {
                     userHandler.getAllUsersFromProject().handle(exchange);
                 }
                 // POST /projects/{projectId}/users/create
                 else if (path.matches("/projects/\\d+/users/create$") && method.equals("POST")) {
                     userHandler.createUser().handle(exchange);
                 }
-                // POST /projects/{projectId}/users/\\d+/add
+                // POST /projects/{projectId}/users/{userId}/add
                 else if (path.matches("/projects/\\d+/users/\\d+/add$") && method.equals("POST")) {
                     userHandler.addUserToProject().handle(exchange);
                 }
-                // DELETE /projects/{projectId}/users/\\d+/remove
+                // DELETE /projects/{projectId}/users/{userId}/remove
                 else if (path.matches("/projects/\\d+/users/\\d+/remove$") && method.equals("DELETE")) {
                     userHandler.removeUserFromProject().handle(exchange);
+                }
+                else {
+                    send405(exchange);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                send500(exchange);
+            }
+        });
+
+        // ============ NOTIFICATION ENDPOINTS ============
+        server.createContext("/notifications", (exchange) -> {
+            String path = exchange.getRequestURI().getPath();
+            String method = exchange.getRequestMethod();
+
+            try {
+                // GET /notifications - all notifications
+                if (path.equals("/notifications") && method.equals("GET")) {
+                    notificationHandler.getAll().handle(exchange);
+                }
+                // POST /notifications/create
+                else if (path.equals("/notifications/create") && method.equals("POST")) {
+                    notificationHandler.create().handle(exchange);
+                }
+                // PUT /notifications/{notificationId}/read
+                else if (path.matches("/notifications/\\d+/read$") && method.equals("PUT")) {
+                    notificationHandler.markRead().handle(exchange);
                 }
                 else {
                     send405(exchange);
@@ -111,30 +162,6 @@ public class Main {
 
         System.out.println("Server started on port 6969");
         System.out.println("API Documentation available at: http://localhost:6969/swagger");
-        System.out.println("\n=== Available Endpoints ===");
-        System.out.println("\nUser Endpoints:");
-        System.out.println("  POST   /users/login");
-        System.out.println("  GET    /users/{userId}");
-        System.out.println("  PUT    /users/{userId}/update");
-        System.out.println("  DELETE /users/{userId}/delete");
-        System.out.println("  GET    /projects/{projectId}/users");
-        System.out.println("  POST   /projects/{projectId}/users/create");
-        System.out.println("  POST   /projects/{projectId}/users/{userId}/add");
-        System.out.println("  DELETE /projects/{projectId}/users/{userId}/remove");
-
-        System.out.println("\nTask Endpoints:");
-        System.out.println("  GET    /tasks/{projectId}");
-        System.out.println("  POST   /tasks/{projectId}/create");
-        System.out.println("  PUT    /tasks/{taskId}/update");
-        System.out.println("  DELETE /tasks/{taskId}/delete");
-
-        System.out.println("\nAI Endpoint:");
-        System.out.println("  POST   /ai/suggest");
-
-        System.out.println("\nDocumentation:");
-        System.out.println("  GET    /swagger");
-        System.out.println("  GET    /openapi.json");
-        System.out.println("  GET    /hello");
     }
 
     private static void send405(HttpExchange exchange) throws IOException {
