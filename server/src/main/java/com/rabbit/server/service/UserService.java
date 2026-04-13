@@ -49,7 +49,7 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public UserDto updateUser(Long userId, UserDto updatedData, Long requestingUserId) {
+    public UserDto updateUser(Long userId, UserDto updatedData, String newPassword, Long requestingUserId) {
         if (!userId.equals(requestingUserId)) {
             throw new SecurityException("You can only update your own account");
         }
@@ -63,7 +63,7 @@ public class UserService {
         if (updatedData.getNickname() != null && !updatedData.getNickname().trim().isEmpty()) {
             existingUser.setNickname(updatedData.getNickname());
         }
-        if (updatedData.getEmail() != null && !updatedData.getEmail().trim().isEmpty())  {
+        if (updatedData.getEmail() != null && !updatedData.getEmail().trim().isEmpty()) {
             if (userRepository.findByEmail(updatedData.getEmail()).isPresent() &&
                     !updatedData.getEmail().equals(existingUser.getEmail())) {
                 throw new IllegalArgumentException("Email already exists");
@@ -72,6 +72,11 @@ public class UserService {
         }
 
         userRepository.update(existingUser);
+
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            userRepository.updatePassword(userId, hashPassword(newPassword));
+        }
+
         return existingUser;
     }
 

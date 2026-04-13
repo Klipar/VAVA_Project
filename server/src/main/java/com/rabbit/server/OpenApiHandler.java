@@ -393,7 +393,11 @@ public class OpenApiHandler implements HttpHandler {
                         "get": {
                             "tags": ["Project"],
                             "summary": "Get all projects",
+<<<<<<< HEAD
                             "description": "Retrieve list of all projects",
+=======
+                            "description": "Retrieve list of projects for the authenticated user",
+>>>>>>> url_and_ai_auth
                             "security": [{"bearerAuth": []}],
                             "responses": {
                                 "200": {
@@ -470,11 +474,37 @@ public class OpenApiHandler implements HttpHandler {
                             }
                         }
                     },
-                    "/projects/{projectId}/update": {
+                    "/projects/{projectId}": {
+                        "get": {
+                            "tags": ["Project"],
+                            "summary": "Get project by ID",
+                            "description": "Retrieve detailed information about a specific project",
+                            "security": [{"bearerAuth": []}],
+                            "parameters": [{
+                                "name": "projectId",
+                                "in": "path",
+                                "required": true,
+                                "description": "ID of the project to retrieve",
+                                "schema": {"type": "integer", "format": "int64", "example": 1}
+                            }],
+                            "responses": {
+                                "200": {
+                                    "description": "Project found successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ProjectDto"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized"},
+                                "404": {"description": "Project not found"},
+                                "405": {"description": "Method not allowed"}
+                            }
+                        },
                         "put": {
                             "tags": ["Project"],
                             "summary": "Update project",
-                            "description": "Update an existing project (only project creator)",
+                            "description": "Update an existing project (only project admin)",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
@@ -501,17 +531,15 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
-                                "403": {"description": "Forbidden - only project creator can update"},
+                                "403": {"description": "Forbidden - only project admin can update"},
                                 "404": {"description": "Project not found"},
                                 "405": {"description": "Method not allowed"}
                             }
-                        }
-                    },
-                    "/projects/{projectId}/delete": {
+                        },
                         "delete": {
                             "tags": ["Project"],
                             "summary": "Delete project",
-                            "description": "Delete a project (only project creator)",
+                            "description": "Delete a project (only project admin)",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
@@ -530,7 +558,7 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
-                                "403": {"description": "Forbidden - only project creator can delete"},
+                                "403": {"description": "Forbidden - only project admin can delete"},
                                 "404": {"description": "Project not found"},
                                 "405": {"description": "Method not allowed"}
                             }
@@ -690,9 +718,7 @@ public class OpenApiHandler implements HttpHandler {
                                 "405": {"description": "Method not allowed"},
                                 "500": {"description": "Internal server error"}
                             }
-                        }
-                    },
-                    "/notifications/create": {
+                        },
                         "post": {
                             "tags": ["Notification"],
                             "summary": "Create a notification",
