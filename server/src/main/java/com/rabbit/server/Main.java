@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 import com.rabbit.server.handler.AiHandler;
+import com.rabbit.server.handler.NotificationHandler;
+import com.rabbit.server.handler.ProjectHandler;
 import com.rabbit.server.handler.TaskHandler;
 import com.rabbit.server.handler.UserHandler;
 import com.rabbit.server.repository.UserRepository;
@@ -26,12 +28,30 @@ public class Main {
         TaskHandler taskHandler = new TaskHandler();
         AiHandler aiHandler = new AiHandler();
         UserHandler userHandler = new UserHandler(userRepository);
+        ProjectHandler projectHandler = new ProjectHandler();
+        NotificationHandler notificationHandler = new NotificationHandler();
 
         // ============ TASK ENDPOINTS ============
-        server.createContext("/tasks/", taskHandler.getAll());        // GET  /tasks/{projectId}
-        server.createContext("/tasks/create", taskHandler.create());  // POST /tasks/{projectId}/create
-        server.createContext("/tasks/update", taskHandler.update());  // PUT  /tasks/{taskId}/update
-        server.createContext("/tasks/delete", taskHandler.delete());  // DELETE /tasks/{taskId}/delete
+        server.createContext("/tasks/", (exchange) -> {
+            String path = exchange.getRequestURI().getPath();
+            String method = exchange.getRequestMethod();
+            try {
+                if (path.matches("/tasks/\\d+$") && method.equals("GET")) {
+                    taskHandler.getAll().handle(exchange);
+                } else if (path.matches("/tasks/\\d+/create$") && method.equals("POST")) {
+                    taskHandler.create().handle(exchange);
+                } else if (path.matches("/tasks/\\d+/update$") && method.equals("PUT")) {
+                    taskHandler.update().handle(exchange);
+                } else if (path.matches("/tasks/\\d+/delete$") && method.equals("DELETE")) {
+                    taskHandler.delete().handle(exchange);
+                } else {
+                    send405(exchange);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                send500(exchange);
+            }
+        });
 
         // ============ AI ENDPOINT ============
         server.createContext("/ai/suggest", aiHandler.suggest());     // POST /ai/suggest
@@ -67,27 +87,70 @@ public class Main {
             }
         });
 
-        // ============ PROJECT-USER ENDPOINTS ============
+        // ============ PROJECT ENDPOINTS ============
         server.createContext("/projects", (exchange) -> {
             String path = exchange.getRequestURI().getPath();
             String method = exchange.getRequestMethod();
 
             try {
+                // GET /projects or GET /projects/{id}
+                if (path.matches("/projects(/\\d+)?$") && method.equals("GET")) {
+                    projectHandler.getAll().handle(exchange);
+                }
+                // POST /projects
+                else if (path.equals("/projects") && method.equals("POST")) {
+                    projectHandler.create().handle(exchange);
+                }
+                // PUT /projects/{id}
+                else if (path.matches("/projects/\\d+$") && method.equals("PUT")) {
+                    projectHandler.update().handle(exchange);
+                }
+                // DELETE /projects/{id}
+                else if (path.matches("/projects/\\d+$") && method.equals("DELETE")) {
+                    projectHandler.delete().handle(exchange);
+                }
                 // GET /projects/{projectId}/users
-                if (path.matches("/projects/\\d+/users$") && method.equals("GET")) {
+                else if (path.matches("/projects/\\d+/users$") && method.equals("GET")) {
                     userHandler.getAllUsersFromProject().handle(exchange);
                 }
                 // POST /projects/{projectId}/users/create
                 else if (path.matches("/projects/\\d+/users/create$") && method.equals("POST")) {
                     userHandler.createUser().handle(exchange);
                 }
-                // POST /projects/{projectId}/users/\\d+/add
+                // POST /projects/{projectId}/users/{userId}/add
                 else if (path.matches("/projects/\\d+/users/\\d+/add$") && method.equals("POST")) {
                     userHandler.addUserToProject().handle(exchange);
                 }
-                // DELETE /projects/{projectId}/users/\\d+/remove
+                // DELETE /projects/{projectId}/users/{userId}/remove
                 else if (path.matches("/projects/\\d+/users/\\d+/remove$") && method.equals("DELETE")) {
                     userHandler.removeUserFromProject().handle(exchange);
+                }
+                else {
+                    send405(exchange);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                send500(exchange);
+            }
+        });
+
+        // ============ NOTIFICATION ENDPOINTS ============
+        server.createContext("/notifications", (exchange) -> {
+            String path = exchange.getRequestURI().getPath();
+            String method = exchange.getRequestMethod();
+
+            try {
+                // GET /notifications
+                if (path.equals("/notifications") && method.equals("GET")) {
+                    notificationHandler.getAll().handle(exchange);
+                }
+                // POST /notifications
+                else if (path.equals("/notifications") && method.equals("POST")) {
+                    notificationHandler.create().handle(exchange);
+                }
+                // PUT /notifications/{id}/read
+                else if (path.matches("/notifications/\\d+/read$") && method.equals("PUT")) {
+                    notificationHandler.markRead().handle(exchange);
                 }
                 else {
                     send405(exchange);

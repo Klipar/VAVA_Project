@@ -14,6 +14,10 @@ public class ProjectService {
         return repo.findAll();
     }
 
+    public List<ProjectDto> getProjectsForUser(int userId) throws SQLException {
+        return repo.findAllByUserId(userId);
+    }
+
     public Optional<ProjectDto> getProjectById(int projectId) throws SQLException {
         return repo.findById(projectId);
     }

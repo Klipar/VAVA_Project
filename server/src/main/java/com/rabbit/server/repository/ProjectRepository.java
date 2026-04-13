@@ -20,6 +20,17 @@ public class ProjectRepository {
                 .toList();
     }
 
+    public List<ProjectDto> findAllByUserId(int userId) throws SQLException {
+        return db.query("""
+            SELECT p.* FROM project p
+            JOIN user_project up ON up.project_id = p.id
+            WHERE up.user_id = ?
+        """, userId)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
     public Optional<ProjectDto> findById(int projectId) throws SQLException {
         return db.query("SELECT * FROM project WHERE id = ?", projectId)
                 .stream()

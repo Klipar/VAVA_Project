@@ -28,6 +28,14 @@ public class OpenApiHandler implements HttpHandler {
                         "description": "User management endpoints - create, update, delete users"
                     },
                     {
+                        "name": "Project",
+                        "description": "Project management endpoints - create, update, delete projects"
+                    },
+                    {
+                        "name": "Notification",
+                        "description": "Notification management endpoints - get and manage user notifications"
+                    },
+                    {
                         "name": "Task",
                         "description": "Task management endpoints - create, update, delete tasks"
                     },
@@ -55,7 +63,7 @@ public class OpenApiHandler implements HttpHandler {
                                 "id": {"type": "integer", "format": "int64", "example": 1},
                                 "name": {"type": "string", "example": "John Doe"},
                                 "nickname": {"type": "string", "example": "johnd"},
-                                "email": {"type": "string", "format": "email", "example": "john@example.com"},
+                                "email": {"type": "string", "format": "email", "example": "ivan@example.com"},
                                 "role": {
                                     "type": "string",
                                     "enum": ["MANAGER", "TEAM_LEADER", "WORKER"],
@@ -70,8 +78,8 @@ public class OpenApiHandler implements HttpHandler {
                             "properties": {
                                 "name": {"type": "string", "example": "John Doe"},
                                 "nickname": {"type": "string", "example": "johnd"},
-                                "email": {"type": "string", "format": "email", "example": "john@example.com"},
-                                "password": {"type": "string", "minLength": 6, "example": "securepassword123"}
+                                "email": {"type": "string", "format": "email", "example": "ivan@example.com"},
+                                "password": {"type": "string", "minLength": 6, "example": "qwerty"}
                             }
                         },
                         "UpdateUserRequest": {
@@ -108,6 +116,27 @@ public class OpenApiHandler implements HttpHandler {
                                     "description": "JWT authentication token",
                                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                                 }
+                            }
+                        },
+                        "ProjectDto": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "integer", "format": "int64", "example": 1},
+                                "name": {"type": "string", "example": "Project Alpha"},
+                                "description": {"type": "string", "example": "Main development project"},
+                                "createdBy": {"type": "integer", "format": "int64", "example": 1},
+                                "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z"}
+                            }
+                        },
+                        "NotificationDto": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "integer", "format": "int64", "example": 1},
+                                "userId": {"type": "integer", "format": "int64", "example": 1},
+                                "title": {"type": "string", "example": "New Task Assigned"},
+                                "message": {"type": "string", "example": "You have been assigned to task #123"},
+                                "isRead": {"type": "boolean", "example": false},
+                                "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z"}
                             }
                         },
                         "TaskDto": {
@@ -179,10 +208,15 @@ public class OpenApiHandler implements HttpHandler {
                             "properties": {
                                 "error": {"type": "string", "example": "Error message"}
                             }
+                        },
+                        "MessageResponse": {
+                            "type": "object",
+                            "properties": {
+                                "message": {"type": "string", "example": "Operation completed successfully"}
+                            }
                         }
                     }
                 },
-                "security": [{"bearerAuth": []}],
                 "paths": {
                     "/hello": {
                         "get": {
@@ -270,6 +304,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["User"],
                             "summary": "Get user by ID",
                             "description": "Retrieve detailed information about a specific user",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "userId",
                                 "in": "path",
@@ -297,6 +332,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["User"],
                             "summary": "Update user",
                             "description": "Update user information (only self)",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "userId",
                                 "in": "path",
@@ -334,6 +370,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["User"],
                             "summary": "Delete user",
                             "description": "Delete user account (only self)",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "userId",
                                 "in": "path",
@@ -346,6 +383,149 @@ public class OpenApiHandler implements HttpHandler {
                                 "401": {"description": "Unauthorized"},
                                 "403": {"description": "Forbidden - can only delete your own account"},
                                 "404": {"description": "User not found"},
+                                "405": {"description": "Method not allowed"}
+                            }
+                        }
+                    },
+                    "/projects": {
+                        "get": {
+                            "tags": ["Project"],
+                            "summary": "Get all projects",
+                            "description": "Retrieve list of all projects",
+                            "responses": {
+                                "200": {
+                                    "description": "List of projects",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": {"$ref": "#/components/schemas/ProjectDto"}
+                                            }
+                                        }
+                                    }
+                                },
+                                "405": {"description": "Method not allowed"},
+                                "500": {"description": "Internal server error"}
+                            }
+                        }
+                    },
+                    "/projects/{projectId}": {
+                        "get": {
+                            "tags": ["Project"],
+                            "summary": "Get project by ID",
+                            "description": "Retrieve detailed information about a specific project",
+                            "parameters": [{
+                                "name": "projectId",
+                                "in": "path",
+                                "required": true,
+                                "description": "ID of the project to retrieve",
+                                "schema": {"type": "integer", "format": "int64", "example": 1}
+                            }],
+                            "responses": {
+                                "200": {
+                                    "description": "Project found successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ProjectDto"}
+                                        }
+                                    }
+                                },
+                                "404": {"description": "Project not found"},
+                                "405": {"description": "Method not allowed"}
+                            }
+                        }
+                    },
+                    "/projects/create": {
+                        "post": {
+                            "tags": ["Project"],
+                            "summary": "Create a new project",
+                            "description": "Create a new project (authenticated users only)",
+                            "security": [{"bearerAuth": []}],
+                            "requestBody": {
+                                "required": true,
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/ProjectDto"}
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "201": {
+                                    "description": "Project created successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized"},
+                                "405": {"description": "Method not allowed"},
+                                "500": {"description": "Internal server error"}
+                            }
+                        }
+                    },
+                    "/projects/{projectId}/update": {
+                        "put": {
+                            "tags": ["Project"],
+                            "summary": "Update project",
+                            "description": "Update an existing project (only project creator)",
+                            "security": [{"bearerAuth": []}],
+                            "parameters": [{
+                                "name": "projectId",
+                                "in": "path",
+                                "required": true,
+                                "description": "ID of the project to update",
+                                "schema": {"type": "integer", "format": "int64", "example": 1}
+                            }],
+                            "requestBody": {
+                                "required": true,
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/ProjectDto"}
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "200": {
+                                    "description": "Project updated successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized"},
+                                "403": {"description": "Forbidden - only project creator can update"},
+                                "404": {"description": "Project not found"},
+                                "405": {"description": "Method not allowed"}
+                            }
+                        }
+                    },
+                    "/projects/{projectId}/delete": {
+                        "delete": {
+                            "tags": ["Project"],
+                            "summary": "Delete project",
+                            "description": "Delete a project (only project creator)",
+                            "security": [{"bearerAuth": []}],
+                            "parameters": [{
+                                "name": "projectId",
+                                "in": "path",
+                                "required": true,
+                                "description": "ID of the project to delete",
+                                "schema": {"type": "integer", "format": "int64", "example": 1}
+                            }],
+                            "responses": {
+                                "200": {
+                                    "description": "Project deleted successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized"},
+                                "403": {"description": "Forbidden - only project creator can delete"},
+                                "404": {"description": "Project not found"},
                                 "405": {"description": "Method not allowed"}
                             }
                         }
@@ -384,6 +564,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["User"],
                             "summary": "Create a new user",
                             "description": "Create a new user in the project (Manager creates WORKER, Team Leader creates TEAM_LEADER)",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
                                 "in": "path",
@@ -421,6 +602,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["User"],
                             "summary": "Add user to project",
                             "description": "Add an existing user to a project (Manager or Team Leader only)",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [
                                 {
                                     "name": "projectId",
@@ -452,6 +634,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["User"],
                             "summary": "Remove user from project",
                             "description": "Remove a user from a project (only self)",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [
                                 {
                                     "name": "projectId",
@@ -474,6 +657,88 @@ public class OpenApiHandler implements HttpHandler {
                                 "403": {"description": "Forbidden - can only remove yourself from project"},
                                 "404": {"description": "User or project not found"},
                                 "405": {"description": "Method not allowed"}
+                            }
+                        }
+                    },
+                    "/notifications": {
+                        "get": {
+                            "tags": ["Notification"],
+                            "summary": "Get all notifications for current user",
+                            "description": "Retrieve all notifications for the authenticated user",
+                            "security": [{"bearerAuth": []}],
+                            "responses": {
+                                "200": {
+                                    "description": "List of notifications",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": {"$ref": "#/components/schemas/NotificationDto"}
+                                            }
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized"},
+                                "405": {"description": "Method not allowed"},
+                                "500": {"description": "Internal server error"}
+                            }
+                        }
+                    },
+                    "/notifications/create": {
+                        "post": {
+                            "tags": ["Notification"],
+                            "summary": "Create a notification",
+                            "description": "Create a new notification for a user",
+                            "security": [{"bearerAuth": []}],
+                            "requestBody": {
+                                "required": true,
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/NotificationDto"}
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "201": {
+                                    "description": "Notification created successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized"},
+                                "405": {"description": "Method not allowed"},
+                                "500": {"description": "Internal server error"}
+                            }
+                        }
+                    },
+                    "/notifications/{notificationId}/read": {
+                        "put": {
+                            "tags": ["Notification"],
+                            "summary": "Mark notification as read",
+                            "description": "Mark a specific notification as read for the authenticated user",
+                            "security": [{"bearerAuth": []}],
+                            "parameters": [{
+                                "name": "notificationId",
+                                "in": "path",
+                                "required": true,
+                                "description": "ID of the notification to mark as read",
+                                "schema": {"type": "integer", "format": "int64", "example": 1}
+                            }],
+                            "responses": {
+                                "200": {
+                                    "description": "Notification marked as read successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized"},
+                                "404": {"description": "Notification not found"},
+                                "405": {"description": "Method not allowed"},
+                                "500": {"description": "Internal server error"}
                             }
                         }
                     },
@@ -508,6 +773,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["Task"],
                             "summary": "Create a new task",
                             "description": "Create a new task in a project (Only Manager or Team Leader can create tasks)",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
                                 "in": "path",
@@ -536,6 +802,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["Task"],
                             "summary": "Update a task",
                             "description": "Update an existing task (Only Manager or Team Leader can update tasks)",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "taskId",
                                 "in": "path",
@@ -565,6 +832,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["Task"],
                             "summary": "Delete a task",
                             "description": "Delete a task (Only Manager or Team Leader can delete tasks)",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "taskId",
                                 "in": "path",
@@ -586,6 +854,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["AI"],
                             "summary": "Get AI suggestion for task assignment",
                             "description": "AI analyzes task requirements and worker skills to suggest the best worker for the job",
+                            "security": [{"bearerAuth": []}],
                             "requestBody": {
                                 "required": true,
                                 "content": {

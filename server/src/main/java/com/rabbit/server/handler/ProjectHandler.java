@@ -22,6 +22,9 @@ public class ProjectHandler {
         return exchange -> {
             if (!exchange.getRequestMethod().equals("GET")) { send(exchange, 405, "{\"error\":\"Method not allowed\"}"); return; }
 
+            Integer userId = resolveUserId(exchange);
+            if (userId == null) { send(exchange, 401, "{\"error\":\"Unauthorized\"}"); return; }
+
             try {
                 String[] segments = exchange.getRequestURI().getPath().split("/");
                 if (segments.length >= 3 && !segments[2].isEmpty()) {
@@ -30,7 +33,7 @@ public class ProjectHandler {
                     if (project.isEmpty()) { send(exchange, 404, "{\"error\":\"Project not found\"}"); return; }
                     send(exchange, 200, mapper.writeValueAsString(project.get()));
                 } else {
-                    List<ProjectDto> projects = service.getAllProjects();
+                    List<ProjectDto> projects = service.getProjectsForUser(userId);
                     send(exchange, 200, mapper.writeValueAsString(projects));
                 }
             } catch (Exception e) {
