@@ -13,14 +13,14 @@ public class TaskRepository {
     private final DatabaseService db = DatabaseService.getInstance();
 
     public List<TaskDto> findByProjectId(int projectId) throws SQLException {
-        return db.query("SELECT * FROM task WHERE project_id = ?", projectId)
+        return db.query("SELECT * FROM tasks WHERE project_id = ?", projectId)
                 .stream()
                 .map(this::mapToDto)
                 .toList();
     }
 
     public Optional<TaskDto> findById(int taskId) throws SQLException {
-        return db.query("SELECT * FROM task WHERE id = ?", taskId)
+        return db.query("SELECT * FROM tasks WHERE id = ?", taskId)
                 .stream()
                 .map(this::mapToDto)
                 .findFirst();
@@ -28,7 +28,7 @@ public class TaskRepository {
 
     public void create(TaskDto dto) throws SQLException {
         db.update("""
-            INSERT INTO task (project_id, assigned_to, created_by, title, description, priority, status, deadline)
+            INSERT INTO tasks (project_id, assigned_to, created_by, title, description, priority, status, deadline)
             VALUES (?, ?, ?, ?, ?, ?, ?::task_status, ?)
         """,
                 dto.getProjectId(),
@@ -44,7 +44,7 @@ public class TaskRepository {
 
     public boolean update(TaskDto dto) throws SQLException {
         return db.update("""
-            UPDATE task SET
+            UPDATE tasks SET
                 assigned_to = ?,
                 title = ?,
                 description = ?,
@@ -64,12 +64,12 @@ public class TaskRepository {
     }
 
     public boolean delete(int taskId) throws SQLException {
-        return db.update("DELETE FROM task WHERE id = ?", taskId) > 0;
+        return db.update("DELETE FROM tasks WHERE id = ?", taskId) > 0;
     }
 
     public boolean isProjectAdmin(int userId, int projectId) throws SQLException {
         return !db.query(
-                "SELECT 1 FROM user_project WHERE user_id = ? AND project_id = ? AND role = 'master'",
+                "SELECT 1 FROM users_projects WHERE user_id = ? AND project_id = ? AND role = 'master'",
                 userId, projectId
         ).isEmpty();
     }
