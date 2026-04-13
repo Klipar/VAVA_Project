@@ -79,6 +79,15 @@ public class UserRepository {
         }
     }
 
+    public void updatePassword(Long userId, String hashedPassword) {
+        String sql = "UPDATE \"user\" SET password = ? WHERE id = ?";
+        try {
+            dbService.update(sql, hashedPassword, userId);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update password for user: " + userId, e);
+        }
+    }
+
     /**
      * Delete user by ID.
      * @param id user ID
