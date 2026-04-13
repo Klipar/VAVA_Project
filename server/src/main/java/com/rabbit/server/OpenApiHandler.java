@@ -123,21 +123,39 @@ public class OpenApiHandler implements HttpHandler {
                             "type": "object",
                             "properties": {
                                 "id": {"type": "integer", "format": "int64", "example": 1},
-                                "name": {"type": "string", "example": "Project Alpha"},
+                                "title": {"type": "string", "example": "Project Alpha"},
                                 "description": {"type": "string", "example": "Main development project"},
-                                "createdBy": {"type": "integer", "format": "int64", "example": 1},
-                                "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z"}
+                                "deadline": {"type": "string", "format": "date-time", "example": "2024-12-31T23:59:59Z"},
+                                "status": {"type": "string", "example": "active"}
                             }
+                        },
+                        "CreateProjectRequest": {
+                            "type": "object",
+                            "required": ["title"],
+                            "properties": {
+                                "title": {"type": "string", "example": "New Project"},
+                                "description": {"type": "string", "example": "Project description"},
+                                "deadline": {"type": "string", "format": "date-time"},
+                                "status": {"type": "string", "example": "planning"}
+                            }
+                        },
+                        "UpdateProjectRequest": {
+                            "allOf": [{"$ref": "#/components/schemas/CreateProjectRequest"}]
                         },
                         "NotificationDto": {
                             "type": "object",
                             "properties": {
                                 "id": {"type": "integer", "format": "int64", "example": 1},
-                                "userId": {"type": "integer", "format": "int64", "example": 1},
-                                "title": {"type": "string", "example": "New Task Assigned"},
                                 "message": {"type": "string", "example": "You have been assigned to task #123"},
-                                "isRead": {"type": "boolean", "example": false},
-                                "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z"}
+                                "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z"},
+                                "isRead": {"type": "boolean", "example": false}
+                            }
+                        },
+                        "CreateNotificationRequest": {
+                            "type": "object",
+                            "required": ["message"],
+                            "properties": {
+                                "message": {"type": "string", "example": "Task deadline approaching"}
                             }
                         },
                         "TaskDto": {
@@ -392,8 +410,8 @@ public class OpenApiHandler implements HttpHandler {
                     "/projects": {
                         "get": {
                             "tags": ["Project"],
-                            "summary": "Get all projects",
-                            "description": "Retrieve list of all projects",
+                            "summary": "Get all projects for current user",
+                            "description": "Retrieve list of projects where the authenticated user is a member",
                             "security": [{"bearerAuth": []}],
                             "responses": {
                                 "200": {
@@ -408,20 +426,19 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
-                                "405": {"description": "Method not allowed"},
                                 "500": {"description": "Internal server error"}
                             }
                         },
                         "post": {
                             "tags": ["Project"],
                             "summary": "Create a new project",
-                            "description": "Create a new project (authenticated users only)",
+                            "description": "Create a new project (authenticated users only). User becomes project master.",
                             "security": [{"bearerAuth": []}],
                             "requestBody": {
                                 "required": true,
                                 "content": {
                                     "application/json": {
-                                        "schema": {"$ref": "#/components/schemas/ProjectDto"}
+                                        "schema": {"$ref": "#/components/schemas/CreateProjectRequest"}
                                     }
                                 }
                             },
@@ -430,12 +447,12 @@ public class OpenApiHandler implements HttpHandler {
                                     "description": "Project created successfully",
                                     "content": {
                                         "application/json": {
-                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                            "schema": {"$ref": "#/components/schemas/ProjectDto"}
                                         }
                                     }
                                 },
+                                "400": {"description": "Bad request - invalid input"},
                                 "401": {"description": "Unauthorized"},
-                                "405": {"description": "Method not allowed"},
                                 "500": {"description": "Internal server error"}
                             }
                         }
@@ -444,7 +461,7 @@ public class OpenApiHandler implements HttpHandler {
                         "get": {
                             "tags": ["Project"],
                             "summary": "Get project by ID",
-                            "description": "Retrieve detailed information about a specific project",
+                            "description": "Retrieve detailed information about a specific project (only members)",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
@@ -463,14 +480,15 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
+                                "403": {"description": "Forbidden - not a member of this project"},
                                 "404": {"description": "Project not found"},
-                                "405": {"description": "Method not allowed"}
+                                "500": {"description": "Internal server error"}
                             }
                         },
                         "put": {
                             "tags": ["Project"],
                             "summary": "Update project",
-                            "description": "Update an existing project (only project creator)",
+                            "description": "Update an existing project (only project master)",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
@@ -483,7 +501,7 @@ public class OpenApiHandler implements HttpHandler {
                                 "required": true,
                                 "content": {
                                     "application/json": {
-                                        "schema": {"$ref": "#/components/schemas/ProjectDto"}
+                                        "schema": {"$ref": "#/components/schemas/UpdateProjectRequest"}
                                     }
                                 }
                             },
@@ -492,20 +510,21 @@ public class OpenApiHandler implements HttpHandler {
                                     "description": "Project updated successfully",
                                     "content": {
                                         "application/json": {
-                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                            "schema": {"$ref": "#/components/schemas/ProjectDto"}
                                         }
                                     }
                                 },
+                                "400": {"description": "Bad request - invalid input"},
                                 "401": {"description": "Unauthorized"},
-                                "403": {"description": "Forbidden - only project creator can update"},
+                                "403": {"description": "Forbidden - only project master can update"},
                                 "404": {"description": "Project not found"},
-                                "405": {"description": "Method not allowed"}
+                                "500": {"description": "Internal server error"}
                             }
                         },
                         "delete": {
                             "tags": ["Project"],
                             "summary": "Delete project",
-                            "description": "Delete a project (only project creator)",
+                            "description": "Delete a project (only project master)",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
@@ -524,9 +543,9 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
-                                "403": {"description": "Forbidden - only project creator can delete"},
+                                "403": {"description": "Forbidden - only project master can delete"},
                                 "404": {"description": "Project not found"},
-                                "405": {"description": "Method not allowed"}
+                                "500": {"description": "Internal server error"}
                             }
                         }
                     },
@@ -681,20 +700,19 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
-                                "405": {"description": "Method not allowed"},
                                 "500": {"description": "Internal server error"}
                             }
                         },
                         "post": {
                             "tags": ["Notification"],
-                            "summary": "Create a notification",
-                            "description": "Create a new notification for a user",
+                            "summary": "Create a notification for current user",
+                            "description": "Create a new notification (automatically linked to authenticated user)",
                             "security": [{"bearerAuth": []}],
                             "requestBody": {
                                 "required": true,
                                 "content": {
                                     "application/json": {
-                                        "schema": {"$ref": "#/components/schemas/NotificationDto"}
+                                        "schema": {"$ref": "#/components/schemas/CreateNotificationRequest"}
                                     }
                                 }
                             },
@@ -703,12 +721,12 @@ public class OpenApiHandler implements HttpHandler {
                                     "description": "Notification created successfully",
                                     "content": {
                                         "application/json": {
-                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                            "schema": {"$ref": "#/components/schemas/NotificationDto"}
                                         }
                                     }
                                 },
+                                "400": {"description": "Bad request - invalid input"},
                                 "401": {"description": "Unauthorized"},
-                                "405": {"description": "Method not allowed"},
                                 "500": {"description": "Internal server error"}
                             }
                         }
@@ -737,7 +755,6 @@ public class OpenApiHandler implements HttpHandler {
                                 },
                                 "401": {"description": "Unauthorized"},
                                 "404": {"description": "Notification not found"},
-                                "405": {"description": "Method not allowed"},
                                 "500": {"description": "Internal server error"}
                             }
                         }
