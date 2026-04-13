@@ -21,9 +21,10 @@ public class NotificationService {
         return repo.markAsRead(userId, notificationId);
     }
 
-    public void createNotification(int userId, NotificationDto dto) throws SQLException {
+    public NotificationDto createNotification(int userId, NotificationDto dto) throws SQLException {
         dto.setCreated_at(LocalDateTime.now());
         long notificationId = repo.save(dto);
         repo.linkToUser(notificationId, userId);
+        return repo.findById(notificationId).orElseThrow(() -> new SQLException("Failed to retrieve created notification"));
     }
 }
