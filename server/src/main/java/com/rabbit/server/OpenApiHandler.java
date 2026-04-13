@@ -53,7 +53,8 @@ public class OpenApiHandler implements HttpHandler {
                         "bearerAuth": {
                             "type": "http",
                             "scheme": "bearer",
-                            "description": "JWT token authentication"
+                            "bearerFormat": "JWT",
+                            "description": "JWT token authentication. Enter your token in the format: Bearer <token>"
                         }
                     },
                     "schemas": {
@@ -322,6 +323,7 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized - Bearer token required"},
+                                "403": {"description": "Forbidden - insufficient permissions"},
                                 "404": {"description": "User not found"},
                                 "405": {"description": "Method not allowed"}
                             }
@@ -392,6 +394,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["Project"],
                             "summary": "Get all projects",
                             "description": "Retrieve list of all projects",
+                            "security": [{"bearerAuth": []}],
                             "responses": {
                                 "200": {
                                     "description": "List of projects",
@@ -404,6 +407,7 @@ public class OpenApiHandler implements HttpHandler {
                                         }
                                     }
                                 },
+                                "401": {"description": "Unauthorized"},
                                 "405": {"description": "Method not allowed"},
                                 "500": {"description": "Internal server error"}
                             }
@@ -414,6 +418,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["Project"],
                             "summary": "Get project by ID",
                             "description": "Retrieve detailed information about a specific project",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
                                 "in": "path",
@@ -430,6 +435,7 @@ public class OpenApiHandler implements HttpHandler {
                                         }
                                     }
                                 },
+                                "401": {"description": "Unauthorized"},
                                 "404": {"description": "Project not found"},
                                 "405": {"description": "Method not allowed"}
                             }
@@ -535,6 +541,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["User"],
                             "summary": "Get all users from project",
                             "description": "Retrieve list of all users belonging to a specific project",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
                                 "in": "path",
@@ -555,6 +562,7 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
+                                "403": {"description": "Forbidden - insufficient permissions"},
                                 "405": {"description": "Method not allowed"}
                             }
                         }
@@ -747,6 +755,7 @@ public class OpenApiHandler implements HttpHandler {
                             "tags": ["Task"],
                             "summary": "Get all tasks for a project",
                             "description": "Retrieve list of all tasks in a specific project",
+                            "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
                                 "in": "path",
@@ -764,6 +773,7 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
+                                "403": {"description": "Forbidden - insufficient permissions"},
                                 "405": {"description": "Method not allowed"}
                             }
                         }
@@ -874,6 +884,7 @@ public class OpenApiHandler implements HttpHandler {
                                 },
                                 "400": {"description": "Bad request - invalid input or missing required fields"},
                                 "401": {"description": "Unauthorized"},
+                                "403": {"description": "Forbidden - insufficient permissions"},
                                 "405": {"description": "Method not allowed - only POST"},
                                 "415": {"description": "Unsupported Media Type - expected application/json"},
                                 "500": {"description": "Internal server error - AI service unavailable"}
