@@ -14,14 +14,14 @@ public class ProjectRepository {
     private final DatabaseService db = DatabaseService.getInstance();
 
     public List<ProjectDto> findAll() throws SQLException {
-        return db.query("SELECT * FROM project")
+        return db.query("SELECT * FROM projects")
                 .stream()
                 .map(this::mapToDto)
                 .toList();
     }
 
     public Optional<ProjectDto> findById(int projectId) throws SQLException {
-        return db.query("SELECT * FROM project WHERE id = ?", projectId)
+        return db.query("SELECT * FROM projects WHERE id = ?", projectId)
                 .stream()
                 .map(this::mapToDto)
                 .findFirst();
@@ -29,7 +29,7 @@ public class ProjectRepository {
 
     public void create(ProjectDto dto, int creatorId) throws SQLException {
         List<Map<String, Object>> result = db.query("""
-            INSERT INTO project (title, description, deadline, status)
+            INSERT INTO projects (title, description, deadline, status)
             VALUES (?, ?, ?, ?::project_status)
             RETURNING id
         """,
@@ -40,14 +40,14 @@ public class ProjectRepository {
         );
         int projectId = (int) result.getFirst().get("id");
         db.update(
-                "INSERT INTO user_project (user_id, project_id, role) VALUES (?, ?, 'master'::project_user_role)",
+                "INSERT INTO users_projects (user_id, project_id, role) VALUES (?, ?, 'master'::project_user_role)",
                 creatorId, projectId
         );
     }
 
     public boolean update(ProjectDto dto) throws SQLException {
         return db.update("""
-            UPDATE project SET
+            UPDATE projects SET
                 title = ?,
                 description = ?,
                 deadline = ?,
@@ -63,12 +63,12 @@ public class ProjectRepository {
     }
 
     public boolean delete(int projectId) throws SQLException {
-        return db.update("DELETE FROM project WHERE id = ?", projectId) > 0;
+        return db.update("DELETE FROM projects WHERE id = ?", projectId) > 0;
     }
 
     public boolean isProjectAdmin(int userId, int projectId) throws SQLException {
         return !db.query(
-                "SELECT 1 FROM user_project WHERE user_id = ? AND project_id = ? AND role = 'master'",
+                "SELECT 1 FROM users_projects WHERE user_id = ? AND project_id = ? AND role = 'master'",
                 userId, projectId
         ).isEmpty();
     }
