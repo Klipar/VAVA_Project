@@ -82,6 +82,34 @@ public class OpenApiHandler implements HttpHandler {
                                 "email": {"type": "string", "format": "email", "example": "john.updated@example.com"}
                             }
                         },
+                        "LoginRequest": {
+                            "type": "object",
+                            "required": ["email", "password"],
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "format": "email",
+                                    "description": "User's email address",
+                                    "example": "ivan@example.com"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "description": "User's password",
+                                    "minLength": 6,
+                                    "example": "qwerty"
+                                }
+                            }
+                        },
+                        "SuccessAuthDto": {
+                            "type": "object",
+                            "properties": {
+                                "token": {
+                                    "type": "string",
+                                    "description": "JWT authentication token",
+                                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                }
+                            }
+                        },
                         "TaskDto": {
                             "type": "object",
                             "properties": {
@@ -184,6 +212,56 @@ public class OpenApiHandler implements HttpHandler {
                             "description": "OpenAPI JSON specification",
                             "responses": {
                                 "200": {"description": "OpenAPI JSON"}
+                            }
+                        }
+                    },
+                    "/users/login": {
+                        "post": {
+                            "tags": ["User"],
+                            "summary": "User login",
+                            "description": "Authenticate user with email and password to receive JWT token",
+                            "requestBody": {
+                                "required": true,
+                                "content": {
+                                    "application/json": {
+                                        "schema": {"$ref": "#/components/schemas/LoginRequest"}
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "201": {
+                                    "description": "Login successful - returns JWT token",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/SuccessAuthDto"}
+                                        }
+                                    }
+                                },
+                                "400": {
+                                    "description": "Bad request - invalid input format or missing required fields",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {
+                                    "description": "Invalid credentials - email or password is incorrect",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "405": {"description": "Method not allowed - only POST method is supported"},
+                                "500": {
+                                    "description": "Internal server error",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                }
                             }
                         }
                     },

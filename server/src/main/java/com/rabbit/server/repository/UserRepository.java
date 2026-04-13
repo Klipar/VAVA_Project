@@ -180,7 +180,7 @@ public class UserRepository {
      * @param projectId project ID
      */
     public void addUserToProject(Long userId, Long projectId) {
-        // Використовуємо правильний синтаксис для enum в PostgreSQL
+        // Use the correct syntax for enums in PostgreSQL
         String sql = "INSERT INTO user_project (project_id, user_id, role) VALUES (?, ?, CAST(? AS project_user_role))";
         try {
             dbService.update(sql, projectId, userId, "slave");

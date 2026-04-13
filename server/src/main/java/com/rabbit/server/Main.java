@@ -1,18 +1,17 @@
 package com.rabbit.server;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
-import com.rabbit.server.handler.TaskHandler;
 import com.rabbit.server.handler.AiHandler;
+import com.rabbit.server.handler.TaskHandler;
 import com.rabbit.server.handler.UserHandler;
 import com.rabbit.server.repository.UserRepository;
 import com.rabbit.server.service.DatabaseService;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -38,7 +37,7 @@ public class Main {
         server.createContext("/ai/suggest", aiHandler.suggest());     // POST /ai/suggest
 
         // ============ USER ENDPOINTS ============
-        // Використовуємо один загальний контекст для всіх user ендпоінтів
+        // We use a single shared context for all user endpoints
         server.createContext("/users", (exchange) -> {
             String path = exchange.getRequestURI().getPath();
             String method = exchange.getRequestMethod();
@@ -55,6 +54,9 @@ public class Main {
                 // DELETE /users/{userId}/delete
                 else if (path.matches("/users/\\d+/delete$") && method.equals("DELETE")) {
                     userHandler.deleteUser().handle(exchange);
+                }
+                else if (path.matches("/users/login") && method.equals("POST")) {
+                    userHandler.loginUser().handle(exchange);
                 }
                 else {
                     send405(exchange);
@@ -111,6 +113,7 @@ public class Main {
         System.out.println("API Documentation available at: http://localhost:6969/swagger");
         System.out.println("\n=== Available Endpoints ===");
         System.out.println("\nUser Endpoints:");
+        System.out.println("  POST   /users/login");
         System.out.println("  GET    /users/{userId}");
         System.out.println("  PUT    /users/{userId}/update");
         System.out.println("  DELETE /users/{userId}/delete");
