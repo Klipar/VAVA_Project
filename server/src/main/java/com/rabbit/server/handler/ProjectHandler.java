@@ -1,21 +1,25 @@
 package com.rabbit.server.handler;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.common.dto.ProjectDto;
 import com.rabbit.server.middleware.AuthMiddleware;
 import com.rabbit.server.service.ProjectService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Optional;
-
 public class ProjectHandler {
 
     private final ProjectService service = new ProjectService();
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper()
+        .registerModule(new JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     private final AuthMiddleware auth = AuthMiddleware.getInstanse();
 
     public HttpHandler getAll() {
