@@ -1,5 +1,6 @@
 package com.rabbit.server.handler;
 
+import com.rabbit.server.middleware.AuthMiddleware;
 import com.rabbit.server.service.AiProxyService;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -13,13 +14,19 @@ import com.rabbit.common.dto.AiResponseDto;
 public class AiHandler {
     private final AiProxyService service = new AiProxyService();
     private final ObjectMapper objectMapper = new ObjectMapper();
-
+    private final AuthMiddleware auth = AuthMiddleware.getInstanse();
 
     // POST /ai/suggest
     public HttpHandler suggest() {
         return exchange -> {
             if (!exchange.getRequestMethod().equals("POST")) {
                 send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ") || auth.getUserId(authHeader.substring(7)) == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
                 return;
             }
 

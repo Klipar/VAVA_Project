@@ -38,14 +38,11 @@
 
         <dependency>
             <groupId>com.rabbit</groupId>
-            <artifactId>common</artifactId> <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.rabbit</groupId>
             <artifactId>server</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+
     </dependencies>
 
     <build>
