@@ -1,7 +1,5 @@
 package com.rabbit.client;
 
-import com.rabbit.common.dto.UserDto;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
