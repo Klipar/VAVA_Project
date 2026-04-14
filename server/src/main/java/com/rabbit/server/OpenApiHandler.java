@@ -136,7 +136,7 @@ public class OpenApiHandler implements HttpHandler {
                                 "title": {"type": "string", "example": "New Project"},
                                 "description": {"type": "string", "example": "Project description"},
                                 "deadline": {"type": "string", "format": "date-time"},
-                                "status": {"type": "string", "example": "planning"}
+                                "status": {"type": "string", "example": "active"}
                             }
                         },
                         "UpdateProjectRequest": {
