@@ -20,6 +20,17 @@ public class ProjectRepository {
                 .toList();
     }
 
+    public List<ProjectDto> findAllByUserId(int userId) throws SQLException {
+        return db.query("""
+            SELECT p.* FROM project p
+            JOIN user_project up ON up.project_id = p.id
+            WHERE up.user_id = ?
+        """, userId)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
     public Optional<ProjectDto> findById(int projectId) throws SQLException {
         return db.query("SELECT * FROM projects WHERE id = ?", projectId)
                 .stream()
@@ -27,7 +38,7 @@ public class ProjectRepository {
                 .findFirst();
     }
 
-    public void create(ProjectDto dto, int creatorId) throws SQLException {
+    public int create(ProjectDto dto, int creatorId) throws SQLException {
         List<Map<String, Object>> result = db.query("""
             INSERT INTO projects (title, description, deadline, status)
             VALUES (?, ?, ?, ?::project_status)
@@ -38,11 +49,12 @@ public class ProjectRepository {
                 dto.getDeadline(),
                 dto.getStatus()
         );
-        int projectId = (int) result.getFirst().get("id");
+        int projectId = ((Number) result.getFirst().get("id")).intValue();
         db.update(
                 "INSERT INTO users_projects (user_id, project_id, role) VALUES (?, ?, 'master'::project_user_role)",
                 creatorId, projectId
         );
+        return projectId;
     }
 
     public boolean update(ProjectDto dto) throws SQLException {
@@ -69,6 +81,13 @@ public class ProjectRepository {
     public boolean isProjectAdmin(int userId, int projectId) throws SQLException {
         return !db.query(
                 "SELECT 1 FROM users_projects WHERE user_id = ? AND project_id = ? AND role = 'master'",
+                userId, projectId
+        ).isEmpty();
+    }
+
+    public boolean isProjectMember(int userId, int projectId) throws SQLException {
+        return !db.query(
+                "SELECT 1 FROM user_project WHERE user_id = ? AND project_id = ?",
                 userId, projectId
         ).isEmpty();
     }

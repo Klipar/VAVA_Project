@@ -127,6 +127,7 @@ public class UserHandler {
     }
 
     // PUT /users/{userId}/update
+    @SuppressWarnings("unchecked")
     public HttpHandler updateUser() {
         return exchange -> {
             if (!exchange.getRequestMethod().equals("PUT")) {
@@ -142,9 +143,15 @@ public class UserHandler {
 
             try {
                 long targetUserId = extractId(exchange.getRequestURI().getPath(), 2);
-                UserDto updatedData = mapper.readValue(exchange.getRequestBody(), UserDto.class);
+                Map<String, Object> body = mapper.readValue(exchange.getRequestBody(), Map.class);
 
-                UserDto updatedUser = service.updateUser(targetUserId, updatedData, requestingUserId.longValue());
+                UserDto updatedData = new UserDto();
+                if (body.containsKey("name")) updatedData.setName((String) body.get("name"));
+                if (body.containsKey("nickname")) updatedData.setNickname((String) body.get("nickname"));
+                if (body.containsKey("email")) updatedData.setEmail((String) body.get("email"));
+                String newPassword = (String) body.get("password");
+
+                UserDto updatedUser = service.updateUser(targetUserId, updatedData, newPassword, requestingUserId.longValue());
                 send(exchange, 200, mapper.writeValueAsString(updatedUser));
             } catch (SecurityException e) {
                 send(exchange, 403, "{\"error\":\"" + e.getMessage() + "\"}");

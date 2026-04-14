@@ -37,11 +37,17 @@ public class NotificationRepository {
     }
 
     public Long save(NotificationDto dto) throws SQLException {
+<<<<<<< HEAD
+        List<Map<String, Object>> result = db.query(
+                "INSERT INTO notification (message, created_at) VALUES (?, ?) RETURNING id",
+=======
         return db.insertAndGetId(
                 "INSERT INTO notifications (message, created_at) VALUES (?, ?)",
+>>>>>>> main
                 dto.getMessage(),
                 dto.getCreated_at()
         );
+        return ((Number) result.getFirst().get("id")).longValue();
     }
 
     public void linkToUser(long notificationId, int userId) throws SQLException {
@@ -65,7 +71,7 @@ public class NotificationRepository {
         Timestamp ts = (Timestamp) row.get("created_at");
         if (ts != null) dto.setCreated_at(ts.toLocalDateTime());
         Object isRead = row.get("is_read");
-        if (isRead != null) dto.setRead((Boolean) isRead);
+        if (isRead != null) dto.setIsRead((Boolean) isRead);
         return dto;
     }
 }
