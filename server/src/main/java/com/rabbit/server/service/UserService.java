@@ -1,5 +1,6 @@
 package com.rabbit.server.service;
 
+import com.rabbit.common.dto.SuccessAuthDto;
 import com.rabbit.common.dto.UserDto;
 import com.rabbit.common.enums.UserRole;
 import com.rabbit.server.middleware.AuthMiddleware;
@@ -60,6 +61,11 @@ public class UserService {
         if (updatedData.getName() != null && !updatedData.getName().trim().isEmpty()) {
             existingUser.setName(updatedData.getName());
         }
+
+        if (updatedData.getSkills() != null) {
+            existingUser.setSkills(updatedData.getSkills());
+        }
+
         if (updatedData.getNickname() != null && !updatedData.getNickname().trim().isEmpty()) {
             existingUser.setNickname(updatedData.getNickname());
         }
@@ -101,7 +107,7 @@ public class UserService {
         userRepository.removeUserFromAllProjects(userId);
     }
 
-    public String loginUser(String email, String password){
+    public SuccessAuthDto loginUser(String email, String password){
         Optional<UserDto> optionalUser = userRepository.findByEmailAndPassword(
             email,
             hashPassword(password)
@@ -110,7 +116,8 @@ public class UserService {
         if (optionalUser.isEmpty())
             return null;
 
-        return AuthMiddleware.getInstanse().createToken(optionalUser.get().getId().intValue());
+        return new SuccessAuthDto(AuthMiddleware.getInstanse().createToken(optionalUser.get().getId().intValue()), optionalUser.get());
+
     }
 
     private String hashPassword(String password) {

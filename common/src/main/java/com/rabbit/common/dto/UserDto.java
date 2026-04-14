@@ -31,6 +31,7 @@ public class UserDto implements JsonSerializable {
     private String email;                // email address (used as login)
     private UserRole role;               // global role (MANAGER, TEAM_LEADER, WORKER)
     private LocalDateTime createdAt;     // account creation timestamp
+    private String skills;
 
     /**
      * Custom setter for id to prevent modification after creation.

@@ -149,6 +149,7 @@ public class UserHandler {
                 if (body.containsKey("name")) updatedData.setName((String) body.get("name"));
                 if (body.containsKey("nickname")) updatedData.setNickname((String) body.get("nickname"));
                 if (body.containsKey("email")) updatedData.setEmail((String) body.get("email"));
+                if (body.containsKey("skills")) updatedData.setSkills((String) body.get("skills"));
                 String newPassword = (String) body.get("password");
 
                 UserDto updatedUser = service.updateUser(targetUserId, updatedData, newPassword, requestingUserId.longValue());
@@ -305,15 +306,17 @@ public class UserHandler {
             try {
                 Map<String, Object> requestBody = mapper.readValue(exchange.getRequestBody(), Map.class);
 
-                String token = service.loginUser(
+                SuccessAuthDto dto = service.loginUser(
                     requestBody.get("email").toString(),
                     requestBody.get("password").toString()
                 );
 
-                if (token == null)
+                if (dto == null){
                     send(exchange, 401, "{\"error\":\"Invalid credentials\"}");
+                    return;
+                }
 
-                send(exchange, 201, mapper.writeValueAsString(new SuccessAuthDto(token)));
+                send(exchange, 201, mapper.writeValueAsString(dto));
             } catch (IllegalArgumentException e) {
                 send(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
             } catch (Exception e) {
