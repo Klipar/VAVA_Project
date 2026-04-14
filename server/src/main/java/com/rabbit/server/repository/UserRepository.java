@@ -28,7 +28,7 @@ public class UserRepository {
      * @return Optional containing UserDTO if found
      */
     public Optional<UserDto> findById(Long id) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM \"user\" WHERE id = ?";
+        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE id = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, id);
 
@@ -49,8 +49,8 @@ public class UserRepository {
      */
     public List<UserDto> findAllByProjectId(Long projectId) {
         String sql = "SELECT u.id, u.name, u.nickname, u.email, u.role, u.created_at " +
-                "FROM \"user\" u " +
-                "INNER JOIN user_project up ON u.id = up.user_id " +
+                "FROM users u " +
+                "INNER JOIN users_projects up ON u.id = up.user_id " +
                 "WHERE up.project_id = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, projectId);
@@ -67,7 +67,7 @@ public class UserRepository {
      * @param userDto user with updated data
      */
     public void update(UserDto userDto) {
-        String sql = "UPDATE \"user\" SET name = ?, nickname = ?, email = ? WHERE id = ?";
+        String sql = "UPDATE users SET name = ?, nickname = ?, email = ? WHERE id = ?";
         try {
             dbService.update(sql,
                     userDto.getName(),
@@ -93,7 +93,7 @@ public class UserRepository {
      * @param id user ID
      */
     public void deleteById(Long id) {
-        String sql = "DELETE FROM \"user\" WHERE id = ?";
+        String sql = "DELETE FROM users WHERE id = ?";
         try {
             dbService.update(sql, id);
         } catch (SQLException e) {
@@ -107,7 +107,7 @@ public class UserRepository {
      * @return Optional containing UserDTO if found
      */
     public Optional<UserDto> findByEmail(String email) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM \"user\" WHERE email = ?";
+        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE email = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, email);
             if (results.isEmpty()) {
@@ -125,10 +125,10 @@ public class UserRepository {
      * @param password hashed password
      * @return Optional containing UserDTO if credentials match
      */
-    public Optional<UserDto> findByEmailAndPassword(String email, String password) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM \"user\" WHERE email = ? AND password = ?";
+    public Optional<UserDto> findByEmailAndPassword(String email, String passwordHash) {
+        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE email = ? AND password_hash = ?";
         try {
-            List<Map<String, Object>> results = dbService.query(sql, email, password);
+            List<Map<String, Object>> results = dbService.query(sql, email, passwordHash);
 
             if (results.isEmpty()) {
                 return Optional.empty();
@@ -142,13 +142,13 @@ public class UserRepository {
 
     /**
      * Get UserDTO by password.
-     * @param password hashed password
+     * @param password_hash hashed password
      * @return Optional containing UserDTO if found
      */
-    public Optional<UserDto> findByPassword(String password) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM \"user\" WHERE password = ?";
+    public Optional<UserDto> findByPassword(String password_hash) {
+        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE password_hash = ?";
         try {
-            List<Map<String, Object>> results = dbService.query(sql, password);
+            List<Map<String, Object>> results = dbService.query(sql, password_hash);
 
             if (results.isEmpty()) {
                 return Optional.empty();
@@ -156,7 +156,7 @@ public class UserRepository {
 
             return Optional.of(mapToUserDto(results.get(0)));
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to find user by password", e);
+            throw new RuntimeException("Failed to find user by password_hash", e);
         }
     }
 
@@ -166,8 +166,8 @@ public class UserRepository {
      * @param password hashed password
      * @return generated user ID
      */
-    public Long save(UserDto userDto, String password) {
-        String sql = "INSERT INTO \"user\" (name, nickname, email, password, role) VALUES (?, ?, ?, ?, CAST(? AS user_role))";
+    public Long save(UserDto userDto, String passwordHash) {
+        String sql = "INSERT INTO users (name, nickname, email, password_hash, role) VALUES (?, ?, ?, ?, CAST(? AS user_role))";
 
         try {
             return dbService.insertAndGetId(
@@ -175,7 +175,7 @@ public class UserRepository {
                     userDto.getName(),
                     userDto.getNickname(),
                     userDto.getEmail(),
-                    password,
+                    passwordHash,
                     userDto.getRole().name().toLowerCase()
             );
         } catch (SQLException e) {
@@ -190,7 +190,7 @@ public class UserRepository {
      */
     public void addUserToProject(Long userId, Long projectId) {
         // Use the correct syntax for enums in PostgreSQL
-        String sql = "INSERT INTO user_project (project_id, user_id, role) VALUES (?, ?, CAST(? AS project_user_role))";
+        String sql = "INSERT INTO users_projects (project_id, user_id, role) VALUES (?, ?, CAST(? AS project_user_role))";
         try {
             dbService.update(sql, projectId, userId, "slave");
         } catch (SQLException e) {
@@ -205,7 +205,7 @@ public class UserRepository {
      * @param role role in project ('master' or 'slave')
      */
     public void addUserToProjectWithRole(Long userId, Long projectId, String role) {
-        String sql = "INSERT INTO user_project (project_id, user_id, role) VALUES (?, ?, CAST(? AS project_user_role))";
+        String sql = "INSERT INTO users_projects (project_id, user_id, role) VALUES (?, ?, CAST(? AS project_user_role))";
         try {
             dbService.update(sql, projectId, userId, role);
         } catch (SQLException e) {
@@ -219,7 +219,7 @@ public class UserRepository {
      * @param projectId project ID
      */
     public void removeUserFromProject(Long userId, Long projectId) {
-        String sql = "DELETE FROM user_project WHERE user_id = ? AND project_id = ?";
+        String sql = "DELETE FROM users_projects WHERE user_id = ? AND project_id = ?";
         try {
             dbService.update(sql, userId, projectId);
         } catch (SQLException e) {
@@ -232,7 +232,7 @@ public class UserRepository {
      * @param userId user ID
      */
     public void removeUserFromAllProjects(Long userId) {
-        String sql = "DELETE FROM user_project WHERE user_id = ?";
+        String sql = "DELETE FROM users_projects WHERE user_id = ?";
         try {
             dbService.update(sql, userId);
         } catch (SQLException e) {
@@ -247,13 +247,13 @@ public class UserRepository {
      * @return true if user belongs to project
      */
     public boolean isUserInProject(Long userId, Long projectId) {
-        String sql = "SELECT COUNT(*) FROM user_project WHERE user_id = ? AND project_id = ?";
+        String sql = "SELECT COUNT(*) FROM users_projects WHERE user_id = ? AND project_id = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, userId, projectId);
             if (results.isEmpty()) {
                 return false;
             }
-            long count = (long) results.get(0).get("count");
+            long count = ((Number) results.get(0).get("count")).longValue();
             return count > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Failed to check if user " + userId + " is in project " + projectId, e);
@@ -266,7 +266,7 @@ public class UserRepository {
      * @return list of project IDs
      */
     public List<Long> findAllProjectIdsByUserId(Long userId) {
-        String sql = "SELECT project_id FROM user_project WHERE user_id = ?";
+        String sql = "SELECT project_id FROM users_projects WHERE user_id = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, userId);
             return results.stream()
