@@ -1,13 +1,13 @@
 package com.rabbit.server.repository;
 
-import com.rabbit.common.dto.NotificationDto;
-import com.rabbit.server.service.DatabaseService;
-
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.rabbit.common.dto.NotificationDto;
+import com.rabbit.server.service.DatabaseService;
 
 public class NotificationRepository {
     private final DatabaseService db;
@@ -37,13 +37,9 @@ public class NotificationRepository {
     }
 
     public Long save(NotificationDto dto) throws SQLException {
-<<<<<<< HEAD
         List<Map<String, Object>> result = db.query(
-                "INSERT INTO notification (message, created_at) VALUES (?, ?) RETURNING id",
-=======
-        return db.insertAndGetId(
-                "INSERT INTO notifications (message, created_at) VALUES (?, ?)",
->>>>>>> main
+                "INSERT INTO notifications (message, created_at) VALUES (?, ?) RETURNING id",
+
                 dto.getMessage(),
                 dto.getCreated_at()
         );
