@@ -29,11 +29,12 @@
                           -fx-border-color: transparent;
                           -fx-table-cell-border-color: #243352;">
             <columns>
-                <TableColumn fx:id="typeColumn"    text="TYPE"         prefWidth="160"/>
-                <TableColumn fx:id="titleColumn"   text="TASK NAME"    prefWidth="260"/>
-                <TableColumn fx:id="statusColumn"  text="STATUS"       prefWidth="170"/>
-                <TableColumn fx:id="projectColumn" text="PROJECT NAME" prefWidth="210"/>
-                <TableColumn fx:id="deadlineColumn" text="DEADLINE"    prefWidth="230"/>
+                <TableColumn fx:id="typeColumn"        text="TYPE"         prefWidth="90"/>
+                <TableColumn fx:id="titleColumn"       text="TASK NAME"    prefWidth="130"/>
+                <TableColumn fx:id="descriptionColumn" text="DESCRIPTION"  prefWidth="160"/>
+                <TableColumn fx:id="statusColumn"      text="STATUS"       prefWidth="110"/>
+                <TableColumn fx:id="projectColumn"     text="PROJECT NAME" prefWidth="120"/>
+                <TableColumn fx:id="deadlineColumn"    text="DEADLINE"     prefWidth="150"/>
             </columns>
 
             <placeholder>

@@ -24,6 +24,8 @@ public class MyTasksController {
     @FXML
     private TableColumn<TaskDto, String> titleColumn;
     @FXML
+    private TableColumn<TaskDto, String> descriptionColumn;
+    @FXML
     private TableColumn<TaskDto, String> statusColumn;
     @FXML
     private TableColumn<TaskDto, String> projectColumn;
@@ -39,6 +41,7 @@ public class MyTasksController {
                 new TaskDto(1, 101, 2, 1, "smth", "smth", 3, TaskStatus.IN_PROGRESS.getValue(), Timestamp.from(Instant.now().plus(2, ChronoUnit.DAYS))),
                 new TaskDto(4, 103, 2, 4, "smth", "smth", 1, TaskStatus.ASSIGNED.getValue(), Timestamp.from(Instant.now().plus(10, ChronoUnit.DAYS)))
         );
+        tasksTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         tasksTable.setItems(testTasks);
         statusLabel.setText("Loaded " + testTasks.size() + " tasks.");
 
@@ -52,6 +55,10 @@ public class MyTasksController {
 
         titleColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getTitle())
+        );
+
+        descriptionColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getDescription())
         );
 
         statusColumn.setCellValueFactory(cellData -> {
