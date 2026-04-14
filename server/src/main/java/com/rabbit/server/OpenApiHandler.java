@@ -61,7 +61,7 @@ public class OpenApiHandler implements HttpHandler {
                         "UserDto": {
                             "type": "object",
                             "properties": {
-                                "id": {"type": "integer", "format": "int64", "example": 1},
+                                "id": {"type": "integer", "format": "int64", "example": 1, "readOnly": true},
                                 "name": {"type": "string", "example": "John Doe"},
                                 "nickname": {"type": "string", "example": "johnd"},
                                 "email": {"type": "string", "format": "email", "example": "ivan@example.com"},
@@ -70,7 +70,8 @@ public class OpenApiHandler implements HttpHandler {
                                     "enum": ["MANAGER", "TEAM_LEADER", "WORKER"],
                                     "example": "TEAM_LEADER"
                                 },
-                                "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z"}
+                                "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z", "readOnly": true},
+                                "skills": {"type": "string", "example": "java,spring,react"}
                             }
                         },
                         "CreateUserRequest": {
@@ -80,7 +81,8 @@ public class OpenApiHandler implements HttpHandler {
                                 "name": {"type": "string", "example": "John Doe"},
                                 "nickname": {"type": "string", "example": "johnd"},
                                 "email": {"type": "string", "format": "email", "example": "ivan@example.com"},
-                                "password": {"type": "string", "minLength": 6, "example": "qwerty"}
+                                "password": {"type": "string", "minLength": 6, "example": "qwerty"},
+                                "skills": {"type": "string", "example": "java,spring"}
                             }
                         },
                         "UpdateUserRequest": {
@@ -88,7 +90,8 @@ public class OpenApiHandler implements HttpHandler {
                             "properties": {
                                 "name": {"type": "string", "example": "John Updated"},
                                 "nickname": {"type": "string", "example": "johnu"},
-                                "email": {"type": "string", "format": "email", "example": "john.updated@example.com"}
+                                "email": {"type": "string", "format": "email", "example": "john.updated@example.com"},
+                                "skills": {"type": "string", "example": "java,spring,python"}
                             }
                         },
                         "LoginRequest": {
@@ -116,6 +119,10 @@ public class OpenApiHandler implements HttpHandler {
                                     "type": "string",
                                     "description": "JWT authentication token",
                                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                },
+                                "user": {
+                                    "$ref": "#/components/schemas/UserDto",
+                                    "description": "User information"
                                 }
                             }
                         },
@@ -283,7 +290,7 @@ public class OpenApiHandler implements HttpHandler {
                             },
                             "responses": {
                                 "201": {
-                                    "description": "Login successful - returns JWT token",
+                                    "description": "Login successful - returns JWT token and user info",
                                     "content": {
                                         "application/json": {
                                             "schema": {"$ref": "#/components/schemas/SuccessAuthDto"}
