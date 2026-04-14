@@ -310,8 +310,10 @@ public class UserHandler {
                     requestBody.get("password").toString()
                 );
 
-                if (dto == null)
+                if (dto == null){
                     send(exchange, 401, "{\"error\":\"Invalid credentials\"}");
+                    return;
+                }
 
                 send(exchange, 201, mapper.writeValueAsString(dto));
             } catch (IllegalArgumentException e) {
