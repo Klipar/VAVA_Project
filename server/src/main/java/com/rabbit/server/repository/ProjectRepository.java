@@ -1,6 +1,7 @@
 package com.rabbit.server.repository;
 
 import com.rabbit.common.dto.ProjectDto;
+import com.rabbit.common.enums.ProjectStatus;
 import com.rabbit.server.service.DatabaseService;
 
 import java.sql.SQLException;
@@ -99,7 +100,8 @@ public class ProjectRepository {
         dto.setDescription((String) row.get("description"));
         Timestamp ts = (Timestamp) row.get("deadline");
         dto.setDeadline(ts != null ? ts.toLocalDateTime() : null);
-        dto.setStatus(row.get("status").toString());
+        String statusStr = row.get("status").toString().toUpperCase();
+        dto.setStatus(ProjectStatus.valueOf(statusStr));
         return dto;
     }
 }

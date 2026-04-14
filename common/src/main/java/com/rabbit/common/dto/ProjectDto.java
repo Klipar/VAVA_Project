@@ -1,6 +1,7 @@
 package com.rabbit.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rabbit.common.enums.ProjectStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,5 +16,5 @@ public class ProjectDto {
     private String title;
     private String description;
     private LocalDateTime deadline;
-    private String status;
+    private ProjectStatus status;
 }
