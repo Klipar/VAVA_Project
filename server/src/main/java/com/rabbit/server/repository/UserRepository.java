@@ -29,7 +29,7 @@ public class UserRepository {
      * @return Optional containing UserDTO if found
      */
     public Optional<UserDto> findById(Long id) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE id = ?";
+        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users WHERE id = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, id);
 
@@ -50,7 +50,7 @@ public class UserRepository {
      * @return list of UserDto
      */
     public List<UserDto> findAllByProjectId(Long projectId) {
-        String sql = "SELECT u.id, u.name, u.nickname, u.email, u.role, u.created_at " +
+        String sql = "SELECT u.id, u.name, u.nickname, u.email, u.role, u.created_at, skills " +
                 "FROM users u " +
                 "INNER JOIN user_projects up ON u.id = up.user_id " +
                 "WHERE up.project_id = ?";
@@ -70,12 +70,13 @@ public class UserRepository {
      * @param userDto user with updated data
      */
     public void update(UserDto userDto) {
-        String sql = "UPDATE users SET name = ?, nickname = ?, email = ? WHERE id = ?";
+        String sql = "UPDATE users SET name = ?, nickname = ?, email = ?, skills = ? WHERE id = ?";
         try {
             dbService.update(sql,
                     userDto.getName(),
                     userDto.getNickname(),
                     userDto.getEmail(),
+                    userDto.getSkills(),
                     userDto.getId());
         } catch (SQLException e) {
             throw new RuntimeException("Failed to update user: " + userDto.getId(), e);
@@ -112,7 +113,7 @@ public class UserRepository {
      * @return Optional containing UserDTO if found
      */
     public Optional<UserDto> findByEmail(String email) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE email = ?";
+        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users WHERE email = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, email);
             if (results.isEmpty()) {
@@ -132,7 +133,7 @@ public class UserRepository {
      * @return Optional containing UserDTO if credentials match
      */
     public Optional<UserDto> findByEmailAndPassword(String email, String passwordHash) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE email = ? AND password_hash = ?";
+        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users WHERE email = ? AND password_hash = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, email, passwordHash);
 
@@ -152,7 +153,7 @@ public class UserRepository {
      * @return Optional containing UserDTO if found
      */
     public Optional<UserDto> findByPassword(String password_hash) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM users WHERE password_hash = ?";
+        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users WHERE password_hash = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, password_hash);
 
@@ -174,7 +175,7 @@ public class UserRepository {
      * @return generated user ID
      */
     public Long save(UserDto userDto, String passwordHash) {
-        String sql = "INSERT INTO users (name, nickname, email, password_hash, role) VALUES (?, ?, ?, ?, CAST(? AS user_role))";
+        String sql = "INSERT INTO users (name, nickname, email, password_hash, role, skills) VALUES (?, ?, ?, ?, CAST(? AS user_role))";
 
         try {
             return dbService.insertAndGetId(
@@ -183,7 +184,8 @@ public class UserRepository {
                     userDto.getNickname(),
                     userDto.getEmail(),
                     passwordHash,
-                    userDto.getRole().name().toLowerCase()
+                    userDto.getRole().name().toLowerCase(),
+                    userDto.getSkills()
             );
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save user: " + userDto.getEmail(), e);
@@ -300,7 +302,7 @@ public class UserRepository {
         dto.setName((String) row.get("name"));
         dto.setNickname((String) row.get("nickname"));
         dto.setEmail((String) row.get("email"));
-
+        dto.setSkills((String) row.get("skills"));
         String roleStr = (String) row.get("role");
         dto.setRole(UserRole.valueOf(roleStr.toUpperCase()));
 

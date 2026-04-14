@@ -61,6 +61,11 @@ public class UserService {
         if (updatedData.getName() != null && !updatedData.getName().trim().isEmpty()) {
             existingUser.setName(updatedData.getName());
         }
+
+        if (updatedData.getSkills() != null) {
+            existingUser.setSkills(updatedData.getSkills());
+        }
+
         if (updatedData.getNickname() != null && !updatedData.getNickname().trim().isEmpty()) {
             existingUser.setNickname(updatedData.getNickname());
         }

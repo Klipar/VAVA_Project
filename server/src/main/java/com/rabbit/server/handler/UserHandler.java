@@ -149,6 +149,7 @@ public class UserHandler {
                 if (body.containsKey("name")) updatedData.setName((String) body.get("name"));
                 if (body.containsKey("nickname")) updatedData.setNickname((String) body.get("nickname"));
                 if (body.containsKey("email")) updatedData.setEmail((String) body.get("email"));
+                if (body.containsKey("skills")) updatedData.setSkills((String) body.get("skills"));
                 String newPassword = (String) body.get("password");
 
                 UserDto updatedUser = service.updateUser(targetUserId, updatedData, newPassword, requestingUserId.longValue());
