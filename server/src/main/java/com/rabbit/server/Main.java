@@ -174,30 +174,6 @@ public class Main {
 
         System.out.println("Server started on port 6969");
         System.out.println("API Documentation available at: http://localhost:6969/swagger");
-        System.out.println("\n=== Available Endpoints ===");
-        System.out.println("\nUser Endpoints:");
-        System.out.println("  POST   /users/login");
-        System.out.println("  GET    /users/{userId}");
-        System.out.println("  PUT    /users/{userId}/update");
-        System.out.println("  DELETE /users/{userId}/delete");
-        System.out.println("  GET    /projects/{projectId}/users");
-        System.out.println("  POST   /projects/{projectId}/users/create");
-        System.out.println("  POST   /projects/{projectId}/users/{userId}/add");
-        System.out.println("  DELETE /projects/{projectId}/users/{userId}/remove");
-
-        System.out.println("\nTask Endpoints:");
-        System.out.println("  GET    /tasks/{projectId}");
-        System.out.println("  POST   /tasks/{projectId}/create");
-        System.out.println("  PUT    /tasks/{taskId}/update");
-        System.out.println("  DELETE /tasks/{taskId}/delete");
-
-        System.out.println("\nAI Endpoint:");
-        System.out.println("  POST   /ai/suggest");
-
-        System.out.println("\nDocumentation:");
-        System.out.println("  GET    /swagger");
-        System.out.println("  GET    /openapi.json");
-        System.out.println("  GET    /hello");
     }
 
     private static void send405(HttpExchange exchange) throws IOException {
