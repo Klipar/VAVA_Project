@@ -48,7 +48,7 @@ public class ProjectRepository {
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getDeadline(),
-                dto.getStatus()
+                dto.getStatus().getValue()
         );
         int projectId = ((Number) result.getFirst().get("id")).intValue();
         db.update(
@@ -70,7 +70,7 @@ public class ProjectRepository {
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getDeadline(),
-                dto.getStatus(),
+                dto.getStatus().getValue(),
                 dto.getId()
         ) > 0;
     }

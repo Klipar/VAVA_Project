@@ -1,7 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.control.Label?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<StackPane xmlns:fx="http://javafx.com/fxml/1" style="-fx-background-color: #0b1a31;">
-    <Label text="This page is My tasks" style="-fx-text-fill: white; -fx-font-size: 24px;"/>
-</StackPane>
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rabbit.client.ui.controllers.MyTasksController"
+      style="-fx-background-color: #0d1b2e;"
+      spacing="20.0">
+
+    <padding>
+        <Insets top="30.0" bottom="30.0" left="40.0" right="40.0"/>
+    </padding>
+
+    <Label text="MY TASKS"
+           style="-fx-text-fill: #ffffff;
+                  -fx-font-size: 36px;
+                  -fx-font-weight: bold;
+                  -fx-font-family: 'Segoe UI', 'Roboto', sans-serif;"/>
+
+    <VBox style="-fx-background-color: #1a2840;
+                 -fx-background-radius: 12;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 4);"
+          VBox.vgrow="ALWAYS">
+
+        <TableView fx:id="tasksTable"
+                   VBox.vgrow="ALWAYS"
+                   style="-fx-background-color: transparent;
+                          -fx-border-color: transparent;
+                          -fx-table-cell-border-color: #243352;">
+            <columns>
+                <TableColumn fx:id="typeColumn"    text="TYPE"         prefWidth="160"/>
+                <TableColumn fx:id="titleColumn"   text="TASK NAME"    prefWidth="260"/>
+                <TableColumn fx:id="statusColumn"  text="STATUS"       prefWidth="170"/>
+                <TableColumn fx:id="projectColumn" text="PROJECT NAME" prefWidth="210"/>
+                <TableColumn fx:id="deadlineColumn" text="DEADLINE"    prefWidth="230"/>
+            </columns>
+
+            <placeholder>
+                <Label text="No tasks assigned to you."
+                       style="-fx-text-fill: #6b7a99; -fx-font-size: 14px;"/>
+            </placeholder>
+        </TableView>
+    </VBox>
+
+    <Label fx:id="statusLabel" text=""
+           style="-fx-text-fill: #5a6a88; -fx-font-size: 12px;"/>
+
+</VBox>
