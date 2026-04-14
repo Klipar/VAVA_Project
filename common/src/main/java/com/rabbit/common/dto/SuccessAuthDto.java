@@ -9,4 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SuccessAuthDto {
     private String token;
+    private UserDto user;
+
+    // public SuccessAuthDto(String token, UserDto user) {
+    //     this.token = token;
+    //     this.user = user;
+    // }
 }
