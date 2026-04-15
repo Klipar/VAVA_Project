@@ -167,16 +167,59 @@ public class OpenApiHandler implements HttpHandler {
                         },
                         "TaskDto": {
                             "type": "object",
+                            "description": "Full task representation returned by the server",
                             "properties": {
-                                "id": {"type": "integer", "format": "int64", "example": 1},
-                                "projectId": {"type": "integer", "format": "int64", "example": 1},
+                                "id": {"type": "integer", "format": "int64", "example": 1, "readOnly": true},
+                                "projectId": {"type": "integer", "format": "int64", "example": 1, "readOnly": true},
                                 "assignedTo": {"type": "integer", "format": "int64", "example": 2},
-                                "createdBy": {"type": "integer", "format": "int64", "example": 1},
+                                "createdBy": {"type": "integer", "format": "int64", "example": 1, "readOnly": true},
                                 "title": {"type": "string", "example": "Fix login bug"},
                                 "description": {"type": "string", "example": "Users cannot login with correct credentials"},
                                 "priority": {"type": "integer", "minimum": 0, "maximum": 4, "example": 2},
-                                "status": {"type": "string", "example": "in_progress"},
+                                "status": {"type": "string", "enum": ["pending", "in_progress", "completed", "cancelled"], "example": "in_progress"},
                                 "deadline": {"type": "string", "format": "date-time", "example": "2024-12-31T23:59:59Z"}
+                            }
+                        },
+                        "TaskRequestDto": {
+                            "type": "object",
+                            "description": "Request body for creating or updating a task. IMPORTANT: Do NOT include 'id', 'projectId', or 'createdBy' fields - they are automatically set by the server.",
+                            "required": ["title", "priority", "status"],
+                            "properties": {
+                                "assignedTo": {
+                                    "type": "integer",
+                                    "format": "int64",
+                                    "description": "ID of the user assigned to the task",
+                                    "example": 2
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "description": "Task title",
+                                    "example": "Fix login bug"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "Detailed task description",
+                                    "example": "Users cannot login with correct credentials"
+                                },
+                                "priority": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 4,
+                                    "description": "Task priority (0=Lowest, 4=Highest)",
+                                    "example": 2
+                                },
+                                "status": {
+                                    "type": "string",
+                                    "enum": ["pending", "in_progress", "completed", "cancelled"],
+                                    "description": "Current task status",
+                                    "example": "in_progress"
+                                },
+                                "deadline": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "description": "Task deadline in ISO format (YYYY-MM-DDTHH:MM:SSZ)",
+                                    "example": "2024-12-31T23:59:59Z"
+                                }
                             }
                         },
                         "WorkerDto": {
@@ -798,7 +841,7 @@ public class OpenApiHandler implements HttpHandler {
                         "post": {
                             "tags": ["Task"],
                             "summary": "Create a new task",
-                            "description": "Create a new task in a project (Only Manager or Team Leader can create tasks)",
+                            "description": "Create a new task in a project (Only project admin can create tasks).\\n\\n**IMPORTANT:** Do NOT include 'id', 'projectId', or 'createdBy' in the request body - these are automatically set by the server.",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
@@ -811,15 +854,53 @@ public class OpenApiHandler implements HttpHandler {
                                 "required": true,
                                 "content": {
                                     "application/json": {
-                                        "schema": {"$ref": "#/components/schemas/TaskDto"}
+                                        "schema": {"$ref": "#/components/schemas/TaskRequestDto"},
+                                        "example": {
+                                            "title": "Fix login bug",
+                                            "description": "Users cannot login with correct credentials",
+                                            "priority": 2,
+                                            "status": "in_progress",
+                                            "assignedTo": 2,
+                                            "deadline": "2024-12-31T23:59:59Z"
+                                        }
                                     }
                                 }
                             },
                             "responses": {
-                                "201": {"description": "Task created successfully"},
-                                "401": {"description": "Unauthorized"},
-                                "403": {"description": "Forbidden - only Manager or Team Leader can create tasks"},
-                                "405": {"description": "Method not allowed"}
+                                "201": {
+                                    "description": "Task created successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                        }
+                                    }
+                                },
+                                "400": {
+                                    "description": "Bad request - invalid input or missing required fields",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized - Bearer token required"},
+                                "403": {
+                                    "description": "Forbidden - only project admin can create tasks",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "405": {"description": "Method not allowed - only POST method is supported"},
+                                "500": {
+                                    "description": "Internal server error",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                }
                             }
                         }
                     },
@@ -827,7 +908,7 @@ public class OpenApiHandler implements HttpHandler {
                         "put": {
                             "tags": ["Task"],
                             "summary": "Update a task",
-                            "description": "Update an existing task (Only Manager or Team Leader can update tasks)",
+                            "description": "Update an existing task (Only project admin can update tasks).\\n\\n**IMPORTANT:** Do NOT include 'id', 'projectId', or 'createdBy' in the request body - these fields are read-only.",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "taskId",
@@ -840,16 +921,61 @@ public class OpenApiHandler implements HttpHandler {
                                 "required": true,
                                 "content": {
                                     "application/json": {
-                                        "schema": {"$ref": "#/components/schemas/TaskDto"}
+                                        "schema": {"$ref": "#/components/schemas/TaskRequestDto"},
+                                        "example": {
+                                            "title": "Fix login bug - UPDATED",
+                                            "description": "Users cannot login with correct credentials - needs immediate fix",
+                                            "priority": 3,
+                                            "status": "in_progress",
+                                            "assignedTo": 3,
+                                            "deadline": "2024-12-15T23:59:59Z"
+                                        }
                                     }
                                 }
                             },
                             "responses": {
-                                "200": {"description": "Task updated successfully"},
-                                "401": {"description": "Unauthorized"},
-                                "403": {"description": "Forbidden - only Manager or Team Leader can update tasks"},
-                                "404": {"description": "Task not found"},
-                                "405": {"description": "Method not allowed"}
+                                "200": {
+                                    "description": "Task updated successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                        }
+                                    }
+                                },
+                                "400": {
+                                    "description": "Bad request - invalid input",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized - Bearer token required"},
+                                "403": {
+                                    "description": "Forbidden - only project admin can update tasks",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "404": {
+                                    "description": "Task not found",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "405": {"description": "Method not allowed - only PUT method is supported"},
+                                "500": {
+                                    "description": "Internal server error",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                }
                             }
                         }
                     },
@@ -857,7 +983,7 @@ public class OpenApiHandler implements HttpHandler {
                         "delete": {
                             "tags": ["Task"],
                             "summary": "Delete a task",
-                            "description": "Delete a task (Only Manager or Team Leader can delete tasks)",
+                            "description": "Delete a task (Only project admin can delete tasks)",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "taskId",
@@ -867,11 +993,40 @@ public class OpenApiHandler implements HttpHandler {
                                 "schema": {"type": "integer", "format": "int64", "example": 1}
                             }],
                             "responses": {
-                                "200": {"description": "Task deleted successfully"},
-                                "401": {"description": "Unauthorized"},
-                                "403": {"description": "Forbidden - only Manager or Team Leader can delete tasks"},
-                                "404": {"description": "Task not found"},
-                                "405": {"description": "Method not allowed"}
+                                "200": {
+                                    "description": "Task deleted successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized - Bearer token required"},
+                                "403": {
+                                    "description": "Forbidden - only project admin can delete tasks",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "404": {
+                                    "description": "Task not found",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                },
+                                "405": {"description": "Method not allowed - only DELETE method is supported"},
+                                "500": {
+                                    "description": "Internal server error",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+                                        }
+                                    }
+                                }
                             }
                         }
                     },

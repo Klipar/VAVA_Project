@@ -6,7 +6,12 @@ import com.rabbit.server.service.DatabaseService;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,13 +40,13 @@ public class TaskRepository {
         VALUES (?, ?, ?, ?, ?, ?, ?::task_status, ?)
     """,
                 projectId,
-                dto.getAssignedTo(),
+                dto.getAssignedTo() == 0 ? null : dto.getAssignedTo(),
                 createdBy,
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getPriority(),
                 dto.getStatus(),
-                dto.getDeadline() != null ? Timestamp.valueOf(LocalDateTime.parse(dto.getDeadline())) : null
+                parseDeadline(dto.getDeadline())
         );
     }
 
@@ -56,12 +61,12 @@ public class TaskRepository {
             deadline = ?
         WHERE id = ?
     """,
-                dto.getAssignedTo(),
+                dto.getAssignedTo() == 0 ? null : dto.getAssignedTo(),
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getPriority(),
                 dto.getStatus(),
-                dto.getDeadline() != null ? Timestamp.valueOf(LocalDateTime.parse(dto.getDeadline())) : null,
+                parseDeadline(dto.getDeadline()),
                 taskId
         ) > 0;
     }
@@ -81,14 +86,86 @@ public class TaskRepository {
         TaskDto dto = new TaskDto();
         dto.setId((int) row.get("id"));
         dto.setProjectId((int) row.get("project_id"));
-        dto.setAssignedTo((int) row.get("assigned_to"));
+        Object assignedTo = row.get("assigned_to");
+        dto.setAssignedTo(assignedTo != null ? (int) assignedTo : 0);
         dto.setCreatedBy((int) row.get("created_by"));
         dto.setTitle((String) row.get("title"));
         dto.setDescription((String) row.get("description"));
         dto.setPriority((int) row.get("priority"));
         dto.setStatus(row.get("status").toString());
         Timestamp ts = (Timestamp) row.get("deadline");
-        dto.setDeadline(ts != null ? ts.toLocalDateTime().toString() : null); // → "2025-06-01T12:00"
+        dto.setDeadline(ts != null ? ts.toLocalDateTime().toString() : null);
         return dto;
+    }
+
+    private Timestamp parseDeadline(String dateString) {
+        if (dateString == null || dateString.trim().isEmpty()) {
+            return null;
+        }
+
+        dateString = dateString.trim();
+
+        try {
+            if (dateString.matches("-?\\d+")) {
+                long timestamp = Long.parseLong(dateString);
+                if (timestamp < 0) return null;
+                if (String.valueOf(timestamp).length() == 10) {
+                    return new Timestamp(timestamp * 1000);
+                }
+                return new Timestamp(timestamp);
+            }
+
+            if (dateString.matches("-?\\d+\\.\\d+")) {
+                double timestamp = Double.parseDouble(dateString);
+                if (timestamp < 0) return null;
+                return new Timestamp((long) (timestamp * 1000));
+            }
+
+            DateTimeFormatter[] formatters = {
+                    DateTimeFormatter.ISO_DATE_TIME,
+                    DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+                    DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+                    DateTimeFormatter.ISO_ZONED_DATE_TIME,
+                    DateTimeFormatter.ISO_INSTANT,
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                    DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"),
+                    DateTimeFormatter.ofPattern("dd.MM.yyyy"),
+                    DateTimeFormatter.RFC_1123_DATE_TIME
+            };
+
+            LocalDateTime dateTime = null;
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    dateTime = LocalDateTime.parse(dateString, formatter);
+                    break;
+                } catch (DateTimeParseException e) {
+                }
+            }
+
+            if (dateTime == null) {
+                try {
+                    ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateString);
+                    dateTime = zonedDateTime.toLocalDateTime();
+                } catch (DateTimeParseException e) {
+                    try {
+                        Instant instant = Instant.parse(dateString);
+                        dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                    } catch (DateTimeParseException e2) {
+                        throw new DateTimeParseException("Unsupported date format: " + dateString, dateString, 0);
+                    }
+                }
+            }
+
+            return Timestamp.valueOf(dateTime);
+
+        } catch (Exception e) {
+            System.err.println("Failed to parse deadline: " + dateString + " - " + e.getMessage());
+            return null;
+        }
     }
 }
