@@ -9,6 +9,7 @@ public class Config {
     private UserDto user = null;
     private ResourceBundle bundle = null;
     private Locale currentLocale = null;
+    private String token = null;
 
     private Config() {
         Locale.setDefault(Locale.US);
@@ -32,6 +33,14 @@ public class Config {
 
     public Locale getCurrentLocale() {
         return currentLocale;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public void setUser(UserDto user) {

@@ -84,7 +84,7 @@ public class UserRepository {
     }
 
     public void updatePassword(Long userId, String hashedPassword) {
-        String sql = "UPDATE \"user\" SET password_hash = ? WHERE id = ?";
+        String sql = "UPDATE \"users\" SET password_hash = ? WHERE id = ?";
         try {
             dbService.update(sql, hashedPassword, userId);
         } catch (SQLException e) {
@@ -148,26 +148,6 @@ public class UserRepository {
     }
 
     /**
-     * Get UserDTO by password.
-     * @param password_hash hashed password
-     * @return Optional containing UserDTO if found
-     */
-    public Optional<UserDto> findByPassword(String password_hash) {
-        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users WHERE password_hash = ?";
-        try {
-            List<Map<String, Object>> results = dbService.query(sql, password_hash);
-
-            if (results.isEmpty()) {
-                return Optional.empty();
-            }
-
-            return Optional.of(mapToUserDto(results.get(0)));
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to find user by password_hash", e);
-        }
-    }
-
-    /**
      * Save UserDTO to database.
      *
      * @param userDto  UserDTO object (without id)
@@ -175,7 +155,7 @@ public class UserRepository {
      * @return generated user ID
      */
     public Long save(UserDto userDto, String passwordHash) {
-        String sql = "INSERT INTO users (name, nickname, email, password_hash, role, skills) VALUES (?, ?, ?, ?, CAST(? AS user_role))";
+        String sql = "INSERT INTO users (name, nickname, email, password_hash, role, skills) VALUES (?, ?, ?, ?, CAST(? AS user_role)), ?";
 
         try {
             return dbService.insertAndGetId(
