@@ -129,11 +129,11 @@ public class UserRepository {
      * Get UserDTO by username (email) and password.
      *
      * @param email    user's email (username)
-     * @param password hashed password
+     * @param passwordHash hashed password
      * @return Optional containing UserDTO if credentials match
      */
     public Optional<UserDto> findByEmailAndPassword(String email, String passwordHash) {
-        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users WHERE email = ? AND password_hash = ?";
+        String sql = "SELECT id, name, nickname, email, role, created_at FROM \"user\" WHERE email = ? AND password = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, email, passwordHash);
 
@@ -171,7 +171,7 @@ public class UserRepository {
      * Save UserDTO to database.
      *
      * @param userDto  UserDTO object (without id)
-     * @param password hashed password
+     * @param passwordHash hashed password
      * @return generated user ID
      */
     public Long save(UserDto userDto, String passwordHash) {

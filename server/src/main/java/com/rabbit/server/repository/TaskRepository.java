@@ -1,9 +1,12 @@
 package com.rabbit.server.repository;
 
 import com.rabbit.common.dto.TaskDto;
+import com.rabbit.common.dto.TaskRequestDto;
 import com.rabbit.server.service.DatabaseService;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,44 +29,44 @@ public class TaskRepository {
                 .findFirst();
     }
 
-    public void create(TaskDto dto) throws SQLException {
+    public void create(int projectId, int createdBy, TaskRequestDto dto) throws SQLException {
         db.update("""
-            INSERT INTO tasks (project_id, assigned_to, created_by, title, description, priority, status, deadline)
-            VALUES (?, ?, ?, ?, ?, ?, ?::task_status, ?)
-        """,
-                dto.getProjectId(),
+        INSERT INTO tasks (project_id, assigned_to, created_by, title, description, priority, status, deadline)
+        VALUES (?, ?, ?, ?, ?, ?, ?::task_status, ?)
+    """,
+                projectId,
                 dto.getAssignedTo(),
-                dto.getCreatedBy(),
+                createdBy,
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getPriority(),
                 dto.getStatus(),
-                dto.getDeadline()
+                dto.getDeadline() != null ? Timestamp.valueOf(LocalDateTime.parse(dto.getDeadline())) : null
         );
     }
 
-    public boolean update(TaskDto dto) throws SQLException {
+    public boolean update(int taskId, TaskRequestDto dto) throws SQLException {
         return db.update("""
-            UPDATE tasks SET
-                assigned_to = ?,
-                title = ?,
-                description = ?,
-                priority = ?,
-                status = ?::task_status,
-                deadline = ?
-            WHERE id = ?
-        """,
+        UPDATE tasks SET
+            assigned_to = ?,
+            title = ?,
+            description = ?,
+            priority = ?,
+            status = ?::task_status,
+            deadline = ?
+        WHERE id = ?
+    """,
                 dto.getAssignedTo(),
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getPriority(),
                 dto.getStatus(),
-                dto.getDeadline(),
-                dto.getId()
+                dto.getDeadline() != null ? Timestamp.valueOf(LocalDateTime.parse(dto.getDeadline())) : null,
+                taskId
         ) > 0;
     }
 
-    public boolean delete(int taskId) throws SQLException {
+    public boolean delete(int taskId, int userId) throws SQLException {
         return db.update("DELETE FROM tasks WHERE id = ?", taskId) > 0;
     }
 
@@ -84,7 +87,8 @@ public class TaskRepository {
         dto.setDescription((String) row.get("description"));
         dto.setPriority((int) row.get("priority"));
         dto.setStatus(row.get("status").toString());
-        dto.setDeadline((java.sql.Timestamp) row.get("deadline"));
+        Timestamp ts = (Timestamp) row.get("deadline");
+        dto.setDeadline(ts != null ? ts.toLocalDateTime().toString() : null); // → "2025-06-01T12:00"
         return dto;
     }
 }

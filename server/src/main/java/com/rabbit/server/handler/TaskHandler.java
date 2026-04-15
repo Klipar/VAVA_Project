@@ -2,6 +2,7 @@ package com.rabbit.server.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbit.common.dto.TaskDto;
+import com.rabbit.common.dto.TaskRequestDto;
 import com.rabbit.server.middleware.AuthMiddleware;
 import com.rabbit.server.service.TaskService;
 import com.sun.net.httpserver.HttpExchange;
@@ -45,7 +46,7 @@ public class TaskHandler {
 
             try {
                 int projectId = extractId(exchange.getRequestURI().getPath(), 2);
-                TaskDto dto = mapper.readValue(exchange.getRequestBody(), TaskDto.class);
+                TaskRequestDto dto = mapper.readValue(exchange.getRequestBody(), TaskRequestDto.class);
                 service.createTask(projectId, userId, dto);
                 send(exchange, 201, "{\"message\":\"Task created\"}");
             } catch (SecurityException e) {
@@ -66,7 +67,7 @@ public class TaskHandler {
 
             try {
                 int taskId = extractId(exchange.getRequestURI().getPath(), 2);
-                TaskDto dto = mapper.readValue(exchange.getRequestBody(), TaskDto.class);
+                TaskRequestDto dto = mapper.readValue(exchange.getRequestBody(), TaskRequestDto.class);
                 boolean updated = service.updateTask(taskId, userId, dto);
                 send(exchange, updated ? 200 : 404,
                         updated ? "{\"message\":\"Updated\"}" : "{\"error\":\"Task not found\"}");
