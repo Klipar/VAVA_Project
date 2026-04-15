@@ -1,40 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
+<HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.rabbit.client.ui.controllers.LoginPageController"
-      alignment="CENTER"
-      spacing="20"
-      style="-fx-background-color: white; -fx-padding: 60px;">
+      style="-fx-background-color: #0b1a32;">
 
-    <Label text="Welcome"
-           style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: black;"/>
+    <StackPane HBox.hgrow="ALWAYS"
+               style="-fx-background-color: #0b1a32;">
 
-    <Label fx:id="errorLabel"
-           text=""
-           style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;"/>
+        <ImageView fitWidth="600" preserveRatio="true">
+            <image>
+                <Image url="@/com/rabbit/client/images/Rabbit_logo.png"/>
+            </image>
+        </ImageView>
 
-    <TextField fx:id="emailField"
-               promptText="Email"
-               maxWidth="300"
-               style="-fx-background-radius: 6;
-                      -fx-padding: 12px 16px;
-                      -fx-font-size: 15px;"/>
+    </StackPane>
 
-    <PasswordField fx:id="passwordField"
-                   promptText="Password"
+    <VBox alignment="CENTER"
+          spacing="20"
+          prefWidth="400"
+          HBox.hgrow="ALWAYS"
+          style="-fx-background-color: #0b1a32; -fx-padding: 60px;">
+
+        <Label text="WELCOME"
+               style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+
+        <Label fx:id="errorLabel"
+               text=""
+               style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;"/>
+
+        <TextField fx:id="emailField"
+                   promptText="LOGIN"
                    maxWidth="300"
-                   style="-fx-background-radius: 6;
+                   style="-fx-background-color: #e0e0e0;
+                          -fx-background-radius: 6;
                           -fx-padding: 12px 16px;
-                          -fx-font-size: 15px;"/>
+                          -fx-font-size: 14px;"/>
 
-    <Button fx:id="loginBtn"
-            text="LOGIN"
-            prefWidth="300"
-            prefHeight="45"
-            onAction="#handleLogin"
-            style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-</VBox>
+        <PasswordField fx:id="passwordField"
+                       promptText="PASSWORD"
+                       maxWidth="300"
+                       style="-fx-background-color: #e0e0e0;
+                              -fx-background-radius: 6;
+                              -fx-padding: 12px 16px;
+                              -fx-font-size: 14px;"/>
+
+        <Button fx:id="loginBtn"
+                text="LOGIN"
+                prefWidth="300"
+                prefHeight="45"
+                onAction="#handleLogin"
+                style="-fx-background-color: #6c757d;
+                       -fx-text-fill: white;
+                       -fx-font-size: 15px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 6;"/>
+
+        <Label text="CONTACT US"
+               style="-fx-text-fill: #b0b0b0; -fx-font-size: 12px;"/>
+    </VBox>
+
+</HBox>
