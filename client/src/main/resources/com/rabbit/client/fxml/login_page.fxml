@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.rabbit.client.ui.controllers.LoginPageController"
+      alignment="CENTER"
+      spacing="20"
+      style="-fx-background-color: white; -fx-padding: 60px;">
+
+    <Label text="Welcome"
+           style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: black;"/>
+
+    <Label fx:id="errorLabel"
+           text=""
+           style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;"/>
+
+    <TextField fx:id="emailField"
+               promptText="Email"
+               maxWidth="300"
+               style="-fx-background-radius: 6;
+                      -fx-padding: 12px 16px;
+                      -fx-font-size: 15px;"/>
+
+    <PasswordField fx:id="passwordField"
+                   promptText="Password"
+                   maxWidth="300"
+                   style="-fx-background-radius: 6;
+                          -fx-padding: 12px 16px;
+                          -fx-font-size: 15px;"/>
+
+    <Button fx:id="loginBtn"
+            text="LOGIN"
+            prefWidth="300"
+            prefHeight="45"
+            onAction="#handleLogin"
+            style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+</VBox>
