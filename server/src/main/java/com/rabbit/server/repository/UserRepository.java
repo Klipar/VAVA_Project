@@ -133,7 +133,7 @@ public class UserRepository {
      * @return Optional containing UserDTO if credentials match
      */
     public Optional<UserDto> findByEmailAndPassword(String email, String passwordHash) {
-        String sql = "SELECT id, name, nickname, email, role, created_at FROM \"user\" WHERE email = ? AND password = ?";
+        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users WHERE email = ? AND password_hash = ?";
         try {
             List<Map<String, Object>> results = dbService.query(sql, email, passwordHash);
 
