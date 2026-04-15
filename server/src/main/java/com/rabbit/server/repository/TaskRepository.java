@@ -34,10 +34,11 @@ public class TaskRepository {
                 .findFirst();
     }
 
-    public void create(int projectId, int createdBy, TaskRequestDto dto) throws SQLException {
-        db.update("""
+    public int create(int projectId, int createdBy, TaskRequestDto dto) throws SQLException {
+        List<Map<String, Object>> result = db.query("""
         INSERT INTO tasks (project_id, assigned_to, created_by, title, description, priority, status, deadline)
         VALUES (?, ?, ?, ?, ?, ?, ?::task_status, ?)
+        RETURNING id
     """,
                 projectId,
                 dto.getAssignedTo() == 0 ? null : dto.getAssignedTo(),
@@ -48,6 +49,7 @@ public class TaskRepository {
                 dto.getStatus(),
                 parseDeadline(dto.getDeadline())
         );
+        return ((Number) result.getFirst().get("id")).intValue();
     }
 
     public boolean update(int taskId, TaskRequestDto dto) throws SQLException {

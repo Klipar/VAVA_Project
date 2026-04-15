@@ -180,6 +180,19 @@ public class OpenApiHandler implements HttpHandler {
                                 "deadline": {"type": "string", "format": "date-time", "example": "2024-12-31T23:59:59Z"}
                             }
                         },
+                        "TaskResponseWithMessage": {
+                            "type": "object",
+                            "description": "Response wrapper for task operations that includes both message and task data",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Task created successfully"
+                                },
+                                "task": {
+                                    "$ref": "#/components/schemas/TaskDto"
+                                }
+                            }
+                        },
                         "TaskRequestDto": {
                             "type": "object",
                             "description": "Request body for creating or updating a task. IMPORTANT: Do NOT include 'id', 'projectId', or 'createdBy' fields - they are automatically set by the server.",
@@ -813,7 +826,7 @@ public class OpenApiHandler implements HttpHandler {
                         "get": {
                             "tags": ["Task"],
                             "summary": "Get all tasks for a project",
-                            "description": "Retrieve list of all tasks in a specific project",
+                            "description": "Retrieve list of all tasks in a specific project. User must be a member of the project.",
                             "security": [{"bearerAuth": []}],
                             "parameters": [{
                                 "name": "projectId",
@@ -832,7 +845,7 @@ public class OpenApiHandler implements HttpHandler {
                                     }
                                 },
                                 "401": {"description": "Unauthorized"},
-                                "403": {"description": "Forbidden - insufficient permissions"},
+                                "403": {"description": "Forbidden - you are not a member of this project"},
                                 "405": {"description": "Method not allowed"}
                             }
                         }
@@ -871,7 +884,7 @@ public class OpenApiHandler implements HttpHandler {
                                     "description": "Task created successfully",
                                     "content": {
                                         "application/json": {
-                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                            "schema": {"$ref": "#/components/schemas/TaskResponseWithMessage"}
                                         }
                                     }
                                 },
@@ -938,7 +951,7 @@ public class OpenApiHandler implements HttpHandler {
                                     "description": "Task updated successfully",
                                     "content": {
                                         "application/json": {
-                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                            "schema": {"$ref": "#/components/schemas/TaskResponseWithMessage"}
                                         }
                                     }
                                 },
@@ -997,7 +1010,7 @@ public class OpenApiHandler implements HttpHandler {
                                     "description": "Task deleted successfully",
                                     "content": {
                                         "application/json": {
-                                            "schema": {"$ref": "#/components/schemas/MessageResponse"}
+                                            "schema": {"$ref": "#/components/schemas/TaskResponseWithMessage"}
                                         }
                                     }
                                 },
