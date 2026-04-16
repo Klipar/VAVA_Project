@@ -7,11 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskDto {
-    private int id;
-    private int projectId;
+public class TaskRequestDto {
     private int assignedTo;
-    private int createdBy;
     private String title;
     private String description;
     private int priority;

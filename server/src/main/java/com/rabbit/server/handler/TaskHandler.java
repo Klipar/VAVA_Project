@@ -2,6 +2,7 @@ package com.rabbit.server.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbit.common.dto.TaskDto;
+import com.rabbit.common.dto.TaskRequestDto;
 import com.rabbit.server.middleware.AuthMiddleware;
 import com.rabbit.server.service.TaskService;
 import com.sun.net.httpserver.HttpExchange;
@@ -9,7 +10,9 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TaskHandler {
 
@@ -20,16 +23,25 @@ public class TaskHandler {
     // GET /tasks/{projectId}
     public HttpHandler getAll() {
         return exchange -> {
-            if (!exchange.getRequestMethod().equals("GET")) { send(exchange, 405, "{\"error\":\"Method not allowed\"}"); return; }
+            if (!exchange.getRequestMethod().equals("GET")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
 
             Integer userId = resolveUserId(exchange);
-            if (userId == null) { send(exchange, 401, "{\"error\":\"Unauthorized\"}"); return; }
+            if (userId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
 
             try {
                 int projectId = extractId(exchange.getRequestURI().getPath(), 2);
-                List<TaskDto> tasks = service.getTasksByProjectId(projectId);
+                List<TaskDto> tasks = service.getTasksByProjectId(projectId, userId);
                 send(exchange, 200, mapper.writeValueAsString(tasks));
+            } catch (SecurityException e) {
+                send(exchange, 403, "{\"error\":\"" + e.getMessage() + "\"}");
             } catch (Exception e) {
+                e.printStackTrace();
                 send(exchange, 500, "{\"error\":\"Internal server error\"}");
             }
         };
@@ -38,19 +50,31 @@ public class TaskHandler {
     // POST /tasks/{projectId}/create
     public HttpHandler create() {
         return exchange -> {
-            if (!exchange.getRequestMethod().equals("POST")) { send(exchange, 405, "{\"error\":\"Method not allowed\"}"); return; }
+            if (!exchange.getRequestMethod().equals("POST")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
 
             Integer userId = resolveUserId(exchange);
-            if (userId == null) { send(exchange, 401, "{\"error\":\"Unauthorized\"}"); return; }
+            if (userId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
 
             try {
                 int projectId = extractId(exchange.getRequestURI().getPath(), 2);
-                TaskDto dto = mapper.readValue(exchange.getRequestBody(), TaskDto.class);
-                service.createTask(projectId, userId, dto);
-                send(exchange, 201, "{\"message\":\"Task created\"}");
+                TaskRequestDto requestDto = mapper.readValue(exchange.getRequestBody(), TaskRequestDto.class);
+                TaskDto createdTask = service.createTask(projectId, userId, requestDto);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "Task created successfully");
+                response.put("task", createdTask);
+
+                send(exchange, 201, mapper.writeValueAsString(response));
             } catch (SecurityException e) {
                 send(exchange, 403, "{\"error\":\"" + e.getMessage() + "\"}");
             } catch (Exception e) {
+                e.printStackTrace();
                 send(exchange, 500, "{\"error\":\"Internal server error\"}");
             }
         };
@@ -59,20 +83,34 @@ public class TaskHandler {
     // PUT /tasks/{taskId}/update
     public HttpHandler update() {
         return exchange -> {
-            if (!exchange.getRequestMethod().equals("PUT")) { send(exchange, 405, "{\"error\":\"Method not allowed\"}"); return; }
+            if (!exchange.getRequestMethod().equals("PUT")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
 
             Integer userId = resolveUserId(exchange);
-            if (userId == null) { send(exchange, 401, "{\"error\":\"Unauthorized\"}"); return; }
+            if (userId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
 
             try {
                 int taskId = extractId(exchange.getRequestURI().getPath(), 2);
-                TaskDto dto = mapper.readValue(exchange.getRequestBody(), TaskDto.class);
-                boolean updated = service.updateTask(taskId, userId, dto);
-                send(exchange, updated ? 200 : 404,
-                        updated ? "{\"message\":\"Updated\"}" : "{\"error\":\"Task not found\"}");
+                TaskRequestDto requestDto = mapper.readValue(exchange.getRequestBody(), TaskRequestDto.class);
+                TaskDto updatedTask = service.updateTask(taskId, userId, requestDto);
+
+                if (updatedTask != null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("message", "Task updated successfully");
+                    response.put("task", updatedTask);
+                    send(exchange, 200, mapper.writeValueAsString(response));
+                } else {
+                    send(exchange, 404, "{\"error\":\"Task not found\"}");
+                }
             } catch (SecurityException e) {
                 send(exchange, 403, "{\"error\":\"" + e.getMessage() + "\"}");
             } catch (Exception e) {
+                e.printStackTrace();
                 send(exchange, 500, "{\"error\":\"Internal server error\"}");
             }
         };
@@ -81,19 +119,33 @@ public class TaskHandler {
     // DELETE /tasks/{taskId}/delete
     public HttpHandler delete() {
         return exchange -> {
-            if (!exchange.getRequestMethod().equals("DELETE")) { send(exchange, 405, "{\"error\":\"Method not allowed\"}"); return; }
+            if (!exchange.getRequestMethod().equals("DELETE")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
 
             Integer userId = resolveUserId(exchange);
-            if (userId == null) { send(exchange, 401, "{\"error\":\"Unauthorized\"}"); return; }
+            if (userId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
 
             try {
                 int taskId = extractId(exchange.getRequestURI().getPath(), 2);
-                boolean deleted = service.deleteTask(taskId, userId);
-                send(exchange, deleted ? 200 : 404,
-                        deleted ? "{\"message\":\"Deleted\"}" : "{\"error\":\"Task not found\"}");
+                TaskDto deletedTask = service.deleteTask(taskId, userId);
+
+                if (deletedTask != null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("message", "Task deleted successfully");
+                    response.put("task", deletedTask);
+                    send(exchange, 200, mapper.writeValueAsString(response));
+                } else {
+                    send(exchange, 404, "{\"error\":\"Task not found\"}");
+                }
             } catch (SecurityException e) {
                 send(exchange, 403, "{\"error\":\"" + e.getMessage() + "\"}");
             } catch (Exception e) {
+                e.printStackTrace();
                 send(exchange, 500, "{\"error\":\"Internal server error\"}");
             }
         };
@@ -103,7 +155,6 @@ public class TaskHandler {
         String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
         return auth.getUserId(authHeader.substring(7));
-
     }
 
     private int extractId(String path, int segment) {

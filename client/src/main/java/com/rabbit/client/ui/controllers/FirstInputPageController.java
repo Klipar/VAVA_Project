@@ -1,0 +1,105 @@
+package com.rabbit.client.ui.controllers;
+
+import com.rabbit.client.Config;
+import com.rabbit.common.dto.UserDto;
+import com.rabbit.common.enums.UserRole;
+import javafx.fxml.FXML;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class FirstInputPageController
+{
+    @FXML private TextField fullNameField;
+    @FXML private TextField emailField;
+    @FXML private TextArea skillsArea;
+    @FXML private Button continueFirstBtn;
+
+    @FXML
+    private void handleContinue() {
+        String fullName = fullNameField.getText();
+        String email = emailField.getText();
+        String skills = skillsArea.getText();
+
+        if (fullName.isEmpty() || email.isEmpty() || skills.isEmpty()) {
+            System.out.println("Please fill in all fields");
+            return;
+        }
+
+        try {
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            String loginBody = "{\"email\": \"lbabijon@example.com\", \"password\": \"qwerty\"}";
+            HttpRequest loginRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:6969/users/login"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(loginBody))
+                    .build();
+
+            HttpResponse<String> loginResponse = client.send(loginRequest, HttpResponse.BodyHandlers.ofString());
+            String responseBody = loginResponse.body();
+            System.out.println("Login response: " + responseBody);
+
+            String token = responseBody
+                    .replace("{\"token\":\"", "")
+                    .replace("\"}", "")
+                    .trim();
+            System.out.println("Token: " + token);
+
+            String updateBody = String.format(
+                    "{\"name\": \"%s\", \"nickname\": \"%s\", \"email\": \"%s\"}",
+                    fullName, fullName.toLowerCase().replace(" ", ""), email
+            );
+
+            HttpRequest updateRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:6969/users/1/update"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .PUT(HttpRequest.BodyPublishers.ofString(updateBody))
+                    .build();
+
+            HttpResponse<String> updateResponse = client.send(updateRequest, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Update status: " + updateResponse.statusCode());
+
+            HttpRequest getUserRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:6969/users/2"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> getUserResponse = client.send(getUserRequest, HttpResponse.BodyHandlers.ofString());
+            System.out.println("User response: " + getUserResponse.body());
+
+            UserDto user = new UserDto();
+            user.setId(2L);
+            user.setName(fullName);
+            user.setEmail(email);
+            user.setNickname(fullName.toLowerCase().replace(" ", ""));
+            user.setRole(UserRole.TEAM_LEADER);
+
+            Config.getInstance().setUser(user);
+            System.out.println("Config user set: " + user.getName());
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/main-view.fxml"));
+            Scene scene = new Scene(loader.load(), 1000, 700);
+            scene.getStylesheets().add(getClass().getResource("/com/rabbit/client/css/style.css").toExternalForm());
+            Stage stage = (Stage) continueFirstBtn.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+

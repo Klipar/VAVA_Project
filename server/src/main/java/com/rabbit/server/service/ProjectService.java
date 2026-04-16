@@ -14,30 +14,39 @@ public class ProjectService {
         return repo.findAll();
     }
 
-    public Optional<ProjectDto> getProjectById(int projectId) throws SQLException {
+    public List<ProjectDto> getProjectsForUser(int userId) throws SQLException {
+        return repo.findAllByUserId(userId);
+    }
+
+    public Optional<ProjectDto> getProjectById(int projectId, int requesterId) throws SQLException {
+        if (!repo.isProjectMember(requesterId, projectId)) {
+            throw new SecurityException("Access denied: you are not a member of this project");
+        }
         return repo.findById(projectId);
     }
 
-    public void createProject(int requesterId, ProjectDto dto) throws SQLException {
-        repo.create(dto, requesterId);
+    public ProjectDto createProject(int requesterId, ProjectDto dto) throws SQLException {
+        int projectId = repo.create(dto, requesterId);
+        return repo.findById(projectId).orElseThrow(() -> new SQLException("Failed to retrieve created project"));
     }
 
-    public boolean updateProject(int projectId, int requesterId, ProjectDto dto) throws SQLException {
+    public ProjectDto updateProject(int projectId, int requesterId, ProjectDto dto) throws SQLException {
         Optional<ProjectDto> existing = repo.findById(projectId);
-        if (existing.isEmpty()) return false;
+        if (existing.isEmpty()) throw new IllegalArgumentException("Project not found");
         if (!repo.isProjectAdmin(requesterId, projectId)) {
             throw new SecurityException("Only project admin can update project");
         }
         dto.setId(projectId);
-        return repo.update(dto);
+        repo.update(dto);
+        return repo.findById(projectId).orElseThrow();
     }
 
-    public boolean deleteProject(int projectId, int requesterId) throws SQLException {
+    public void deleteProject(int projectId, int requesterId) throws SQLException {
         Optional<ProjectDto> existing = repo.findById(projectId);
-        if (existing.isEmpty()) return false;
+        if (existing.isEmpty()) throw new IllegalArgumentException("Project not found");
         if (!repo.isProjectAdmin(requesterId, projectId)) {
             throw new SecurityException("Only project admin can delete project");
         }
-        return repo.delete(projectId);
+        repo.delete(projectId);
     }
 }

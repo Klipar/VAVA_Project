@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.rabbit.client.ui.controllers.FirstInputPageController"
+            alignment="CENTER"
+            spacing="40"
+      style="-fx-background-color: #0b1a32; -fx-padding: 80px;">
+    <Label text = "ENTER INFO ABOUT YOU" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
+    <TextField fx:id="fullNameField"
+               promptText="Full name"
+               maxWidth="750"
+               style="-fx-background-color: #f0f0f0;
+                      -fx-background-radius: 8;
+                      -fx-padding: 16px 20px;
+                      -fx-font-size: 15px;"/>
+
+    <TextField fx:id="emailField"
+               promptText="Email"
+               maxWidth="750"
+               style="-fx-background-color: #f0f0f0;
+                      -fx-background-radius: 8;
+                      -fx-padding: 16px 20px;
+                      -fx-font-size: 15px;"/>
+
+    <TextArea fx:id="skillsArea"
+              promptText="Enter your skills, split them by comma"
+              maxWidth="750"
+              prefHeight="150"
+              wrapText="true"
+              style="-fx-background-color: #f0f0f0;
+                     -fx-background-radius: 8;
+                     -fx-padding: 16px 20px;
+                     -fx-font-size: 15px;
+                     "/>
+
+    <HBox alignment="CENTER" spacing="30">
+        <Button fx:id="continueFirstBtn"
+                text="CONTINUE"
+                prefWidth="200"
+                prefHeight="60"
+                onAction="#handleContinue"
+                />
+
+        <Button fx:id="importFirstBtn"
+                text="IMPORT SKILLS"
+                prefWidth="220"
+                prefHeight="60"
+               />
+    </HBox>
+</VBox>
