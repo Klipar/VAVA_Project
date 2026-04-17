@@ -29,6 +29,7 @@ public class FirstInputPageController
         String fullName = fullNameField.getText();
         String email = emailField.getText();
         String skills = skillsArea.getText();
+        Long user_id = Config.getInstance().getUser().getId();
 
         if (fullName.isEmpty() || email.isEmpty() || skills.isEmpty()) {
             System.out.println("Please fill in all fields");
@@ -39,30 +40,15 @@ public class FirstInputPageController
 
             HttpClient client = HttpClient.newHttpClient();
 
-            String loginBody = "{\"email\": \"lbabijon@example.com\", \"password\": \"qwerty\"}";
-            HttpRequest loginRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:6969/users/login"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(loginBody))
-                    .build();
-
-            HttpResponse<String> loginResponse = client.send(loginRequest, HttpResponse.BodyHandlers.ofString());
-            String responseBody = loginResponse.body();
-            System.out.println("Login response: " + responseBody);
-
-            String token = responseBody
-                    .replace("{\"token\":\"", "")
-                    .replace("\"}", "")
-                    .trim();
-            System.out.println("Token: " + token);
+            String token = Config.getInstance().getToken();
 
             String updateBody = String.format(
-                    "{\"name\": \"%s\", \"nickname\": \"%s\", \"email\": \"%s\"}",
-                    fullName, fullName.toLowerCase().replace(" ", ""), email
+                    "{\"name\": \"%s\", \"nickname\": \"%s\", \"email\": \"%s\", \"skills\": \"%s\"}",
+                    fullName, fullName.toLowerCase().replace(" ", ""), email, skills
             );
 
             HttpRequest updateRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:6969/users/1/update"))
+                    .uri(URI.create(String.format("http://localhost:6969/users/%d/update", user_id)))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + token)
                     .PUT(HttpRequest.BodyPublishers.ofString(updateBody))
@@ -72,7 +58,7 @@ public class FirstInputPageController
             System.out.println("Update status: " + updateResponse.statusCode());
 
             HttpRequest getUserRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:6969/users/2"))
+                    .uri(URI.create(String.format("http://localhost:6969/users/%d", user_id)))
                     .header("Authorization", "Bearer " + token)
                     .GET()
                     .build();
@@ -81,11 +67,12 @@ public class FirstInputPageController
             System.out.println("User response: " + getUserResponse.body());
 
             UserDto user = new UserDto();
-            user.setId(2L);
+            user.setId(user_id);
             user.setName(fullName);
             user.setEmail(email);
             user.setNickname(fullName.toLowerCase().replace(" ", ""));
-            user.setRole(UserRole.TEAM_LEADER);
+            user.setRole(Config.getInstance().getUser().getRole());
+            user.setSkills(skills);
 
             Config.getInstance().setUser(user);
             System.out.println("Config user set: " + user.getName());
