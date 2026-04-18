@@ -1,0 +1,206 @@
+package com.rabbit.client.ui.controllers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbit.client.Config;
+import com.rabbit.common.dto.ProjectDto;
+import com.rabbit.common.dto.UserDto;
+import com.rabbit.common.enums.ProjectStatus;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CreateProjectController {
+    @FXML private TextField nameField;
+    @FXML private TextArea descriptionField;
+    @FXML private TextField assignField;
+    @FXML private FlowPane assignedChipsPane;
+    @FXML private DatePicker deadlinePicker;
+
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final List<String> assignedPeople = new ArrayList<>();
+    private final List<UserDto> assignedUsers = new ArrayList<>();
+
+    @FXML
+    private void handleAddAssign() {
+        String name = assignField.getText().trim();
+        if (name.isBlank()) return;
+
+        boolean alreadyAdded = assignedUsers.stream()
+                .anyMatch(u -> u.getNickname() != null && u.getNickname().equalsIgnoreCase(name));
+        if (alreadyAdded) {
+            showAlert("User already assigned: " + name);
+            return;
+        }
+
+        UserDto currentUser = Config.getInstance().getUser();
+        if (currentUser.getNickname() != null && currentUser.getNickname().equalsIgnoreCase(name)) {
+            showAlert("You are already the project creator and will be added automatically.");
+            return;
+        }
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:6969/users/nickname/" + name))
+                .header("Authorization", "Bearer " + Config.getInstance().getToken())
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                UserDto fetchedUser = mapper.readValue(response.body(), UserDto.class);
+
+                assignedPeople.add(name);
+                assignedUsers.add(fetchedUser);
+                assignField.clear();
+
+                // Create chip
+                HBox chip = new HBox(5);
+                chip.setStyle("-fx-background-color: #1a3a5c; -fx-background-radius: 20; -fx-padding: 5 10 5 10;");
+                Label nameLabel = new Label(name);
+                nameLabel.setStyle("-fx-text-fill: white;");
+                Button removeBtn = new Button("x");
+                removeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 0;");
+                removeBtn.setOnAction(e -> {
+                    assignedPeople.remove(name);
+                    assignedUsers.removeIf(u -> u.getId() != null && fetchedUser.getId() != null
+                            && u.getId().longValue() == fetchedUser.getId().longValue());
+                    assignedChipsPane.getChildren().remove(chip);
+                });
+                chip.getChildren().addAll(nameLabel, removeBtn);
+                assignedChipsPane.getChildren().add(chip);
+            } else {
+                showAlert("User not found: " + name);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error occurred while fetching user information.");
+        }
+
+    }
+
+    private boolean handleAddingAssigned(UserDto user, int projectId) {
+        try {
+                String token = Config.getInstance().getToken();
+                if (token == null || token.isBlank()) {
+                    showAlert("You are not logged in. Please login again.");
+                    return false;
+                }
+                
+                //POST /projects/{projectId}/users/{userId}/add
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:6969/projects/" + projectId + "/users/" + user.getId() + "/add"))
+                        .header("Content-Type", "application/json")
+                        .header("Authorization", "Bearer " + token.trim())
+                        .POST(HttpRequest.BodyPublishers.ofString("{}"))
+                        .build();
+    
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    
+                int status = response.statusCode();
+                String responseBody = response.body();
+    
+                // Debug logs for terminal
+                System.out.println("[FetchUser] status=" + status);
+                System.out.println("[FetchUser] body=" + responseBody);
+    
+                if (status == 200 || status == 201) {
+                    return true;
+                } else if (status == 401) {
+                    showAlert("Unauthorized (401). Your session is invalid or expired. Please login again.");
+                } else if (status == 403) {
+                    showAlert("Forbidden (403). You are authenticated but do not have permission.");
+                } else {
+                    showAlert("Failed to fetch user (" + status + "): " + responseBody);
+                }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to parse user data for: " + user.getNickname());
+        }
+        return false;
+    }
+
+    @FXML
+    private void handleCreateProject() {
+        String name = nameField.getText().trim();
+        if (name.isBlank()) {
+            showAlert("Please enter a project name.");
+            return;
+        }
+
+        LocalDate deadlineDate = deadlinePicker.getValue();
+        if (deadlineDate == null) {
+            showAlert("Please select a deadline.");
+            return;
+        }
+
+        try {
+            String token = Config.getInstance().getToken();
+            if (token == null || token.isBlank()) {
+                showAlert("You are not logged in. Please login again.");
+                return;
+            }
+
+            ProjectDto dto = new ProjectDto();
+            dto.setTitle(name);
+            dto.setDescription(descriptionField.getText().trim());
+            dto.setStatus(ProjectStatus.ACTIVE);
+            dto.setDeadline(deadlineDate.atStartOfDay());
+
+            String body = mapper.writeValueAsString(dto);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:6969/projects"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token.trim())
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            int status = response.statusCode();
+            String responseBody = response.body();
+
+            // Debug logs for terminal
+            System.out.println("[CreateProject] status=" + status);
+            System.out.println("[CreateProject] body=" + responseBody);
+
+            if (status == 201) {
+                int projectId = mapper.readTree(responseBody).get("id").asInt();
+
+                for (UserDto user : new ArrayList<>(assignedUsers)) {
+                    handleAddingAssigned(user, projectId);
+                }
+
+                showAlert("Project created successfully!");
+                Config.getInstance().getMainController().loadView("projects-view.fxml");
+                return;
+            } else if (status == 401) {
+                showAlert("Unauthorized (401). Your session is invalid or expired. Please login again.");
+            } else if (status == 403) {
+                showAlert("Forbidden (403). You are authenticated but do not have permission.");
+            } else {
+                showAlert("Failed to create project (" + status + "): " + responseBody);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Connection error.");
+        }
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+}

@@ -3,6 +3,7 @@ package com.rabbit.client;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import com.rabbit.client.ui.controllers.MainController;
 import com.rabbit.common.dto.UserDto;
 
 public class Config {
@@ -10,6 +11,7 @@ public class Config {
     private ResourceBundle bundle = null;
     private Locale currentLocale = null;
     private String token = null;
+    private MainController mainController;
 
     private Config() {
         Locale.setDefault(Locale.US);
@@ -56,5 +58,13 @@ public class Config {
 
     public void setBundle(ResourceBundle bundle) {
         this.bundle = bundle;
+    }
+
+    public MainController getMainController() {
+        return mainController;
+    }
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
     }
 }

@@ -30,6 +30,32 @@ public class UserHandler {
         this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
+    // GET /users/nickname/{nickname}
+    public HttpHandler getUserByNickname() {
+        return exchange -> {
+            if (!exchange.getRequestMethod().equals("GET")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            Integer userId = resolveUserId(exchange);
+            if (userId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
+
+            try {
+                String nickname = extractNickname(exchange.getRequestURI().getPath(), 3);
+                UserDto user = service.getUserByNickname(nickname);
+                send(exchange, 200, mapper.writeValueAsString(user));
+            } catch (IllegalArgumentException e) {
+                send(exchange, 404, "{\"error\":\"" + e.getMessage() + "\"}");
+            } catch (Exception e) {
+                send(exchange, 500, "{\"error\":\"Internal server error\"}");
+            }
+        };
+    }
+
     // GET /users/{userId}
     public HttpHandler getUser() {
         return exchange -> {
@@ -279,6 +305,14 @@ public class UserHandler {
             throw new IllegalArgumentException("Invalid path");
         }
         return Long.parseLong(parts[segment]);
+    }
+
+    private String extractNickname(String path, int segment) {
+        String[] parts = path.split("/");
+        if (segment >= parts.length) {
+            throw new IllegalArgumentException("Invalid path");
+        }
+        return parts[segment];
     }
 
     private UserRole getUserRole(Long userId) {

@@ -7,6 +7,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
 
+import com.rabbit.client.Config;
+
 public class MainController {
     @FXML private BorderPane rootPane;
 
@@ -20,6 +22,8 @@ public class MainController {
             sidebarController.setMainController(this);
             sidebarController.initMenu();
         }
+
+        Config.getInstance().setMainController(this);
 
         loadView("home-view.fxml");
     }

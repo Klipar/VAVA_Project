@@ -410,6 +410,35 @@ public class OpenApiHandler implements HttpHandler {
                             }
                         }
                     },
+                    "/users/nickname/{nickname}": {
+                        "get": {
+                            "tags": ["User"],
+                            "summary": "Get user by nickname",
+                            "description": "Retrieve detailed information about a specific user by their nickname",
+                            "security": [{"bearerAuth": []}],
+                            "parameters": [{
+                                "name": "nickname",
+                                "in": "path",
+                                "required": true,
+                                "description": "Nickname of the user to retrieve",
+                                "schema": {"type": "string", "example": "ivan"}
+                            }],
+                            "responses": {
+                                "200": {
+                                    "description": "User found successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {"$ref": "#/components/schemas/UserDto"}
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized - Bearer token required"},
+                                "403": {"description": "Forbidden - insufficient permissions"},
+                                "404": {"description": "User not found"},
+                                "405": {"description": "Method not allowed"}
+                            }
+                        }   
+                    },
                     "/users/{userId}/update": {
                         "put": {
                             "tags": ["User"],

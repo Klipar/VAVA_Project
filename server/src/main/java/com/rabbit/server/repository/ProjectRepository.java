@@ -48,7 +48,7 @@ public class ProjectRepository {
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getDeadline(),
-                dto.getStatus()
+                toDbStatus(dto.getStatus())
         );
         int projectId = ((Number) result.getFirst().get("id")).intValue();
         db.update(
@@ -70,7 +70,7 @@ public class ProjectRepository {
                 dto.getTitle(),
                 dto.getDescription(),
                 dto.getDeadline(),
-                dto.getStatus(),
+                toDbStatus(dto.getStatus()),
                 dto.getId()
         ) > 0;
     }
@@ -91,6 +91,10 @@ public class ProjectRepository {
                 "SELECT 1 FROM user_projects WHERE user_id = ? AND project_id = ?",
                 userId, projectId
         ).isEmpty();
+    }
+
+    private String toDbStatus(ProjectStatus status) {
+        return status == null ? "active" : status.name().toLowerCase();
     }
 
     private ProjectDto mapToDto(Map<String, Object> row) {
