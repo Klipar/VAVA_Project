@@ -2,7 +2,6 @@ package com.rabbit.client.ui.controllers;
 
 import com.rabbit.client.Config;
 import com.rabbit.common.dto.UserDto;
-import com.rabbit.common.enums.UserRole;
 import javafx.fxml.FXML;
 
 import javafx.fxml.FXMLLoader;
@@ -20,18 +19,19 @@ import java.net.http.HttpResponse;
 public class FirstInputPageController
 {
     @FXML private TextField fullNameField;
-    @FXML private TextField emailField;
+    @FXML private TextField nicknameField;
     @FXML private TextArea skillsArea;
     @FXML private Button continueFirstBtn;
 
     @FXML
     private void handleContinue() {
         String fullName = fullNameField.getText();
-        String email = emailField.getText();
+        String nickname = nicknameField.getText();
         String skills = skillsArea.getText();
         Long user_id = Config.getInstance().getUser().getId();
+        String user_email = Config.getInstance().getUser().getEmail();
 
-        if (fullName.isEmpty() || email.isEmpty() || skills.isEmpty()) {
+        if (fullName.isEmpty() || nickname.isEmpty() || skills.isEmpty()) {
             System.out.println("Please fill in all fields");
             return;
         }
@@ -44,7 +44,7 @@ public class FirstInputPageController
 
             String updateBody = String.format(
                     "{\"name\": \"%s\", \"nickname\": \"%s\", \"email\": \"%s\", \"skills\": \"%s\"}",
-                    fullName, fullName.toLowerCase().replace(" ", ""), email, skills
+                    fullName, nickname, user_email, skills
             );
 
             HttpRequest updateRequest = HttpRequest.newBuilder()
@@ -66,12 +66,9 @@ public class FirstInputPageController
             HttpResponse<String> getUserResponse = client.send(getUserRequest, HttpResponse.BodyHandlers.ofString());
             System.out.println("User response: " + getUserResponse.body());
 
-            UserDto user = new UserDto();
-            user.setId(user_id);
+            UserDto user = Config.getInstance().getUser();
             user.setName(fullName);
-            user.setEmail(email);
-            user.setNickname(fullName.toLowerCase().replace(" ", ""));
-            user.setRole(Config.getInstance().getUser().getRole());
+            user.setNickname(nickname);
             user.setSkills(skills);
 
             Config.getInstance().setUser(user);

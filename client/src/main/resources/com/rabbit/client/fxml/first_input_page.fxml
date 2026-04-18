@@ -21,8 +21,8 @@
                       -fx-padding: 16px 20px;
                       -fx-font-size: 15px;"/>
 
-    <TextField fx:id="emailField"
-               promptText="Email"
+    <TextField fx:id="nicknameField"
+               promptText="Nickname"
                maxWidth="750"
                style="-fx-background-color: #f0f0f0;
                       -fx-background-radius: 8;
