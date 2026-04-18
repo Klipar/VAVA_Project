@@ -70,16 +70,19 @@ public class ProjectsController {
         Button assignedTasks = new Button("VIEW ASSIGNED TASKS");
         assignedTasks.setStyle("-fx-background-color: transparent; -fx-text-fill: #fcfcfc; -fx-padding: 0; -fx-cursor: hand;");
 
-        Button deleteBtn = new Button("DELETE");
-        deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #e05555; -fx-padding: 0; -fx-cursor: hand;");
-        deleteBtn.setOnAction(e -> {
-            deleteProject(projectId);
-            recentProjectsPane.getChildren().clear();
-            yourProjectsPane.getChildren().clear();
-            initialize();
-        });
+        card.getChildren().addAll(title, openTasks, assignedTasks);
 
-        card.getChildren().addAll(title, openTasks, assignedTasks, deleteBtn);
+        if (Config.getInstance().getUser().getRole() == UserRole.MANAGER || Config.getInstance().getUser().getRole() == UserRole.TEAM_LEADER) {
+            Button deleteBtn = new Button("DELETE");
+            deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #e05555; -fx-padding: 0; -fx-cursor: hand;");
+            deleteBtn.setOnAction(e -> {
+                deleteProject(projectId);
+                recentProjectsPane.getChildren().clear();
+                yourProjectsPane.getChildren().clear();
+                initialize();
+            });
+            card.getChildren().add(deleteBtn);
+        }
         return card;
     }
 
