@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.client.Config;
+import com.rabbit.client.service.UserService;
 import com.rabbit.common.dto.UserDto;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,6 +29,7 @@ public class LoginPageController {
 
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final UserService userService = UserService.getInstance();
 
     @FXML
     private void handleLogin() {
@@ -38,6 +40,9 @@ public class LoginPageController {
             errorLabel.setText("Please fill in all fields");
             return;
         }
+
+        loginBtn.setDisable(true);
+        errorLabel.setText("");
 
         try {
             String loginBody = String.format("{\"email\": \"%s\", \"password\": \"%s\"}", email, password);
@@ -51,17 +56,18 @@ public class LoginPageController {
 
             if (loginResponse.statusCode() != 201) {
                 errorLabel.setText("Invalid email or password");
+                loginBtn.setDisable(false);
                 return;
             }
-
 
             JsonNode root = mapper.readTree(loginResponse.body());
             String token = root.get("token").asText();
             UserDto loggedInUser = mapper.treeToValue(root.get("user"), UserDto.class);
 
+            userService.login(token, loggedInUser);
+
             Config.getInstance().setToken(token);
             Config.getInstance().setUser(loggedInUser);
-
 
             String skills = loggedInUser.getSkills();
             String nextFxml = (skills == null || skills.isBlank())
@@ -71,6 +77,7 @@ public class LoginPageController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/" + nextFxml));
             Scene scene = new Scene(loader.load(), 1000, 700);
             scene.getStylesheets().add(getClass().getResource("/com/rabbit/client/css/style.css").toExternalForm());
+
             Stage stage = (Stage) loginBtn.getScene().getWindow();
             stage.setScene(scene);
             stage.show();
@@ -78,6 +85,7 @@ public class LoginPageController {
         } catch (Exception e) {
             e.printStackTrace();
             errorLabel.setText("Connection error. Is the server running?");
+            loginBtn.setDisable(false);
         }
     }
 }
