@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true" style="-fx-background: #0b1a31; -fx-background-color: #0b1a31;"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rabbit.client.ui.controllers.CreateProjectController">
+
+    <VBox spacing="20" style="-fx-background-color: #0b1a31;">
+        <padding><Insets top="40" left="60" right="60" bottom="40"/></padding>
+
+        <Label text="CREATE PROJECT" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+
+        <!-- Card -->
+        <VBox spacing="20" style="-fx-background-color: #0d2137; -fx-background-radius: 10; -fx-padding: 30;">
+
+            <Label text="NAME NEW PROJECT:" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            <TextField fx:id="nameField" style="-fx-background-color: white; -fx-background-radius: 5;"/>
+
+            <Separator style="-fx-background-color: #4a9eda;"/>
+
+            <Label text="DESCRIPTION:" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            <TextArea fx:id="descriptionField" prefHeight="120"
+                      style="-fx-background-color: white; -fx-background-radius: 5;"/>
+
+            <Separator style="-fx-background-color: #4a9eda;"/>
+            
+            <Label text="Deadline" />
+            <DatePicker fx:id="deadlinePicker" promptText="Select deadline" />
+
+            <Label text="ASSIGNED:" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="assignField" prefWidth="400"
+                           style="-fx-background-color: white; -fx-background-radius: 20; -fx-background-insets: 0; -fx-padding: 5 15 5 15;"/>
+                <Button fx:id="addAssignBtn" text="+" onAction="#handleAddAssign"
+                        style="-fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35; -fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 50; -fx-text-fill: white; -fx-font-size: 18px; -fx-cursor: hand;"/>
+            </HBox>
+            <FlowPane fx:id="assignedChipsPane" hgap="10" vgap="10"/>
+
+        </VBox>
+
+        <Button text="CREATE PROJECT" onAction="#handleCreateProject"
+                maxWidth="1.7976931348623157E308"
+                style="-fx-background-color: #4a9eda; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12; -fx-background-radius: 5; -fx-cursor: hand;"/>
+
+    </VBox>
+</ScrollPane>

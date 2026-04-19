@@ -23,6 +23,23 @@ public class UserRepository {
     }
 
     /**
+     * Find user by nickname.
+     * @param nickname
+     * @return Optional containing UserDTO if found
+     */
+    public Optional<UserDto> findByNickname(String nickname) {
+        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users WHERE nickname = ?";
+        try {
+            List<Map<String, Object>> results = dbService.query(sql, nickname);
+            if (results.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(mapToUserDto(results.get(0)));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find user by nickname: " + nickname, e);
+        }
+    }
+    /**
      * Get UserDTO by ID.
      *
      * @param id user ID
