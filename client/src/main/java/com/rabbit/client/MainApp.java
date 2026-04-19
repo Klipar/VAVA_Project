@@ -1,16 +1,32 @@
 package com.rabbit.client;
 
+import com.rabbit.client.service.UserService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
+
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/login_page.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1000, 700);
+        UserService userService = UserService.getInstance();
+        userService.loadSavedSession();
 
+        String fxmlPath;
+        if (userService.isLoggedIn()) {
+            if (userService.getCurrentUser().getSkills() == null ||
+                    userService.getCurrentUser().getSkills().isBlank()) {
+                fxmlPath = "/com/rabbit/client/fxml/first_input_page.fxml";
+            } else {
+                fxmlPath = "/com/rabbit/client/fxml/main-view.fxml";
+            }
+        } else {
+            fxmlPath = "/com/rabbit/client/fxml/login_page.fxml";
+        }
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
+        Scene scene = new Scene(fxmlLoader.load(), 1000, 700);
         scene.getStylesheets().add(getClass().getResource("/com/rabbit/client/css/style.css").toExternalForm());
 
         stage.setTitle("Rabbit Client");
@@ -19,6 +35,6 @@ public class MainApp extends Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 }

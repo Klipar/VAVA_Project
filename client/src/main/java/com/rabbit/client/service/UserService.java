@@ -1,8 +1,14 @@
 package com.rabbit.client.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbit.client.Config;
 import com.rabbit.client.model.UserSession;
 import com.rabbit.common.dto.UserDto;
 import lombok.Getter;
+
+import java.net.http.HttpResponse;
+import java.util.Map;
 
 public class UserService {
     private static UserService instance;
@@ -10,7 +16,12 @@ public class UserService {
     @Getter
     private UserSession currentSession;
 
-    private UserService() {}
+    private ApiClient apiClient;
+    private final ObjectMapper objectMapper;
+
+    private UserService() {
+        this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    }
 
     public static synchronized UserService getInstance() {
         if (instance == null) {
@@ -19,15 +30,22 @@ public class UserService {
         return instance;
     }
 
+    private ApiClient getApiClient() {
+        if (apiClient == null) {
+            apiClient = ApiClient.getInstance();
+        }
+        return apiClient;
+    }
+
     public void login(String token, UserDto user) {
         this.currentSession = new UserSession(token, user);
-        saveToLocalStorage();
+        SessionStorage.saveSession(token, user.getId(), user.getEmail());
     }
 
     public void logout() {
         if (currentSession != null) {
             currentSession.clear();
-            clearLocalStorage();
+            SessionStorage.clearSession();
         }
     }
 
@@ -43,43 +61,29 @@ public class UserService {
         return isLoggedIn() ? currentSession.getUser() : null;
     }
 
-    private void saveToLocalStorage() {
-        try {
-            java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(UserService.class);
-            prefs.put("auth_token", currentSession.getToken());
-            prefs.put("user_id", String.valueOf(currentSession.getUser().getId()));
-            prefs.put("user_email", currentSession.getUser().getEmail());
-        } catch (Exception e) {
-            System.err.println("Failed to save session: " + e.getMessage());
-        }
-    }
-
-    private void clearLocalStorage() {
-        try {
-            java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(UserService.class);
-            prefs.remove("auth_token");
-            prefs.remove("user_id");
-            prefs.remove("user_email");
-        } catch (Exception e) {
-            System.err.println("Failed to clear session: " + e.getMessage());
-        }
-    }
-    // TODO: use that method to load session from local storage
     public void loadSavedSession() {
-        try {
-            java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(UserService.class);
-            String token = prefs.get("auth_token", null);
-            String userId = prefs.get("user_id", null);
-            String userEmail = prefs.get("user_email", null);
+        Map<String, String> sessionData = SessionStorage.loadSession();
+
+        if (sessionData != null) {
+            String token = sessionData.get("auth_token");
+            String userId = sessionData.get("user_id");
 
             if (token != null && userId != null) {
-                UserDto user = new UserDto();
-                user.setId(Long.parseLong(userId));
-                user.setEmail(userEmail);
-                this.currentSession = new UserSession(token, user);
+                try {
+                    HttpResponse<String> response = getApiClient().getAuthenticated("/users/" + userId, token);
+
+                    if (getApiClient().isSuccess(response)) {
+                        UserDto user = objectMapper.readValue(response.body(), UserDto.class);
+                        this.currentSession = new UserSession(token, user);
+                        Config.getInstance().setToken(token);
+                        Config.getInstance().setUser(user);
+                    } else {
+                        SessionStorage.clearSession();
+                    }
+                } catch (Exception e) {
+                    SessionStorage.clearSession();
+                }
             }
-        } catch (Exception e) {
-            System.err.println("Failed to load session: " + e.getMessage());
         }
     }
 }

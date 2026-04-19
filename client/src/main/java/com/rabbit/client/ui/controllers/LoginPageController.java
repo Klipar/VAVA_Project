@@ -44,8 +44,6 @@ public class LoginPageController {
 
         try {
             String loginBody = String.format("{\"email\": \"%s\", \"password\": \"%s\"}", email, password);
-
-            // ВИКОРИСТОВУЄМО postPublic замість post (без авторизації)
             HttpResponse<String> loginResponse = apiClient.postPublic("/users/login", loginBody);
 
             if (loginResponse.statusCode() != 201) {
@@ -59,7 +57,6 @@ public class LoginPageController {
             UserDto loggedInUser = mapper.treeToValue(root.get("user"), UserDto.class);
 
             userService.login(token, loggedInUser);
-
             Config.getInstance().setToken(token);
             Config.getInstance().setUser(loggedInUser);
 

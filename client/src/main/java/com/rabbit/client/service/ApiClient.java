@@ -3,7 +3,6 @@ package com.rabbit.client.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.client.Config;
-import com.rabbit.client.model.UserSession;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -15,15 +14,14 @@ public class ApiClient {
     private static ApiClient instance;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
-    private final UserService userService;
     private final Config config;
+    private UserService userService;
 
     private ApiClient() {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
         this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        this.userService = UserService.getInstance();
         this.config = Config.getInstance();
     }
 
@@ -34,7 +32,13 @@ public class ApiClient {
         return instance;
     }
 
-    // ПУБЛІЧНІ ЗАПИТИ (без авторизації) - для логіну, реєстрації тощо
+    private UserService getUserService() {
+        if (userService == null) {
+            userService = UserService.getInstance();
+        }
+        return userService;
+    }
+
     public HttpResponse<String> postPublic(String url, String body) throws Exception {
         String fullUrl = config.getBaseUrl() + url;
         HttpRequest request = HttpRequest.newBuilder()
@@ -59,17 +63,29 @@ public class ApiClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    // АВТОРИЗОВАНІ ЗАПИТИ (вимагають токен)
-    public HttpResponse<String> sendAuthenticatedRequest(String url, String method, String body) throws Exception {
-        UserSession session = userService.getCurrentSession();
-        if (session == null || !session.isValid()) {
-            throw new IllegalStateException("User not authenticated. Please login first.");
+    public HttpResponse<String> getAuthenticated(String url, String token) throws Exception {
+        String fullUrl = config.getBaseUrl() + url;
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(fullUrl))
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .GET()
+                .timeout(Duration.ofSeconds(30))
+                .build();
+
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> sendAuthenticatedRequest(String url, String method, String body) throws Exception {
+        String token = getUserService().getToken();
+        if (token == null || token.isEmpty()) {
+            throw new IllegalStateException("User not authenticated");
         }
 
         String fullUrl = config.getBaseUrl() + url;
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(fullUrl))
-                .header("Authorization", "Bearer " + session.getToken())
+                .header("Authorization", "Bearer " + token)
                 .header("Content-Type", "application/json")
                 .timeout(Duration.ofSeconds(30));
 
@@ -94,7 +110,6 @@ public class ApiClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    // Зручні методи для авторизованих запитів
     public HttpResponse<String> get(String url) throws Exception {
         return sendAuthenticatedRequest(url, "GET", null);
     }
@@ -111,7 +126,6 @@ public class ApiClient {
         return sendAuthenticatedRequest(url, "DELETE", null);
     }
 
-    // Хелпери для перевірки статусів
     public boolean isSuccess(HttpResponse<String> response) {
         int code = response.statusCode();
         return code >= 200 && code < 300;
