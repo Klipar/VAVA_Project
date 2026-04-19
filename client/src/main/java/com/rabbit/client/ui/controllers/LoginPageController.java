@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.client.Config;
+import com.rabbit.client.service.ApiClient;
 import com.rabbit.client.service.UserService;
 import com.rabbit.common.dto.UserDto;
 import javafx.fxml.FXML;
@@ -15,9 +16,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class LoginPageController {
@@ -27,9 +25,9 @@ public class LoginPageController {
     @FXML private Button loginBtn;
     @FXML private Label errorLabel;
 
-    private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final UserService userService = UserService.getInstance();
+    private final ApiClient apiClient = ApiClient.getInstance();
 
     @FXML
     private void handleLogin() {
@@ -46,13 +44,9 @@ public class LoginPageController {
 
         try {
             String loginBody = String.format("{\"email\": \"%s\", \"password\": \"%s\"}", email, password);
-            HttpRequest loginRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:6969/users/login"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(loginBody))
-                    .build();
 
-            HttpResponse<String> loginResponse = client.send(loginRequest, HttpResponse.BodyHandlers.ofString());
+            // ВИКОРИСТОВУЄМО postPublic замість post (без авторизації)
+            HttpResponse<String> loginResponse = apiClient.postPublic("/users/login", loginBody);
 
             if (loginResponse.statusCode() != 201) {
                 errorLabel.setText("Invalid email or password");

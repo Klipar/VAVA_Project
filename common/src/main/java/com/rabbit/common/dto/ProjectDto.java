@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectDto {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private int id;
     private String title;
     private String description;

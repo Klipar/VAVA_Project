@@ -10,6 +10,7 @@ public class Config {
     private ResourceBundle bundle = null;
     private Locale currentLocale = null;
     private String token = null;
+    private static final String BASE_URL = "http://localhost:6969";
 
     private Config() {
         Locale.setDefault(Locale.US);
@@ -21,6 +22,10 @@ public class Config {
 
     public static Config getInstance() {
         return Holder.INSTANCE;
+    }
+
+    public String getBaseUrl() {
+        return BASE_URL;
     }
 
     public UserDto getUser() {

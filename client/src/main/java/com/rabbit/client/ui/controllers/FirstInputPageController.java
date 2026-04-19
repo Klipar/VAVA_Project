@@ -1,6 +1,7 @@
 package com.rabbit.client.ui.controllers;
 
 import com.rabbit.client.Config;
+import com.rabbit.client.service.ApiClient;
 import com.rabbit.common.dto.UserDto;
 import javafx.fxml.FXML;
 
@@ -11,9 +12,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class FirstInputPageController
@@ -22,6 +20,8 @@ public class FirstInputPageController
     @FXML private TextField nicknameField;
     @FXML private TextArea skillsArea;
     @FXML private Button continueFirstBtn;
+
+    private final ApiClient apiClient = ApiClient.getInstance();
 
     @FXML
     private void handleContinue() {
@@ -38,8 +38,6 @@ public class FirstInputPageController
 
         try {
 
-            HttpClient client = HttpClient.newHttpClient();
-
             String token = Config.getInstance().getToken();
 
             String updateBody = String.format(
@@ -47,23 +45,17 @@ public class FirstInputPageController
                     fullName, nickname, user_email, skills
             );
 
-            HttpRequest updateRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(String.format("http://localhost:6969/users/%d/update", user_id)))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + token)
-                    .PUT(HttpRequest.BodyPublishers.ofString(updateBody))
-                    .build();
-
-            HttpResponse<String> updateResponse = client.send(updateRequest, HttpResponse.BodyHandlers.ofString());
+            // Використовуємо ApiClient для оновлення
+            HttpResponse<String> updateResponse = apiClient.put(
+                    String.format("/users/%d/update", user_id),
+                    updateBody
+            );
             System.out.println("Update status: " + updateResponse.statusCode());
 
-            HttpRequest getUserRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(String.format("http://localhost:6969/users/%d", user_id)))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-
-            HttpResponse<String> getUserResponse = client.send(getUserRequest, HttpResponse.BodyHandlers.ofString());
+            // Використовуємо ApiClient для отримання користувача
+            HttpResponse<String> getUserResponse = apiClient.get(
+                    String.format("/users/%d", user_id)
+            );
             System.out.println("User response: " + getUserResponse.body());
 
             UserDto user = Config.getInstance().getUser();
@@ -86,4 +78,3 @@ public class FirstInputPageController
 
     }
 }
-
