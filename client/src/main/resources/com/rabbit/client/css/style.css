@@ -70,3 +70,113 @@
     -fx-background-color: #f0f0f0;
     -fx-background-radius: 8;
 }
+
+.scroll-pane {
+    -fx-background-color: #09263E;
+    -fx-background: #09263E;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #09263E;
+}
+
+.project-card {
+    -fx-background-color: #253447;
+    -fx-background-radius: 10;
+    -fx-padding: 15;
+}
+
+.project-link {
+    -fx-text-fill: #99AAB5;
+    -fx-font-size: 11px;
+    -fx-underline: true;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.project-link:hover {
+    -fx-text-fill: white;
+}
+
+.dark-table {
+    -fx-background-color: #253447;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-background-insets: 0;
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.dark-table:focused {
+    -fx-background-insets: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.dark-table .column-header-background {
+    -fx-background-color: #1e2a3a;
+    -fx-background-radius: 10 10 0 0;
+    -fx-background-insets: 0;
+}
+
+.dark-table .column-header-background .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.dark-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 45px;
+    -fx-border-color: #253447;
+    -fx-border-width: 0 1 0 0;
+}
+
+.dark-table .column-header:last-visible {
+    -fx-border-width: 0;
+}
+
+.dark-table .column-header .label {
+    -fx-text-fill: #99AAB5;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.dark-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: #1e2a3a;
+    -fx-border-width: 0 0 1 0;
+}
+
+.dark-table .table-row-cell:filled:hover {
+    -fx-background-color: #2d3e54;
+}
+
+.dark-table .table-row-cell:filled:selected,
+.dark-table .table-row-cell:filled:focused:selected {
+    -fx-background-color: #3d4f66;
+    -fx-background-insets: 0;
+}
+
+.dark-table .table-cell {
+    -fx-text-fill: white;
+    -fx-padding: 12;
+    -fx-border-color: transparent;
+}
+
+.dark-table .table-row-cell:focused .text {
+    -fx-fill: white;
+}
+
+.dark-table .placeholder .label {
+    -fx-text-fill: #99AAB5;
+}
+
+.dark-table .scroll-bar:vertical,
+.dark-table .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.dark-table .scroll-bar .thumb {
+    -fx-background-color: #3d4f66;
+    -fx-background-radius: 5;
+}

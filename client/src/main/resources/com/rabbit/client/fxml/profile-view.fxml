@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
 
 <VBox xmlns:fx="http://javafx.com/fxml/1"
@@ -15,9 +16,14 @@
 
     <Label text="USER PROFILE" style="-fx-text-fill: #fcfcfc; -fx-font-size: 32px; -fx-font-weight: bold;"/>
 
-    <VBox spacing="10.0" alignment="CENTER_LEFT" style="-fx-background-color: #1a2533; -fx-padding: 20; -fx-background-radius: 10;">
+    <VBox spacing="10.0" alignment="CENTER_LEFT"
+          style="-fx-background-color: #1a2533; -fx-padding: 20; -fx-background-radius: 10;">
         <Label fx:id="nameLabel" text="Name: " style="-fx-text-fill: white; -fx-font-size: 18px;"/>
         <Label fx:id="emailLabel" text="Email: " style="-fx-text-fill: white; -fx-font-size: 18px;"/>
         <Label fx:id="roleLabel" text="Role: " style="-fx-text-fill: #ff79c6; -fx-font-size: 18px; -fx-font-weight: bold;"/>
     </VBox>
+
+    <Button fx:id="logoutButton" text="LOGOUT"
+            style="-fx-background-color: #ff5555; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10 30 10 30; -fx-background-radius: 5;"
+            onAction="#handleLogout"/>
 </VBox>

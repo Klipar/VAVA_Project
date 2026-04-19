@@ -3,6 +3,7 @@ package com.rabbit.client;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import com.rabbit.client.ui.controllers.MainController;
 import com.rabbit.common.dto.UserDto;
 
 public class Config {
@@ -10,6 +11,8 @@ public class Config {
     private ResourceBundle bundle = null;
     private Locale currentLocale = null;
     private String token = null;
+    private MainController mainController;
+    private static final String BASE_URL = "http://localhost:6969";
 
     private Config() {
         Locale.setDefault(Locale.US);
@@ -21,6 +24,10 @@ public class Config {
 
     public static Config getInstance() {
         return Holder.INSTANCE;
+    }
+
+    public String getBaseUrl() {
+        return BASE_URL;
     }
 
     public UserDto getUser() {
@@ -56,5 +63,13 @@ public class Config {
 
     public void setBundle(ResourceBundle bundle) {
         this.bundle = bundle;
+    }
+
+    public MainController getMainController() {
+        return mainController;
+    }
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
     }
 }
