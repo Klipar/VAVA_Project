@@ -45,14 +45,14 @@ public class FirstInputPageController
                     fullName, nickname, user_email, skills
             );
 
-            // Використовуємо ApiClient для оновлення
+            // Using ApiClient for updates
             HttpResponse<String> updateResponse = apiClient.put(
                     String.format("/users/%d/update", user_id),
                     updateBody
             );
             System.out.println("Update status: " + updateResponse.statusCode());
 
-            // Використовуємо ApiClient для отримання користувача
+            // Using ApiClient for obtaining user
             HttpResponse<String> getUserResponse = apiClient.get(
                     String.format("/users/%d", user_id)
             );
