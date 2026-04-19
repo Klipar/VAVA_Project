@@ -34,7 +34,7 @@
                style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;"/>
 
         <TextField fx:id="emailField"
-                   promptText="LOGIN"
+                   promptText="EMAIL"
                    maxWidth="300"
                    style="-fx-background-color: #e0e0e0;
                           -fx-background-radius: 6;
