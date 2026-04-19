@@ -129,25 +129,17 @@ public class OpenApiHandler implements HttpHandler {
                         "ProjectDto": {
                             "type": "object",
                             "properties": {
-                                "id": {"type": "integer", "format": "int64", "example": 1},
+                                "id": {"type": "integer", "format": "int64", "example": 1, "readOnly": true},
                                 "title": {"type": "string", "example": "Project Alpha"},
                                 "description": {"type": "string", "example": "Main development project"},
                                 "deadline": {"type": "string", "format": "date-time", "example": "2024-12-31T23:59:59Z"},
-                                "status": {"type": "string", "example": "active"}
+                                "status": {
+                                    "type": "string",
+                                    "enum": ["active", "completed", "archived"],
+                                    "example": "active"
+                                },
+                                "masterId": {"type": "integer", "format": "int64", "example": 1, "readOnly": true}
                             }
-                        },
-                        "CreateProjectRequest": {
-                            "type": "object",
-                            "required": ["title"],
-                            "properties": {
-                                "title": {"type": "string", "example": "New Project"},
-                                "description": {"type": "string", "example": "Project description"},
-                                "deadline": {"type": "string", "format": "date-time"},
-                                "status": {"type": "string", "example": "active"}
-                            }
-                        },
-                        "UpdateProjectRequest": {
-                            "allOf": [{"$ref": "#/components/schemas/CreateProjectRequest"}]
                         },
                         "NotificationDto": {
                             "type": "object",
@@ -530,7 +522,7 @@ public class OpenApiHandler implements HttpHandler {
                                 "required": true,
                                 "content": {
                                     "application/json": {
-                                        "schema": {"$ref": "#/components/schemas/CreateProjectRequest"}
+                                        "schema": {"$ref": "#/components/schemas/ProjectDto"}
                                     }
                                 }
                             },
@@ -593,7 +585,7 @@ public class OpenApiHandler implements HttpHandler {
                                 "required": true,
                                 "content": {
                                     "application/json": {
-                                        "schema": {"$ref": "#/components/schemas/UpdateProjectRequest"}
+                                        "schema": {"$ref": "#/components/schemas/ProjectDto"}
                                     }
                                 }
                             },

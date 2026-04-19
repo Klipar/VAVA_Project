@@ -4,6 +4,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -15,6 +16,8 @@ import com.rabbit.client.Config;
 import java.net.URI;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
@@ -76,10 +79,12 @@ public class ProjectsController {
             Button deleteBtn = new Button("DELETE");
             deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #e05555; -fx-padding: 0; -fx-cursor: hand;");
             deleteBtn.setOnAction(e -> {
-                deleteProject(project.getId());
-                recentProjectsPane.getChildren().clear();
-                yourProjectsPane.getChildren().clear();
-                initialize();
+                if (confirmProjectDeletion(project.getTitle())) {
+                    deleteProject(project.getId());
+                    recentProjectsPane.getChildren().clear();
+                    yourProjectsPane.getChildren().clear();
+                    initialize();
+                }
             });
             card.getChildren().add(deleteBtn);
         }
@@ -119,5 +124,15 @@ public class ProjectsController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean confirmProjectDeletion(String projectTitle) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Project");
+        alert.setHeaderText("Delete project \"" + projectTitle + "\"?");
+        alert.setContentText("Are you sure you want to delete this project?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 }
