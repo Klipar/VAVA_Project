@@ -35,12 +35,12 @@ public class ProjectsController {
         List<ProjectDto> yourProjects = projects;
 
         for (ProjectDto p : recentProjects) {
-            recentProjectsPane.getChildren().add(createProjectCard(p.getTitle(), p.getId()));
+            recentProjectsPane.getChildren().add(createProjectCard(p));
         }
         for (ProjectDto p : yourProjects) {
-            yourProjectsPane.getChildren().add(createProjectCard(p.getTitle(), p.getId()));
+            yourProjectsPane.getChildren().add(createProjectCard(p));
         }
-
+        
         for (ProjectDto p : projects) {
             System.out.println("[Project] id=" + p.getId() + " title=" + p.getTitle());
         }
@@ -55,13 +55,13 @@ public class ProjectsController {
         }
     }
 
-    private VBox createProjectCard(String name, int projectId) {
+    private VBox createProjectCard(ProjectDto project) {
         VBox card = new VBox(10);
         card.setPrefWidth(220);
         card.setPrefHeight(120);
         card.setStyle("-fx-background-color: #0d2137; -fx-background-radius: 8; -fx-padding: 15;");
 
-        Label title = new Label(name);
+        Label title = new Label(project.getTitle());
         title.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
 
         Button openTasks = new Button("VIEW OPEN TASKS");
@@ -72,11 +72,11 @@ public class ProjectsController {
 
         card.getChildren().addAll(title, openTasks, assignedTasks);
 
-        if (Config.getInstance().getUser().getRole() == UserRole.MANAGER || Config.getInstance().getUser().getRole() == UserRole.TEAM_LEADER) {
+        if (project.getMasterId() == Config.getInstance().getUser().getId()) {
             Button deleteBtn = new Button("DELETE");
             deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #e05555; -fx-padding: 0; -fx-cursor: hand;");
             deleteBtn.setOnAction(e -> {
-                deleteProject(projectId);
+                deleteProject(project.getId());
                 recentProjectsPane.getChildren().clear();
                 yourProjectsPane.getChildren().clear();
                 initialize();

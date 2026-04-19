@@ -15,7 +15,11 @@ public class ProjectRepository {
     private final DatabaseService db = DatabaseService.getInstance();
 
     public List<ProjectDto> findAll() throws SQLException {
-        return db.query("SELECT * FROM projects")
+        return db.query("""
+            SELECT p.*, up.user_id as master_id
+            FROM projects p
+            LEFT JOIN user_projects up ON up.project_id = p.id AND up.role = 'master'
+        """)
                 .stream()
                 .map(this::mapToDto)
                 .toList();
@@ -23,9 +27,10 @@ public class ProjectRepository {
 
     public List<ProjectDto> findAllByUserId(int userId) throws SQLException {
         return db.query("""
-            SELECT p.* FROM projects p
-            JOIN user_projects up ON up.project_id = p.id
-            WHERE up.user_id = ?
+            SELECT p.*, up2.user_id as master_id
+            FROM projects p
+            JOIN user_projects up ON up.project_id = p.id AND up.user_id = ?
+            LEFT JOIN user_projects up2 ON up2.project_id = p.id AND up2.role = 'master'
         """, userId)
                 .stream()
                 .map(this::mapToDto)
@@ -33,7 +38,12 @@ public class ProjectRepository {
     }
 
     public Optional<ProjectDto> findById(int projectId) throws SQLException {
-        return db.query("SELECT * FROM projects WHERE id = ?", projectId)
+        return db.query("""
+            SELECT p.*, up.user_id as master_id
+            FROM projects p
+            LEFT JOIN user_projects up ON up.project_id = p.id AND up.role = 'master'
+            WHERE p.id = ?
+        """, projectId)
                 .stream()
                 .map(this::mapToDto)
                 .findFirst();
@@ -106,6 +116,8 @@ public class ProjectRepository {
         dto.setDeadline(ts != null ? ts.toLocalDateTime() : null);
         String statusStr = row.get("status").toString().toUpperCase();
         dto.setStatus(ProjectStatus.valueOf(statusStr));
+        Object masterId = row.get("master_id");
+        dto.setMasterId(masterId != null ? ((Number) masterId).intValue() : null);
         return dto;
     }
 }
