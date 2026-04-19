@@ -6,6 +6,8 @@ import com.rabbit.client.Config;
 import com.rabbit.common.dto.ProjectDto;
 import com.rabbit.common.dto.UserDto;
 import com.rabbit.common.enums.ProjectStatus;
+import com.rabbit.common.enums.UserRole;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
@@ -131,6 +133,12 @@ public class CreateProjectController {
 
     @FXML
     private void handleCreateProject() {
+        UserDto userTest = Config.getInstance().getUser();
+        if (!(userTest.getRole() == UserRole.MANAGER || userTest.getRole() == UserRole.TEAM_LEADER)) {
+            showAlert("You do not have permission to create a project.");
+            return;
+        }
+
         String name = nameField.getText().trim();
         if (name.isBlank()) {
             showAlert("Please enter a project name.");

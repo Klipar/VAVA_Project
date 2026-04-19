@@ -56,11 +56,6 @@ public class ProjectsController {
     }
 
     private VBox createProjectCard(String name, int projectId) {
-        UserDto user = Config.getInstance().getUser();
-        if (!(user.getRole() == UserRole.MANAGER || user.getRole() == UserRole.TEAM_LEADER)) {
-            return null;
-        }
-
         VBox card = new VBox(10);
         card.setPrefWidth(220);
         card.setPrefHeight(120);
