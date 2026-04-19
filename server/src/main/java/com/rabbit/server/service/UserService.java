@@ -91,6 +91,11 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
+    public UserDto getUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
     public List<UserDto> getAllUsersFromProject(Long projectId) {
         return userRepository.findAllByProjectId(projectId);
     }

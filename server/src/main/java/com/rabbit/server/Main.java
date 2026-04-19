@@ -63,23 +63,33 @@ public class Main {
             String method = exchange.getRequestMethod();
 
             try {
+                // GET /users/nickname/{nickname}
+                if (path.matches("/users/nickname/[^/]+$") && method.equals("GET")) {
+                    userHandler.getUserByNickname().handle(exchange);
+                    return;
+                }
                 // GET /users/{userId}
                 if (path.matches("/users/\\d+$") && method.equals("GET")) {
                     userHandler.getUser().handle(exchange);
+                    return;
                 }
                 // PUT /users/{userId}/update
                 else if (path.matches("/users/\\d+/update$") && method.equals("PUT")) {
                     userHandler.updateUser().handle(exchange);
+                    return; 
                 }
                 // DELETE /users/{userId}/delete
                 else if (path.matches("/users/\\d+/delete$") && method.equals("DELETE")) {
                     userHandler.deleteUser().handle(exchange);
+                    return;
                 }
                 else if (path.matches("/users/login") && method.equals("POST")) {
                     userHandler.loginUser().handle(exchange);
+                    return;
                 }
                 else {
                     send405(exchange);
+                    return;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
