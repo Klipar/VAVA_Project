@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
 
-<BorderPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.rabbit.client.ui.controllers.MainController">
-    <left>
-        <fx:include fx:id="sidebar" source="sidebar.fxml" />
-    </left>
-    <center>
-        <StackPane>
-            <Label text="Default content, may be something go wrong... \(-_-)/" style="-fx-text-fill: white;"/>
-        </StackPane>
-    </center>
-</BorderPane>
+<StackPane fx:id="overlayPane" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rabbit.client.ui.controllers.MainController">
+    <BorderPane fx:id="rootPane">
+        <left>
+            <fx:include fx:id="sidebar" source="sidebar.fxml" />
+        </left>
+        <center>
+            <StackPane>
+                <Label text="Default content..." style="-fx-text-fill: white;"/>
+            </StackPane>
+        </center>
+    </BorderPane>
+</StackPane>

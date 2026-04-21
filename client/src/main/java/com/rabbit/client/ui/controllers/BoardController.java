@@ -19,6 +19,7 @@ import javafx.geometry.Pos;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
@@ -31,6 +32,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.util.Duration;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +50,8 @@ public class BoardController {
     private final ApiClient apiClient = ApiClient.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final Map<TaskStatus, VBox> columnContainers = new HashMap<>();
+    @Setter
+    private MainController mainController;
 
     private int currentProjectId;
     private String projectName;
@@ -59,9 +63,11 @@ public class BoardController {
 
     @FXML
     public void initialize() {
-        if (projectName != null) {
-            projectNameLabel.setText(projectName.toUpperCase());
+        if (projectName == null || currentProjectId == 0) {
+            return;
         }
+
+        projectNameLabel.setText(projectName.toUpperCase());
         setupUserPermissions();
         createColumns();
         loadTasksFromServer();
@@ -296,7 +302,11 @@ public class BoardController {
                     System.out.println("Task " + task.getId() + " status updated!");
                     task.setStatus(newStatus.getValue());
                 } else {
-                    System.err.println("Server error (" + response.statusCode() + "): " + response.body());
+                    if (response.statusCode() == 403) {
+                        showNotification("Access Denied: Only admins can move tasks", Color.web("#ED4245"));
+                    } else {
+                        showNotification("Server error: " + response.statusCode(), Color.web("#ED4245"));
+                    }
                     Platform.runLater(this::loadTasksFromServer);
                 }
             } catch (Exception e) {
@@ -323,5 +333,21 @@ public class BoardController {
     @FXML
     private void handleCreateTask() {
         System.out.println("Opening Create Task Modal for Project ID: " + currentProjectId);
+    }
+
+    private void showNotification(String message, Color color) {
+        MainController currentMain = MainController.getInstance();
+        if (currentMain != null) {
+            currentMain.showGlobalNotification(message, toHexString(color));
+        } else {
+            System.out.println("MainController instance is NULL!");
+        }
+    }
+
+    private String toHexString(Color color) {
+        return String.format("#%02X%02X%02X",
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
     }
 }

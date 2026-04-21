@@ -162,15 +162,27 @@ public class HomePageController {
     private void navigateToProjectBoard(ProjectDto project) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/board-page.fxml"));
+
+            // Створюємо контролер вручну (як ти і робив, бо так у тебе працює таблиця)
             BoardController boardController = new BoardController();
+
+            // 1. Встановлюємо дані проекту
             boardController.setCurrentProject(project.getId(), project.getTitle());
+
+            // 2. КРИТИЧНО: Передаємо посилання на MainController
+            // Саме через це раніше писало "MainController not set"
+            boardController.setMainController(this.mainController);
+
+            // Прив'язуємо цей конкретний екземпляр до завантажувача
             loader.setController(boardController);
 
             Parent boardView = loader.load();
+
             if (mainController != null) {
                 mainController.setView(boardView);
             }
         } catch (IOException e) {
+            System.err.println("Помилка завантаження дошки проекту: " + e.getMessage());
             e.printStackTrace();
         }
     }
