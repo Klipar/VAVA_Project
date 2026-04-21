@@ -41,17 +41,28 @@ public class MainController {
     }
 
     public void loadView(String fxmlName) {
+        try {
+            String path = "/com/rabbit/client/fxml/" + fxmlName;
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
+            Parent view = loader.load();
+
+            // Якщо завантажуємо головну сторінку, передаємо їй MainController
+            Object controller = loader.getController();
+            if (controller instanceof HomePageController) {
+                ((HomePageController) controller).setMainController(this);
+            }
+
+            rootPane.setCenter(view);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setView(Parent view) {
         if (!userService.isLoggedIn()) {
             redirectToLogin();
             return;
         }
-        try {
-            String path = "/com/rabbit/client/fxml/" + fxmlName;
-            Parent view = FXMLLoader.load(getClass().getResource(path));
-            rootPane.setCenter(view);
-        } catch (IOException e) {
-            System.err.println("Failed to load FXML: " + fxmlName);
-            e.printStackTrace();
-        }
+        rootPane.setCenter(view);
     }
 }
