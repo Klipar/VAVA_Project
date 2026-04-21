@@ -279,34 +279,25 @@ public class BoardController {
     private void updateTaskStatusRequest(TaskDto task, TaskStatus newStatus) {
         new Thread(() -> {
             try {
-                Map<String, Object> payload = new HashMap<>();
-                payload.put("title", task.getTitle());
-                payload.put("description", task.getDescription());
-                payload.put("priority", task.getPriority());
+                Map<String, String> payload = new HashMap<>();
                 payload.put("status", newStatus.getValue());
-                payload.put("assignedTo", task.getAssignedTo());
-
-                String deadline = task.getDeadline().toString();
-                if (!deadline.endsWith("Z")) {
-                    deadline += "Z";
-                }
-                payload.put("deadline", deadline);
 
                 String json = mapper.writeValueAsString(payload);
 
-                System.out.println("Sending JSON: " + json);
+                System.out.println("Sending Status Update JSON: " + json);
 
-                var response = apiClient.put("/tasks/" + task.getId() + "/update", json);
+                var response = apiClient.put("/tasks/" + task.getId() + "/status", json);
 
                 if (apiClient.isSuccess(response)) {
-                    System.out.println("Task " + task.getId() + " status updated!");
+                    System.out.println("Task " + task.getId() + " status updated successfully to " + newStatus);
                     task.setStatus(newStatus.getValue());
                 } else {
                     if (response.statusCode() == 403) {
-                        showNotification("Access Denied: Only admins can move tasks", Color.web("#ED4245"));
+                        showNotification("Access Denied: You cannot move this task", Color.web("#ED4245"));
                     } else {
-                        showNotification("Server error: " + response.statusCode(), Color.web("#ED4245"));
+                        showNotification("Error: " + response.statusCode(), Color.web("#ED4245"));
                     }
+
                     Platform.runLater(this::loadTasksFromServer);
                 }
             } catch (Exception e) {
@@ -315,7 +306,6 @@ public class BoardController {
             }
         }).start();
     }
-
     private TaskCardComponent findCardInUi(int taskId) {
         String idStr = String.valueOf(taskId);
         for (VBox column : columnContainers.values()) {

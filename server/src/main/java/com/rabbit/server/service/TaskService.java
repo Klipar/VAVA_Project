@@ -49,4 +49,23 @@ public class TaskService {
         boolean deleted = taskRepo.delete(taskId, requesterId);
         return deleted ? deletedTask : null;
     }
+
+    public TaskDto updateTaskStatus(int taskId, int requesterId, String newStatus) throws SQLException {
+        Optional<TaskDto> existing = taskRepo.findById(taskId);
+        if (existing.isEmpty()) {
+            return null;
+        }
+
+        if (!projectRepo.isProjectMember(requesterId, existing.get().getProjectId())) {
+            throw new SecurityException("Access denied: you are not a member of this project");
+        }
+
+        boolean updated = taskRepo.updateStatus(taskId, newStatus);
+
+        if (!updated) {
+            return null;
+        }
+
+        return taskRepo.findById(taskId).orElse(null);
+    }
 }

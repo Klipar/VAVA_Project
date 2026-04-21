@@ -34,6 +34,17 @@ public class TaskRepository {
                 .findFirst();
     }
 
+    public boolean updateStatus(int taskId, String newStatus) throws SQLException {
+        return db.update("""
+        UPDATE tasks SET
+            status = ?::task_status 
+        WHERE id = ?
+    """,
+                newStatus,
+                taskId
+        ) > 0;
+    }
+
     public int create(int projectId, int createdBy, TaskRequestDto dto) throws SQLException {
         List<Map<String, Object>> result = db.query("""
         INSERT INTO tasks (project_id, assigned_to, created_by, title, description, priority, status, deadline)

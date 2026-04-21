@@ -116,6 +116,50 @@ public class TaskHandler {
         };
     }
 
+    // PATCH or PUT /tasks/{taskId}/status
+    public HttpHandler updateStatus() {
+        return exchange -> {
+            if (!exchange.getRequestMethod().equals("PUT") && !exchange.getRequestMethod().equals("PATCH")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            Integer userId = resolveUserId(exchange);
+            if (userId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
+
+            try {
+                int taskId = extractId(exchange.getRequestURI().getPath(), 2);
+
+                Map<String, String> body = mapper.readValue(exchange.getRequestBody(), new com.fasterxml.jackson.core.type.TypeReference<>() {});
+                String newStatus = body.get("status");
+
+                if (newStatus == null) {
+                    send(exchange, 400, "{\"error\":\"Status field is required\"}");
+                    return;
+                }
+
+                TaskDto updatedTask = service.updateTaskStatus(taskId, userId, newStatus);
+
+                if (updatedTask != null) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("message", "Status updated successfully");
+                    response.put("task", updatedTask);
+                    send(exchange, 200, mapper.writeValueAsString(response));
+                } else {
+                    send(exchange, 404, "{\"error\":\"Task not found\"}");
+                }
+            } catch (SecurityException e) {
+                send(exchange, 403, "{\"error\":\"" + e.getMessage() + "\"}");
+            } catch (Exception e) {
+                e.printStackTrace();
+                send(exchange, 500, "{\"error\":\"Internal server error\"}");
+            }
+        };
+    }
+
     // DELETE /tasks/{taskId}/delete
     public HttpHandler delete() {
         return exchange -> {

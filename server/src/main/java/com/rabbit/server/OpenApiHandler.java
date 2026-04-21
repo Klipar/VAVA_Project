@@ -938,6 +938,28 @@ public class OpenApiHandler implements HttpHandler {
                             }
                         }
                     },
+                    "/tasks/{taskId}/status": {
+                                            "put": {
+                                                "tags": ["Task"],
+                                                "summary": "Update task status only",
+                                                "description": "Quickly change task status (e.g. for Drag-and-Drop). Available to all project members.",
+                                                "security": [{"bearerAuth": []}],
+                                                "parameters": [{"name": "taskId", "in": "path", "required": true, "schema": {"type": "integer"}}],
+                                                "requestBody": {
+                                                    "required": true,
+                                                    "content": {
+                                                        "application/json": {
+                                                            "schema": {"$ref": "#/components/schemas/StatusUpdateRequest"}
+                                                        }
+                                                    }
+                                                },
+                                                "responses": {
+                                                    "200": {"description": "Status updated successfully"},
+                                                    "403": {"description": "Access denied"},
+                                                    "404": {"description": "Task not found"}
+                                                }
+                                            }
+                                        },
                     "/tasks/{taskId}/update": {
                         "put": {
                             "tags": ["Task"],

@@ -26,6 +26,8 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        instance = this;
+        com.rabbit.client.Config.getInstance().setMainController(this);
         if (!userService.isLoggedIn()) {
             redirectToLogin();
             return;
@@ -35,7 +37,6 @@ public class MainController {
             sidebarController.initMenu();
         }
         loadView("home-view.fxml");
-        instance = this;
     }
 
     private void redirectToLogin() {
