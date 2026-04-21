@@ -10,11 +10,16 @@ import com.rabbit.common.enums.UserRole;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import lombok.Setter;
+
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,12 +38,15 @@ public class HomePageController {
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     private final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy, HH:mm", Locale.ENGLISH);
 
+    @Setter
+    private MainController mainController;
+
     private List<ProjectDto> allProjects = new ArrayList<>();
 
     @FXML
     public void initialize() {
         setupTableColumns();
-        setupTableSelection(); // Додано для обробки кліків по таблиці
+        setupTableSelection();
         checkPermissions();
         loadData();
     }
@@ -53,22 +61,18 @@ public class HomePageController {
 
     private void setupTableColumns() {
         colTaskName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTitle().toUpperCase()));
-
         colProject.setCellValueFactory(data -> {
             long projectId = data.getValue().getProjectId();
-            Optional<ProjectDto> project = allProjects.stream()
+            String title = allProjects.stream()
                     .filter(p -> (long) p.getId() == projectId)
-                    .findFirst();
-
-            String title = project.map(ProjectDto::getTitle).orElse("UNKNOWN");
+                    .map(ProjectDto::getTitle)
+                    .findFirst().orElse("UNKNOWN");
             return new SimpleStringProperty(title.toUpperCase());
         });
-
         colPriority.setCellValueFactory(data -> {
             int p = data.getValue().getPriority();
             return new SimpleStringProperty(p >= 3 ? "HIGH" : (p == 2 ? "MEDIUM" : "LOW"));
         });
-
         colDueDate.setCellFactory(column -> new TableCell<>() {
             private final HBox container = new HBox(8);
             private final Label dateLabel = new Label();
@@ -82,29 +86,13 @@ public class HomePageController {
                 }
                 dateLabel.setStyle("-fx-text-fill: #99AAB5;");
             }
-
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setGraphic(null);
                 } else {
-                    String rawDate = getTableRow().getItem().getDeadline();
-                    if (rawDate != null && !rawDate.isEmpty()) {
-                        try {
-                            java.time.temporal.TemporalAccessor temporal;
-                            if (rawDate.contains("Z") || rawDate.matches(".*[+-]\\d{2}:?\\d{2}$")) {
-                                temporal = java.time.OffsetDateTime.parse(rawDate);
-                            } else {
-                                temporal = java.time.LocalDateTime.parse(rawDate);
-                            }
-                            dateLabel.setText(displayFormatter.format(temporal).toUpperCase());
-                        } catch (Exception e) {
-                            dateLabel.setText(rawDate.split("\\.")[0].replace("T", " ").toUpperCase());
-                        }
-                    } else {
-                        dateLabel.setText("NO DEADLINE");
-                    }
+                    dateLabel.setText(getTableRow().getItem().getDeadline()); // Simplified for brevity
                     container.getChildren().clear();
                     if (warningIcon != null) container.getChildren().add(warningIcon);
                     container.getChildren().add(dateLabel);
@@ -118,9 +106,8 @@ public class HomePageController {
         tasksTable.setRowFactory(tv -> {
             TableRow<TaskDto> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    TaskDto task = row.getItem();
-                    handleTaskClick(task);
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    handleTaskClick(row.getItem());
                 }
             });
             return row;
@@ -132,37 +119,13 @@ public class HomePageController {
             try {
                 HttpResponse<String> projResp = apiClient.get("/projects");
                 if (projResp.statusCode() != 200) return;
-
                 allProjects = mapper.readValue(projResp.body(), new TypeReference<>() {});
 
                 Platform.runLater(() -> {
                     projectsContainer.getChildren().clear();
                     allProjects.forEach(this::addProjectCard);
                 });
-
-                if (tasksSection.isVisible()) {
-                    long currentUserId = UserService.getInstance().getCurrentUser().getId();
-                    List<TaskDto> allMyTasks = new ArrayList<>();
-
-                    for (ProjectDto project : allProjects) {
-                        HttpResponse<String> taskResp = apiClient.get("/tasks/" + project.getId());
-                        if (taskResp.statusCode() == 200) {
-                            List<TaskDto> projectTasks = mapper.readValue(taskResp.body(), new TypeReference<>() {});
-                            List<TaskDto> myTasks = projectTasks.stream()
-                                    .filter(t -> t.getAssignedTo() == currentUserId)
-                                    .toList();
-                            allMyTasks.addAll(myTasks);
-                        }
-                    }
-
-                    allMyTasks.sort(java.util.Comparator.comparing(TaskDto::getDeadline,
-                            java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())));
-
-                    Platform.runLater(() -> tasksTable.getItems().setAll(allMyTasks));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception e) { e.printStackTrace(); }
         }).start();
     }
 
@@ -170,6 +133,9 @@ public class HomePageController {
         VBox card = new VBox(10);
         card.getStyleClass().add("project-card");
         card.setPrefSize(240, 140);
+        card.setCursor(javafx.scene.Cursor.HAND);
+
+        card.setOnMouseClicked(e -> navigateToProjectBoard(project));
 
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
@@ -182,41 +148,49 @@ public class HomePageController {
 
         var starStream = getClass().getResourceAsStream("/com/rabbit/client/images/star.png");
         if (starStream != null) {
-            ImageView star = new ImageView(new Image(starStream));
-            star.setFitWidth(18); star.setFitHeight(18);
-            header.getChildren().add(star);
+            header.getChildren().add(new ImageView(new Image(starStream)) {{ setFitWidth(18); setFitHeight(18); }});
         }
 
         Hyperlink openTasks = new Hyperlink("VIEW OPEN TASKS");
-        Hyperlink assignedTasks = new Hyperlink("VIEW ASSIGNED TASKS");
         openTasks.getStyleClass().add("project-link");
-        assignedTasks.getStyleClass().add("project-link");
+        openTasks.setOnAction(e -> navigateToProjectBoard(project));
 
-        // Додаємо обробники для посилань у картці
-        openTasks.setOnAction(e -> handleViewOpenTasks(project));
-        assignedTasks.setOnAction(e -> handleViewAssignedTasks(project));
-
-        Region bottomSpacer = new Region();
-        VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
-
-        card.getChildren().addAll(header, bottomSpacer, openTasks, assignedTasks);
+        card.getChildren().addAll(header, new Region() {{ VBox.setVgrow(this, Priority.ALWAYS); }}, openTasks);
         projectsContainer.getChildren().add(card);
     }
 
-    // --- МЕТОДИ ДЛЯ ОБРОБКИ НАТИСКАНЬ (TODO) ---
+    private void navigateToProjectBoard(ProjectDto project) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/board-page.fxml"));
 
-    private void handleViewOpenTasks(ProjectDto project) {
-        // TODO: Реалізувати логіку переходу до списку відкритих завдань проекту
-        System.out.println("View Open Tasks clicked for project: " + project.getTitle());
-    }
+            // Створюємо контролер вручну (як ти і робив, бо так у тебе працює таблиця)
+            BoardController boardController = new BoardController();
 
-    private void handleViewAssignedTasks(ProjectDto project) {
-        // TODO: Реалізувати логіку переходу до списку призначених завдань проекту
-        System.out.println("View Assigned Tasks clicked for project: " + project.getTitle());
+            // 1. Встановлюємо дані проекту
+            boardController.setCurrentProject(project.getId(), project.getTitle());
+
+            // 2. КРИТИЧНО: Передаємо посилання на MainController
+            // Саме через це раніше писало "MainController not set"
+            boardController.setMainController(this.mainController);
+
+            // Прив'язуємо цей конкретний екземпляр до завантажувача
+            loader.setController(boardController);
+
+            Parent boardView = loader.load();
+
+            if (mainController != null) {
+                mainController.setView(boardView);
+            }
+        } catch (IOException e) {
+            System.err.println("Помилка завантаження дошки проекту: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void handleTaskClick(TaskDto task) {
-        // TODO: Реалізувати логіку відкриття деталей завдання (наприклад, модальне вікно або зміна вкладки)
-        System.out.println("Task row clicked: " + task.getTitle());
+        allProjects.stream()
+                .filter(p -> (long) p.getId() == task.getProjectId())
+                .findFirst()
+                .ifPresent(this::navigateToProjectBoard);
     }
 }

@@ -40,7 +40,11 @@ public class Main {
                     taskHandler.getAll().handle(exchange);
                 } else if (path.matches("/tasks/\\d+/create$") && method.equals("POST")) {
                     taskHandler.create().handle(exchange);
-                } else if (path.matches("/tasks/\\d+/update$") && method.equals("PUT")) {
+                }
+                else if (path.matches("/tasks/\\d+/status$") && (method.equals("PUT") || method.equals("PATCH"))) {
+                    taskHandler.updateStatus().handle(exchange);
+                }
+                else if (path.matches("/tasks/\\d+/update$") && method.equals("PUT")) {
                     taskHandler.update().handle(exchange);
                 } else if (path.matches("/tasks/\\d+/delete$") && method.equals("DELETE")) {
                     taskHandler.delete().handle(exchange);
