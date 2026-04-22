@@ -38,7 +38,7 @@ public class Main {
             try {
                 if (path.matches("/tasks/\\d+$") && method.equals("GET")) {
                     taskHandler.getAll().handle(exchange);
-                } else if (path.matches("/tasks/\\d+/create$") && method.equals("POST")) {
+                }else if (path.matches("/tasks/\\d+/create$") && method.equals("POST")) {
                     taskHandler.create().handle(exchange);
                 }
                 else if (path.matches("/tasks/\\d+/status$") && (method.equals("PUT") || method.equals("PATCH"))) {

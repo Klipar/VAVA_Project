@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class NotificationService {
-    private final NotificationRepository repo = new NotificationRepository(DatabaseService.getInstance());
+    private static final NotificationRepository repo = new NotificationRepository(DatabaseService.getInstance());
 
     public List<NotificationDto> getNotificationsForUser(int userId) throws SQLException {
         return repo.findByUserId(userId);
@@ -21,10 +21,19 @@ public class NotificationService {
         return repo.markAsRead(userId, notificationId);
     }
 
-    public NotificationDto createNotification(int userId, NotificationDto dto) throws SQLException {
-        dto.setCreated_at(LocalDateTime.now());
-        long notificationId = repo.save(dto);
-        repo.linkToUser(notificationId, userId);
-        return repo.findById(notificationId).orElseThrow(() -> new SQLException("Failed to retrieve created notification"));
+    public static void sendSystemNotification(int usedId, String message) {
+        try {
+            NotificationDto dto = new NotificationDto();
+            dto.setMessage(message);
+            dto.setCreated_at(LocalDateTime.now());
+            dto.setIsRead(false);
+            dto.setId(0L);
+
+            long notificationId = repo.save(dto);
+            repo.linkToUser(notificationId,usedId);
+            System.out.println("System notification sent to" +usedId + ": " + message);
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 }

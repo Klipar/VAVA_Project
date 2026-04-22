@@ -47,6 +47,10 @@ public class BoardController {
     @FXML private Button topCreateTaskBtn;
     @FXML private Button floatingAddBtn;
 
+    @FXML private Button boardBtn;
+    @FXML private Button listBtn;
+    @FXML private Button tasksBtn;
+
     private final ApiClient apiClient = ApiClient.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final Map<TaskStatus, VBox> columnContainers = new HashMap<>();
@@ -71,6 +75,24 @@ public class BoardController {
         setupUserPermissions();
         createColumns();
         loadTasksFromServer();
+        setupNavigationButtons();
+    }
+
+    private void setupNavigationButtons() {
+        if (mainController == null) return;
+        if (boardBtn != null) {
+            boardBtn.getStyleClass().add("active-nav-button");
+        }
+        if (listBtn != null) {
+            listBtn.setOnAction(e ->
+                    mainController.loadView("project-tasks-view.fxml", currentProjectId, projectName)
+            );
+        }
+        if (tasksBtn != null) {
+            tasksBtn.setOnAction(e ->
+                    mainController.loadView("my-tasks-view.fxml")
+            );
+        }
     }
 
     private void setupUserPermissions() {
