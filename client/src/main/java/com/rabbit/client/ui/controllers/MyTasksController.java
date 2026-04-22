@@ -27,7 +27,7 @@ import java.util.*;
 public class MyTasksController {
 
     @FXML private TableView<TaskDto> tasksTable;
-    @FXML private TableColumn<TaskDto, String> typeColumn, titleColumn, descriptionColumn,
+    @FXML private TableColumn<TaskDto, String> titleColumn, descriptionColumn,
             statusColumn, projectColumn, deadlineColumn;
     @FXML private Label statusLabel;
 
@@ -43,19 +43,6 @@ public class MyTasksController {
     public void initialize() {
         setupColumns();
         loadTask();
-        tasksTable.setRowFactory(tv -> {
-            TableRow<TaskDto> row = new TableRow<>();
-            row.setOnMouseClicked(e -> {
-                if (e.getClickCount() == 2 && !row.isEmpty() && mainController != null) {
-                    TaskDto task = row.getItem();
-                    if (task != null && task.getProjectId() > 0) {
-                        String projectName = projectNames.getOrDefault(task.getProjectId(), "Project");
-                        mainController.loadView("board-page.fxml", task.getProjectId(), projectName);
-                    }
-                }
-            });
-            return row;
-        });
     }
 
     private void loadTask() {
@@ -107,7 +94,7 @@ public class MyTasksController {
                         }
                     }
                 }else {
-                    System.out.println("Failed to load tasks f0r project: " + projectName);
+                    System.out.println("Failed to load tasks for project: " + projectName);
                 }
             }
             ObservableList<TaskDto> observableTasks = FXCollections.observableArrayList(myTasks);
@@ -121,12 +108,6 @@ public class MyTasksController {
 
 
     private void setupColumns() {
-        typeColumn.setCellValueFactory(cellData -> {
-            int priority = cellData.getValue().getPriority();
-            String type = priority > 2 ? "Bug" : "Feature";
-            return new SimpleStringProperty(type);
-        });
-
         titleColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getTitle())
         );

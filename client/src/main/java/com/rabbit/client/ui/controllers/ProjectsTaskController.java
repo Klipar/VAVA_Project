@@ -3,11 +3,9 @@ package com.rabbit.client.ui.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbit.client.Config;
-import com.rabbit.client.service.ApiClient;
 import com.rabbit.client.service.UserService;
 import com.rabbit.common.dto.TaskDto;
 import com.rabbit.common.enums.UserRole;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,7 +22,7 @@ import java.util.List;
 public class ProjectsTaskController {
 
     @FXML private TableView<TaskDto> tasksTable;
-    @FXML private TableColumn<TaskDto, String> typeColumn, titleColumn, descriptionColumn,statusColumn, assigneeColumn, deadlineColumn;
+    @FXML private TableColumn<TaskDto, String> titleColumn, descriptionColumn,statusColumn, assigneeColumn, deadlineColumn;
     @FXML private Label statusLabel;
     @FXML private Button boardBtn, listBtn, tasksBtn, topCreateTaskBtn;
     @FXML private Label projectTitleLabel;
@@ -97,12 +95,6 @@ public class ProjectsTaskController {
     }
 
     private void setupColumns() {
-        typeColumn.setCellValueFactory(cellData -> {
-            int priority = cellData.getValue().getPriority();
-            String type = priority >= 4 ? "BUGS" : "FEATURE";
-            return new SimpleStringProperty(type);
-        });
-
         titleColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getTitle() != null ? cellData.getValue().getTitle().toUpperCase() : ""));
 
@@ -120,15 +112,5 @@ public class ProjectsTaskController {
         deadlineColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getDeadline() != null ? cellData.getValue().getDeadline() : "No deadline"));
 
-        tasksTable.setRowFactory(tv -> {
-            TableRow<TaskDto> row = new TableRow<>();
-            row.setOnMouseClicked(e -> {
-                if (e.getClickCount() == 2 && !row.isEmpty() && mainController != null) {
-                    TaskDto task = row.getItem();
-                    mainController.loadView("board-page.fxml", task.getProjectId(), currentProjectTitle);
-                }
-            });
-            return row;
-        });
     }
 }

@@ -31,7 +31,6 @@
             </columnResizePolicy>
 
             <columns>
-                <TableColumn fx:id="typeColumn"        text="TYPE" />
                 <TableColumn fx:id="titleColumn"       text="TASK NAME" />
                 <TableColumn fx:id="descriptionColumn" text="DESCRIPTION" />
                 <TableColumn fx:id="statusColumn"      text="STATUS" />
