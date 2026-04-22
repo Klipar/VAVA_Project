@@ -158,10 +158,6 @@ public class Main {
                 if (path.equals("/notifications") && method.equals("GET")) {
                     notificationHandler.getAll().handle(exchange);
                 }
-                // POST /notifications
-                else if (path.equals("/notifications") && method.equals("POST")) {
-                    notificationHandler.create().handle(exchange);
-                }
                 // PUT /notifications/{id}/read
                 else if (path.matches("/notifications/\\d+/read$") && method.equals("PUT")) {
                     notificationHandler.markRead().handle(exchange);

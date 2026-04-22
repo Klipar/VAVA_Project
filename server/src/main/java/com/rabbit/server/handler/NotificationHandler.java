@@ -66,38 +66,6 @@ public class NotificationHandler {
             }
         };
     }
-
-    public HttpHandler create() {
-        return exchange -> {
-            if (!exchange.getRequestMethod().equals("POST")) {
-                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
-                return;
-            }
-
-            Integer userId = resolveUserId(exchange);
-            if (userId == null) {
-                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
-                return;
-            }
-
-            try {
-                NotificationDto dto = mapper.readValue(exchange.getRequestBody(), NotificationDto.class);
-                dto.setId(0L);
-                dto.setIsRead(false);
-                NotificationDto created = service.createNotification(userId, dto);
-                send(exchange, 201, mapper.writeValueAsString(created));
-            } catch (IllegalArgumentException e) {
-                send(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
-            } catch (SQLException e) {
-                e.printStackTrace();
-                send(exchange, 500, "{\"error\":\"Database error\"}");
-            } catch (Exception e) {
-                e.printStackTrace();
-                send(exchange, 500, "{\"error\":\"Internal server error\"}");
-            }
-        };
-    }
-
     private Integer resolveUserId(HttpExchange exchange) {
         String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
