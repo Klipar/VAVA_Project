@@ -63,19 +63,16 @@ public class BoardController {
     public void setCurrentProject(int id, String name) {
         this.currentProjectId = id;
         this.projectName = name;
-    }
-
-    @FXML
-    public void initialize() {
-        if (projectName == null || currentProjectId == 0) {
-            return;
-        }
 
         projectNameLabel.setText(projectName.toUpperCase());
         setupUserPermissions();
         createColumns();
         loadTasksFromServer();
         setupNavigationButtons();
+    }
+
+    @FXML
+    public void initialize() {
     }
 
     private void setupNavigationButtons() {
