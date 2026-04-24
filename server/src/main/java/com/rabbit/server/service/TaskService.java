@@ -25,6 +25,9 @@ public class TaskService {
             throw new SecurityException("Only project admin can create tasks");
         }
         int taskId = taskRepo.create(projectId, requesterId, dto);
+        if(dto.getAssignedTo() > 0){
+            NotificationService.sendSystemNotification(dto.getAssignedTo(),"New task have been assigned to you:" + " " + dto.getTitle());
+        }
         return taskRepo.findById(taskId).orElseThrow(() -> new SQLException("Failed to retrieve created task"));
     }
 
@@ -36,6 +39,9 @@ public class TaskService {
         }
         boolean updated = taskRepo.update(taskId, dto);
         if (!updated) return null;
+        if(dto.getAssignedTo() > 0){
+            NotificationService.sendSystemNotification(dto.getAssignedTo(),"Task have been updated:" + " " + dto.getTitle());
+        }
         return taskRepo.findById(taskId).orElse(null);
     }
 

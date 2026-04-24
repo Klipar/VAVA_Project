@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="25" style="-fx-background-color: #09263E; -fx-padding: 30;"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rabbit.client.ui.controllers.ProjectsTaskController">
+
+    <Label fx:id="projectTitleLabel"
+           style="-fx-text-fill: white; -fx-font-size: 48px; -fx-font-weight: bold;"/>
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Button fx:id="boardBtn" text="BOARD" prefWidth="200" prefHeight="50" styleClass="top-nav-button"/>
+        <Button fx:id="listBtn"  text="LIST"  prefWidth="200" prefHeight="50" styleClass="top-nav-button, active-nav-button"/>
+        <Button fx:id="tasksBtn" text="TASKS" prefWidth="200" prefHeight="50" styleClass="top-nav-button"/>
+        <Button fx:id="topCreateTaskBtn" text="CREATE TASK" visible="false" managed="false"
+                prefWidth="200" prefHeight="50" styleClass="top-nav-button, create-task-button"/>
+    </HBox>
+
+    <VBox style="-fx-background-color: #1a2840; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 4);"
+          VBox.vgrow="ALWAYS">
+
+        <TableView fx:id="tasksTable"
+                   styleClass="dark-table"
+                   VBox.vgrow="ALWAYS"
+                   style="-fx-background-color: transparent; -fx-border-color: transparent;">
+
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+
+            <columns>
+                <TableColumn fx:id="titleColumn"       text="TASK NAME" />
+                <TableColumn fx:id="descriptionColumn" text="DESCRIPTION" />
+                <TableColumn fx:id="statusColumn"      text="STATUS" />
+                <TableColumn fx:id="assigneeColumn"    text="ASSIGNEE" />
+                <TableColumn fx:id="deadlineColumn"    text="DEADLINE" />
+            </columns>
+
+            <placeholder>
+                <Label text="No tasks in this project." style="-fx-text-fill: #6b7a99; -fx-font-size: 14px;"/>
+            </placeholder>
+        </TableView>
+    </VBox>
+
+    <Label fx:id="statusLabel" text="" style="-fx-text-fill: #5a6a88; -fx-font-size: 12px;"/>
+</VBox>

@@ -68,9 +68,15 @@ public class MainController {
                 if (projectId != null) {
                     board.setCurrentProject(projectId, projectName);
                 }
-            }
-            else if (controller instanceof HomePageController home) {
+            } else if (controller instanceof HomePageController home) {
                 home.setMainController(this);
+            } else if (controller instanceof ProjectsTaskController projectTasks) {
+                projectTasks.setMainController(this);
+                if (projectId != null && projectName != null) {
+                    projectTasks.setProject(projectId, projectName);
+                }
+            } else if (controller instanceof MyTasksController myTasks) {
+                myTasks.setMainController(this);
             }
 
             rootPane.setCenter(view);
@@ -78,6 +84,10 @@ public class MainController {
             System.err.println("Помилка завантаження FXML: " + fxmlName);
             e.printStackTrace();
         }
+    }
+
+    public void openProjectTasks(int projectId, String projectTitle) {
+        loadView("project-tasks-view.fxml", projectId, projectTitle);
     }
 
     public void setView(Parent view) {
@@ -117,9 +127,6 @@ public class MainController {
 
             fadeIn.play();
             fadeOut.play();
-
-            System.out.println("[DEBUG] Нотіфікація додана: " + message);
         });
     }
-
 }

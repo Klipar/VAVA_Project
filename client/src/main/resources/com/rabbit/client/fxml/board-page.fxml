@@ -6,7 +6,8 @@
 
 <ScrollPane fitToHeight="true" fitToWidth="true"
             style="-fx-background: #09263E; -fx-background-color: #09263E;"
-            xmlns:fx="http://javafx.com/fxml/1">
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rabbit.client.ui.controllers.BoardController">
 
     <StackPane fx:id="rootStackPane" style="-fx-background-color: #09263E;">
         <VBox spacing="25">

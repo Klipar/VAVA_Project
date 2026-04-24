@@ -38,7 +38,7 @@ public class Main {
             try {
                 if (path.matches("/tasks/\\d+$") && method.equals("GET")) {
                     taskHandler.getAll().handle(exchange);
-                } else if (path.matches("/tasks/\\d+/create$") && method.equals("POST")) {
+                }else if (path.matches("/tasks/\\d+/create$") && method.equals("POST")) {
                     taskHandler.create().handle(exchange);
                 }
                 else if (path.matches("/tasks/\\d+/status$") && (method.equals("PUT") || method.equals("PATCH"))) {
@@ -157,10 +157,6 @@ public class Main {
                 // GET /notifications
                 if (path.equals("/notifications") && method.equals("GET")) {
                     notificationHandler.getAll().handle(exchange);
-                }
-                // POST /notifications
-                else if (path.equals("/notifications") && method.equals("POST")) {
-                    notificationHandler.create().handle(exchange);
                 }
                 // PUT /notifications/{id}/read
                 else if (path.matches("/notifications/\\d+/read$") && method.equals("PUT")) {

@@ -3,11 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" style="-fx-background: #0b1a31; -fx-background-color: #0b1a31;"
+<ScrollPane fitToWidth="true" style="-fx-background: #09263E; -fx-background-color: #09263E;"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.rabbit.client.ui.controllers.CreateProjectController">
 
-    <VBox spacing="20" style="-fx-background-color: #0b1a31;">
+    <VBox spacing="20" style="-fx-background-color: #09263E;">
         <padding><Insets top="40" left="60" right="60" bottom="40"/></padding>
 
         <Label text="CREATE PROJECT" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
