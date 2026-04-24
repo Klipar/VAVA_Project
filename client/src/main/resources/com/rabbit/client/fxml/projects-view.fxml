@@ -3,21 +3,21 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" style="-fx-background: #fcfcfc; -fx-background-color: #0b1a31;"
+<ScrollPane fitToWidth="true" style="-fx-background: #09263E; -fx-background-color: #09263E;"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.rabbit.client.ui.controllers.ProjectsController">
 
-    <VBox spacing="30" style="-fx-background-color: #fcfcfc;">
+    <VBox spacing="30" style="-fx-background-color: transparent;">
         <padding><Insets top="20" left="20" right="20" bottom="40"/></padding>
 
-        <Label text="MY PROJECTS" style="-fx-text-fill: #051020; -fx-font-size: 48px; -fx-font-weight: bold;"/>
+        <Label text="MY PROJECTS" style="-fx-text-fill: #fcfcfc; -fx-font-size: 48px; -fx-font-weight: bold;"/>
 
-        <Label text="RECENT PROJECTS" style="-fx-text-fill: #051020; -fx-font-size: 24px; -fx-font-weight: bold;">
+        <Label text="RECENT PROJECTS" style="-fx-text-fill: #fcfcfc; -fx-font-size: 24px; -fx-font-weight: bold;">
         <VBox.margin><Insets top="-35"/></VBox.margin>
         </Label>
         <FlowPane fx:id="recentProjectsPane" hgap="20" vgap="20"/>
 
-        <Label text="YOUR PROJECTS" style="-fx-text-fill: #051020; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <Label text="YOUR PROJECTS" style="-fx-text-fill: #fcfcfc; -fx-font-size: 24px; -fx-font-weight: bold;"/>
         <FlowPane fx:id="yourProjectsPane" hgap="20" vgap="20"/>
 
     </VBox>
