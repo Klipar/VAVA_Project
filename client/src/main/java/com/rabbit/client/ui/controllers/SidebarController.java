@@ -53,20 +53,19 @@ public class SidebarController {
             javafx.scene.image.Image image = new javafx.scene.image.Image(getClass().getResourceAsStream(imagePath));
             javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView(image);
 
+            imageView.setFitWidth(18);
+            imageView.setFitHeight(18);
 
-            imageView.setFitWidth(20);
-            imageView.setFitHeight(20);
+            imageView.getStyleClass().add("button-icon");
 
             btn.setGraphic(imageView);
-
-            btn.setGraphicTextGap(10);
+            btn.setGraphicTextGap(12);
         } catch (Exception e) {
-            System.err.println("Failed to load icon: " + iconName);
+            System.err.println("Icon not found: " + iconName);
         }
 
         btn.getStyleClass().add("sidebar-button");
         btn.setMaxWidth(Double.MAX_VALUE);
-
         btn.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         btn.setOnAction(event -> {
