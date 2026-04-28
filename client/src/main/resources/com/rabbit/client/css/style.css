@@ -621,3 +621,27 @@
     -fx-scale-x: 0.96;
     -fx-scale-y: 0.96;
 }
+
+.overlay {
+    -fx-background-color: rgba(0,0,0,0.6);
+    -fx-alignment: center;
+}
+
+.popup-card {
+    -fx-background-color: #0f2a3f;
+    -fx-background-radius: 16;
+
+    -fx-pref-width: 80%;
+    -fx-max-width: 680;
+
+    -fx-pref-height: 80%;
+    -fx-max-height: 600;
+}
+
+.popup-scroll {
+    -fx-background-color: transparent;
+}
+
+.popup-scroll .viewport {
+    -fx-background-color: transparent;
+}

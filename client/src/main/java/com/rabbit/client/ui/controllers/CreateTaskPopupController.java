@@ -59,6 +59,14 @@ public class CreateTaskPopupController {
         descriptionField.textProperty().addListener((o, a, b) -> validateForm());
         deadlinePicker.valueProperty().addListener((o, a, b) -> validateForm());
         playOpenAnimation();
+
+        overlayPane.widthProperty().addListener((obs, oldV, newV) -> {
+            popupCard.setMaxWidth(Math.min(680, newV.doubleValue() * 0.8));
+        });
+
+        overlayPane.heightProperty().addListener((obs, oldV, newV) -> {
+            popupCard.setMaxHeight(Math.min(600, newV.doubleValue() * 0.8));
+        });
     }
 
     public void setup(int projectId, Runnable onTaskCreated) {
@@ -69,8 +77,10 @@ public class CreateTaskPopupController {
 
     private void buildPriorityButtons() {
         for (int i = 0; i < PRIORITY_LABELS.length; i++) {
-            final int value = i + 1;
+            final int value = i;
             final String color = PRIORITY_COLORS[i];
+
+            System.out.println(value);
 
             Circle circle = new Circle(18);
             circle.setFill(Color.web("#1a3a56"));
@@ -94,8 +104,9 @@ public class CreateTaskPopupController {
 
     private void selectPriority(int value, String color) {
         priorityCircles.forEach(c -> c.setFill(Color.web("#1a3a56")));
-        priorityCircles.get(value - 1).setFill(Color.web(color));
+        priorityCircles.get(value).setFill(Color.web(color));
         selectedPriority = value;
+        System.out.println(selectedPriority);
         validateForm();
     }
 

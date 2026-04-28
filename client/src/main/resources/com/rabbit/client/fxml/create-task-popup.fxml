@@ -9,8 +9,16 @@
            styleClass="overlay"
            onMouseClicked="#handleOverlayClick">
 
-    <VBox fx:id="popupCard" maxWidth="680" spacing="0"
-          onMouseClicked="#consumeClick" styleClass="popup-card">
+      <VBox fx:id="popupCard"
+          maxWidth="680"
+          maxHeight="600"
+          fillWidth="true"
+          VBox.vgrow="ALWAYS"
+          alignment="CENTER"
+          StackPane.alignment="CENTER"
+          spacing="0"
+          onMouseClicked="#consumeClick"
+          styleClass="popup-card">
 
         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="popup-header">
             <Label text="CREATE TASK" styleClass="popup-title"/>
@@ -18,7 +26,10 @@
             <Button text="✕" onAction="#handleCancel" styleClass="close-btn"/>
         </HBox>
 
-        <ScrollPane fitToWidth="true" prefHeight="580" styleClass="popup-scroll">
+        <ScrollPane fitToWidth="true"
+                    VBox.vgrow="ALWAYS"
+                    fitToHeight="true"
+                    styleClass="popup-scroll">
             <VBox spacing="18" styleClass="popup-body">
                 <padding><Insets top="24" left="24" right="24" bottom="16"/></padding>
 
@@ -41,7 +52,7 @@
                                     maxWidth="1.7976931348623157E308" styleClass="date-input"/>
                         <HBox styleClass="status-box" alignment="CENTER_LEFT" spacing="8">
                             <Label text="Status:" styleClass="status-label"/>
-                            <Label text="DRAFTS" styleClass="status-value"/>
+                            <Label text="BACKLOG" styleClass="status-value"/>
                         </HBox>
                     </VBox>
                     <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="priority-box-container">
