@@ -1,3 +1,7 @@
+.root {
+    -fx-font-family: "Segoe UI";
+}
+
 #sidebarContainer {
     -fx-background-color: #71aaff;
     -fx-pref-width: 260px;
@@ -30,6 +34,7 @@
     -fx-text-fill: #4da6ff;
     -fx-padding: 12 15 12 25;
 }
+
 .sidebar-button:pressed, .language-button:pressed {
     -fx-background-color: #0f172a;
     -fx-scale-x: 0.95;
@@ -122,10 +127,13 @@
 }
 
 .text-field, .text-area {
-    -fx-prompt-text-fill: #1f1f1f;
-    -fx-text-fill: #000000;
-    -fx-background-color: #f0f0f0;
-    -fx-background-radius: 8;
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-prompt-text-fill: #6c757d;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10 14;
     -fx-transition: 0.2s;
 }
 
@@ -147,14 +155,13 @@
     -fx-background-color: transparent;
 }
 
-.scroll-pane .scroll-bar:vertical,
-.scroll-pane .scroll-bar:horizontal,
-.dark-table .scroll-bar:vertical,
-.dark-table .scroll-bar:horizontal,
-.board-scroll-pane .scroll-bar:vertical,
-.board-scroll-pane .scroll-bar:horizontal {
+.scroll-pane .scroll-bar, .dark-table .scroll-bar, .board-scroll-pane .scroll-bar {
     -fx-opacity: 0;
     -fx-padding: -5;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #3E6273;
 }
 
 .project-card {
@@ -280,4 +287,361 @@
     -fx-scale-x: 0.9;
     -fx-scale-y: 0.9;
     -fx-opacity: 0.7;
+}
+
+.button {
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-opacity: 0.85;
+}
+
+.overlay {
+    -fx-background-color: rgba(0,0,0,0.6);
+}
+
+.popup-card {
+    -fx-background-color: #1a2533;
+    -fx-background-radius: 16;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 16;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 50, 0, 0, 12);
+}
+
+.popup-header {
+    -fx-background-color: #0d1b2a;
+    -fx-background-radius: 16 16 0 0;
+    -fx-padding: 18 24;
+    -fx-border-color: transparent transparent #3E6273 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+.popup-title {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.close-btn {
+    -fx-background-color: #1f2f3d;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-background-radius: 8;
+    -fx-padding: 6 12;
+    -fx-border-color: transparent;
+}
+
+.popup-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.popup-body {
+    -fx-background-color: #0d1e2f;
+}
+
+.field-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.divider {
+    -fx-background-color: #2a3f55;
+}
+
+.input-white {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 10;
+    -fx-border-width: 2.5;
+    -fx-text-fill: #111;
+    -fx-prompt-text-fill: #888;
+    -fx-font-size: 14px;
+    -fx-padding: 10 14;
+    -fx-background-insets: 2;
+}
+
+.input-white .text-field-skin {
+    -fx-background-color: transparent;
+}
+
+.input-white .scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+}
+
+.input-white .scroll-pane > .viewport {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+}
+
+.input-white .content {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+}
+
+.input-white:focused {
+    -fx-background-color: white;
+    -fx-border-color: #3E6273;
+    -fx-border-width: 2.5;
+    -fx-background-radius: 8;
+    -fx-background-insets: 2;
+}
+
+.input-dark {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 8;
+    -fx-border-width: 2;
+    -fx-text-fill: rgb(0, 0, 0);
+    -fx-prompt-text-fill: #3a6a8b;
+    -fx-font-size: 13px;
+    -fx-padding: 10 14;
+}
+
+.input-dark .text-field-skin {
+    -fx-background-color: transparent;
+}
+
+.input-dark:focused {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 8;
+    -fx-border-width: 2;
+    -fx-text-fill: rgb(0, 0, 0);
+    -fx-prompt-text-fill: #3a6a8b;
+    -fx-font-size: 13px;
+    -fx-padding: 10 14;
+    -fx-background-insets: 1;
+}
+
+.date-input {
+    -fx-background-color: #0a1f33;
+    -fx-background-radius: 10;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 10;
+    -fx-border-width: 2.5;
+    -fx-font-size: 14px;
+}
+
+.date-input .text-field {
+    -fx-background-color: white;
+    -fx-text-fill: #111;
+    -fx-background-radius: 8 0 0 8;
+    -fx-border-color: transparent;
+    -fx-prompt-text-fill: #888;
+}
+
+.date-input .arrow-button {
+    -fx-background-color: #3E6273;
+    -fx-background-radius: 0 8 8 0;
+}
+
+.date-input .arrow {
+    -fx-background-color: white;
+}
+
+.date-picker-popup {
+    -fx-background-color: #253447;
+    -fx-border-color: #3E6273;
+}
+
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: #68A2B9;
+}
+
+.date-input:focused, .date-input .text-field:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: none;
+}
+
+.combo-input {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 10;
+    -fx-border-width: 2.5;
+    -fx-font-size: 14px;
+    -fx-background-insets: 2;
+}
+
+.combo-input .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #111;
+    -fx-background-radius: 12;
+}
+
+.combo-input .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-input .arrow {
+    -fx-background-color: #3E6273;
+}
+
+.combo-box-popup .list-cell {
+    -fx-text-fill: rgb(0, 0, 0);
+    -fx-background-color: transparent;
+}
+
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #3E6273;
+    -fx-text-fill: white;
+}
+
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #68A2B9;
+    -fx-text-fill: white;
+}
+
+.status-box {
+    -fx-background-color: #0a1f33;
+    -fx-background-radius: 10;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 10;
+    -fx-border-width: 2.5;
+    -fx-padding: 10 16;
+}
+
+.status-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+}
+
+.status-value {
+    -fx-text-fill: #4a9eda;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+}
+
+.priority-box-container {
+    -fx-background-color: #0a1f33;
+    -fx-background-radius: 10;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 10;
+    -fx-border-width: 2.5;
+    -fx-padding: 12 14;
+}
+
+.assigned-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-min-width: 90;
+}
+
+.ai-card {
+    -fx-background-color: #061929;
+    -fx-background-radius: 12;
+    -fx-border-color: #3E6273;
+    -fx-border-radius: 12;
+    -fx-border-width: 2;
+    -fx-padding: 16;
+}
+
+.ai-icon {
+    -fx-font-size: 22px;
+}
+
+.ai-header-text, .ai-results-title {
+    -fx-text-fill: #4a9eda;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.ai-results-title {
+    -fx-padding: 0 0 10 0;
+}
+
+.ai-btn {
+    -fx-background-color: #68A2B9;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 10;
+    -fx-padding: 10 18;
+}
+
+.ai-btn:hover {
+    -fx-background-color: #7ab5cc;
+}
+
+.ai-btn:pressed {
+    -fx-background-color: #5690a6;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+
+.ai-btn:disabled {
+    -fx-opacity: 0.6;
+}
+
+.popup-footer {
+    -fx-padding: 18 24;
+    -fx-background-color: #061929;
+    -fx-background-radius: 0 0 16 16;
+    -fx-border-color: #3E6273 transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+}
+
+.btn-cancel, .btn-create {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-background-radius: 22;
+    -fx-padding: 12 32;
+}
+
+.btn-cancel {
+    -fx-background-color: #c46363;
+}
+
+.btn-cancel:hover {
+    -fx-background-color: #d47373;
+}
+
+.btn-create {
+    -fx-background-color: #6aa896;
+}
+
+.btn-create:hover {
+    -fx-background-color: #7abca8;
+}
+
+.btn-cancel:pressed, .btn-create:pressed {
+    -fx-scale-x: 0.96;
+    -fx-scale-y: 0.96;
+}
+
+.overlay {
+    -fx-background-color: rgba(0,0,0,0.6);
+    -fx-alignment: center;
+}
+
+.popup-card {
+    -fx-background-color: #0f2a3f;
+    -fx-background-radius: 16;
+
+    -fx-pref-width: 80%;
+    -fx-max-width: 680;
+
+    -fx-pref-height: 80%;
+    -fx-max-height: 600;
+}
+
+.popup-scroll {
+    -fx-background-color: transparent;
+}
+
+.popup-scroll .viewport {
+    -fx-background-color: transparent;
 }

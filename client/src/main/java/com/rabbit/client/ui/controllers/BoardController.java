@@ -15,6 +15,7 @@ import javafx.animation.RotateTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
@@ -34,6 +35,7 @@ import javafx.scene.shape.Shape;
 import javafx.util.Duration;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,6 +180,33 @@ public class BoardController {
             } catch (Exception e) {
                 floatingAddBtn.setText("+");
             }
+
+            floatingAddBtn.setOnAction(e -> openCreateTaskPopup());
+            topCreateTaskBtn.setOnAction(e -> openCreateTaskPopup());
+        }
+    }
+
+    @FXML
+    private void handleCreateTask() {
+        openCreateTaskPopup();
+    }
+
+    private void openCreateTaskPopup() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/rabbit/client/fxml/create-task-popup.fxml")
+            );
+            Pane overlay = loader.load();
+
+            CreateTaskPopupController controller = loader.getController();
+            controller.setup(currentProjectId, this::loadTasksFromServer);
+
+            rootStackPane.getChildren().add(overlay);
+
+            overlay.prefWidthProperty().bind(rootStackPane.widthProperty());
+            overlay.prefHeightProperty().bind(rootStackPane.heightProperty());
+
+        } catch (IOException e) {
         }
     }
 
@@ -254,48 +283,6 @@ public class BoardController {
         });
     }
 
-    private void triggerConfetti(double startX, double startY) {
-        int particlesCount = 100;
-        Color[] colors = {Color.web("#8AB0C2"), Color.web("#61899B"), Color.WHITE, Color.GOLD, Color.PINK};
-        Random random = new Random();
-
-        for (int i = 0; i < particlesCount; i++) {
-            Shape particle;
-            if (random.nextBoolean()) {
-                particle = new Circle(random.nextInt(4) + 2, colors[random.nextInt(colors.length)]);
-            } else {
-                particle = new Rectangle(random.nextInt(5) + 3, random.nextInt(5) + 3, colors[random.nextInt(colors.length)]);
-            }
-
-            particle.setManaged(false);
-            particle.setMouseTransparent(true);
-
-            particle.setLayoutX(startX);
-            particle.setLayoutY(startY);
-
-            rootStackPane.getChildren().add(particle);
-
-            double angle = random.nextDouble() * 360;
-            double distance = 50 + random.nextDouble() * 300;
-            double endX = Math.cos(Math.toRadians(angle)) * distance;
-            double endY = Math.sin(Math.toRadians(angle)) * distance;
-
-            TranslateTransition move = new TranslateTransition(Duration.seconds(1.0 + random.nextDouble() * 0.5), particle);
-            move.setByX(endX);
-            move.setByY(endY);
-
-            RotateTransition rotate = new RotateTransition(Duration.seconds(1.5), particle);
-            rotate.setByAngle(random.nextInt(720) - 360);
-
-            FadeTransition fade = new FadeTransition(Duration.seconds(1.5), particle);
-            fade.setToValue(0);
-
-            ParallelTransition pt = new ParallelTransition(particle, move, rotate, fade);
-            pt.setOnFinished(e -> rootStackPane.getChildren().remove(particle));
-            pt.play();
-        }
-    }
-
     private void setupDropTarget(VBox target, TaskStatus targetStatus) {
         target.setOnDragOver(event -> {
             if (event.getDragboard().hasString()) {
@@ -362,36 +349,6 @@ public class BoardController {
         });
     }
 
-    private void updateTaskStatusRequest(TaskDto task, TaskStatus newStatus) {
-        new Thread(() -> {
-            try {
-                Map<String, String> payload = new HashMap<>();
-                payload.put("status", newStatus.getValue());
-
-                String json = mapper.writeValueAsString(payload);
-
-                System.out.println("Sending Status Update JSON: " + json);
-
-                var response = apiClient.put("/tasks/" + task.getId() + "/status", json);
-
-                if (apiClient.isSuccess(response)) {
-                    System.out.println("Task " + task.getId() + " status updated successfully to " + newStatus);
-                    task.setStatus(newStatus.getValue());
-                } else {
-                    if (response.statusCode() == 403) {
-                        showNotification("Access Denied: You cannot move this task", Color.web("#ED4245"));
-                    } else {
-                        showNotification("Error: " + response.statusCode(), Color.web("#ED4245"));
-                    }
-
-                    Platform.runLater(this::loadTasksFromServer);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Platform.runLater(this::loadTasksFromServer);
-            }
-        }).start();
-    }
     private TaskCardComponent findCardInUi(int taskId) {
         String idStr = String.valueOf(taskId);
         for (VBox column : columnContainers.values()) {
@@ -406,24 +363,84 @@ public class BoardController {
         return null;
     }
 
-    @FXML
-    private void handleCreateTask() {
-        System.out.println("Opening Create Task Modal for Project ID: " + currentProjectId);
+    private void updateTaskStatusRequest(TaskDto task, TaskStatus newStatus) {
+        new Thread(() -> {
+            try {
+                Map<String, String> payload = new HashMap<>();
+                payload.put("status", newStatus.getValue());
+
+                String json = mapper.writeValueAsString(payload);
+                var response = apiClient.put("/tasks/" + task.getId() + "/status", json);
+
+                if (apiClient.isSuccess(response)) {
+                    task.setStatus(newStatus.getValue());
+                } else {
+                    if (response.statusCode() == 403) {
+                        showNotification("Access Denied: You cannot move this task", Color.web("#ED4245"));
+                    } else {
+                        showNotification("Error: " + response.statusCode(), Color.web("#ED4245"));
+                    }
+
+                    Platform.runLater(this::loadTasksFromServer);
+                }
+            } catch (Exception e) {
+                Platform.runLater(this::loadTasksFromServer);
+            }
+        }).start();
+    }
+
+    private void triggerConfetti(double startX, double startY) {
+        int particlesCount = 100;
+        Color[] colors = {Color.web("#8AB0C2"), Color.web("#61899B"), Color.WHITE, Color.GOLD, Color.PINK};
+        Random random = new Random();
+
+        for (int i = 0; i < particlesCount; i++) {
+            Shape particle;
+            if (random.nextBoolean()) {
+                particle = new Circle(random.nextInt(4) + 2, colors[random.nextInt(colors.length)]);
+            } else {
+                particle = new Rectangle(random.nextInt(5) + 3, random.nextInt(5) + 3, colors[random.nextInt(colors.length)]);
+            }
+
+            particle.setManaged(false);
+            particle.setMouseTransparent(true);
+            particle.setLayoutX(startX);
+            particle.setLayoutY(startY);
+
+            rootStackPane.getChildren().add(particle);
+
+            double angle = random.nextDouble() * 360;
+            double distance = 50 + random.nextDouble() * 300;
+            double endX = Math.cos(Math.toRadians(angle)) * distance;
+            double endY = Math.sin(Math.toRadians(angle)) * distance;
+
+            TranslateTransition move = new TranslateTransition(Duration.seconds(1.0 + random.nextDouble() * 0.5), particle);
+            move.setByX(endX);
+            move.setByY(endY);
+
+            RotateTransition rotate = new RotateTransition(Duration.seconds(1.5), particle);
+            rotate.setByAngle(random.nextInt(720) - 360);
+
+            FadeTransition fade = new FadeTransition(Duration.seconds(1.5), particle);
+            fade.setToValue(0);
+
+            ParallelTransition pt = new ParallelTransition(particle, move, rotate, fade);
+            pt.setOnFinished(e -> rootStackPane.getChildren().remove(particle));
+            pt.play();
+        }
     }
 
     private void showNotification(String message, Color color) {
         MainController currentMain = MainController.getInstance();
         if (currentMain != null) {
             currentMain.showGlobalNotification(message, toHexString(color));
-        } else {
-            System.out.println("MainController instance is NULL!");
         }
     }
 
     private String toHexString(Color color) {
         return String.format("#%02X%02X%02X",
-                (int) (color.getRed() * 255),
+                (int) (color.getRed()   * 255),
                 (int) (color.getGreen() * 255),
-                (int) (color.getBlue() * 255));
+                (int) (color.getBlue()  * 255));
     }
 }

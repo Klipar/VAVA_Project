@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="overlayPane"
+           fx:controller="com.rabbit.client.ui.controllers.CreateTaskPopupController"
+           styleClass="overlay"
+           onMouseClicked="#handleOverlayClick">
+
+      <VBox fx:id="popupCard"
+          maxWidth="680"
+          prefWidth="600"
+          maxHeight="800"
+          fillWidth="true"
+          alignment="CENTER"
+          StackPane.alignment="CENTER"
+          spacing="0"
+          onMouseClicked="#consumeClick"
+          styleClass="popup-card">
+
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="popup-header">
+            <Label text="CREATE TASK" styleClass="popup-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="✕" onAction="#handleCancel" styleClass="close-btn"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true"
+                    VBox.vgrow="ALWAYS"
+                    fitToHeight="true"
+                    styleClass="popup-scroll">
+            <VBox spacing="18" styleClass="popup-body">
+                <padding><Insets top="24" left="24" right="24" bottom="16"/></padding>
+
+                <VBox spacing="6">
+                    <Label text="TASK NAME:" styleClass="field-label"/>
+                    <TextField fx:id="titleField" promptText="Enter task name..." styleClass="input-white"/>
+                </VBox>
+
+                <VBox spacing="6">
+                    <Label text="DESCRIPTION:" styleClass="field-label"/>
+                    <TextArea fx:id="descriptionField" promptText="Describe the task..."
+                              prefHeight="100" wrapText="true" styleClass="input-white"/>
+                </VBox>
+
+                <Separator styleClass="divider"/>
+
+                <HBox spacing="16" alignment="TOP_LEFT">
+                    <VBox spacing="10" HBox.hgrow="ALWAYS">
+                        <DatePicker fx:id="deadlinePicker" promptText="Select deadline"
+                                    maxWidth="1.7976931348623157E308" styleClass="date-input"/>
+                        <HBox styleClass="status-box" alignment="CENTER_LEFT" spacing="8">
+                            <Label text="Status:" styleClass="status-label"/>
+                            <Label text="BACKLOG" styleClass="status-value"/>
+                        </HBox>
+                    </VBox>
+                    <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="priority-box-container">
+                        <Label text="PRIORITY:" styleClass="field-label" maxWidth="1.7976931348623157E308"/>
+                        <HBox fx:id="priorityBox" spacing="10" alignment="CENTER"/>
+                    </VBox>
+                </HBox>
+
+                <Separator styleClass="divider"/>
+
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <Label text="Assigned:" styleClass="assigned-label"/>
+                    <ComboBox fx:id="assigneeCombo" promptText="-- pick worker --"
+                              maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"
+                              styleClass="combo-input"/>
+                </HBox>
+
+                <VBox spacing="12" styleClass="ai-card">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="🐇" styleClass="ai-icon"/>
+                        <Label text="Try our AI to pick a suitable worker for this task:"
+                               styleClass="ai-header-text"/>
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER">
+                        <TextField fx:id="skillsField"
+                                   promptText="SKILLS FOR THIS TASK...(devide by comma)"
+                                   HBox.hgrow="ALWAYS" styleClass="input-dark"/>
+                        <Button fx:id="aiSuggestBtn" text="ADVICE FROM AI"
+                                onAction="#handleAiSuggest" styleClass="ai-btn"/>
+                    </HBox>
+                    <ProgressIndicator fx:id="aiLoadingIndicator"
+                                       visible="false" managed="false"
+                                       prefWidth="30" prefHeight="30"/>
+                    <VBox fx:id="aiResultsBox" spacing="0" visible="false" managed="false">
+                        <Label fx:id="aiResultsTitle"
+                               text="AI thinks those are the best candidates to assign this task:"
+                               styleClass="ai-results-title"/>
+                    </VBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+
+        <HBox styleClass="popup-footer">
+            <Button text="Cancel" onAction="#handleCancel" styleClass="btn-cancel"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="createBtn" text="Create Task" onAction="#handleCreateTask"
+                    styleClass="btn-create"/>
+        </HBox>
+
+    </VBox>
+</StackPane>
