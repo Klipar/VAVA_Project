@@ -1,6 +1,7 @@
 package com.rabbit.client.component;
 
 import com.rabbit.common.dto.TaskDto;
+import com.rabbit.common.enums.Priority; // Імпортуємо наш енум
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -22,7 +23,6 @@ public class TaskCardComponent extends VBox {
         this.task = task;
         this.getStyleClass().add("task-card");
         this.setSpacing(10);
-
         this.setAccessibleText(String.valueOf(task.getId()));
 
         Label title = new Label(task.getTitle().toUpperCase());
@@ -30,56 +30,47 @@ public class TaskCardComponent extends VBox {
 
         HBox dateBox = new HBox(8);
         dateBox.setAlignment(Pos.CENTER_LEFT);
-
         ImageView calIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/rabbit/client/images/calendar.png"))));
-        calIcon.setFitWidth(16);
-        calIcon.setFitHeight(16);
+        calIcon.setFitWidth(16); calIcon.setFitHeight(16);
 
         String formattedDate = formatDeadline(task.getDeadline());
         Label dateLabel = new Label(formattedDate);
         dateLabel.setStyle("-fx-text-fill: #99AAB5; -fx-font-size: 12px;");
-
         dateBox.getChildren().addAll(calIcon, dateLabel);
 
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER_LEFT);
+
         Label priorityLabel = new Label("Priority: ");
         priorityLabel.setStyle("-fx-text-fill: #99AAB5; -fx-font-size: 12px;");
-        Label priorityVal = new Label(getPriorityText(task.getPriority()));
-        priorityVal.setStyle("-fx-text-fill: #FF9F0A; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        Priority p = Priority.fromLevel(task.getPriority());
+
+        Label priorityVal = new Label(p.name());
+
+        priorityVal.setStyle("-fx-text-fill: " + p.getColor() + "; -fx-font-weight: bold; -fx-font-size: 12px;");
 
         Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
         ImageView userIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/rabbit/client/images/user.png"))));
-        userIcon.setFitWidth(20);
-        userIcon.setFitHeight(20);
+        userIcon.setFitWidth(20); userIcon.setFitHeight(20);
 
         footer.getChildren().addAll(priorityLabel, priorityVal, spacer, userIcon);
+
         this.getChildren().addAll(title, dateBox, footer);
     }
 
     private String formatDeadline(String deadlineStr) {
-        if (deadlineStr == null || deadlineStr.isEmpty()) return "No deadline";
+        if (deadlineStr == null || deadlineStr.isEmpty() || "null".equals(deadlineStr)) return "No deadline";
         try {
-            if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+") && !deadlineStr.contains("GMT")) {
+            if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) {
                 deadlineStr += "Z";
             }
             ZonedDateTime zdt = ZonedDateTime.parse(deadlineStr);
             return zdt.format(displayFormatter);
         } catch (Exception e) {
-            try {
-                java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(deadlineStr);
-                return ldt.atZone(java.time.ZoneId.of("UTC")).format(displayFormatter);
-            } catch (Exception e2) {
-                return deadlineStr;
-            }
+            return deadlineStr;
         }
-    }
-
-    private String getPriorityText(int p) {
-        if (p >= 3) return "HIGH";
-        if (p == 2) return "MEDIUM";
-        return "LOW";
     }
 }
