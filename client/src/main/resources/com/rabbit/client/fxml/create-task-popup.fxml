@@ -11,9 +11,9 @@
 
       <VBox fx:id="popupCard"
           maxWidth="680"
-          maxHeight="600"
+          prefWidth="600"
+          maxHeight="800"
           fillWidth="true"
-          VBox.vgrow="ALWAYS"
           alignment="CENTER"
           StackPane.alignment="CENTER"
           spacing="0"

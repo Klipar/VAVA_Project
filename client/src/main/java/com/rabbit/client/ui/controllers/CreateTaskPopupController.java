@@ -65,7 +65,7 @@ public class CreateTaskPopupController {
         });
 
         overlayPane.heightProperty().addListener((obs, oldV, newV) -> {
-            popupCard.setMaxHeight(Math.min(600, newV.doubleValue() * 0.8));
+            popupCard.setMaxHeight(Math.min(800, newV.doubleValue() * 0.8));
         });
     }
 
@@ -79,8 +79,6 @@ public class CreateTaskPopupController {
         for (int i = 0; i < PRIORITY_LABELS.length; i++) {
             final int value = i;
             final String color = PRIORITY_COLORS[i];
-
-            System.out.println(value);
 
             Circle circle = new Circle(18);
             circle.setFill(Color.web("#1a3a56"));
@@ -106,7 +104,6 @@ public class CreateTaskPopupController {
         priorityCircles.forEach(c -> c.setFill(Color.web("#1a3a56")));
         priorityCircles.get(value).setFill(Color.web(color));
         selectedPriority = value;
-        System.out.println(selectedPriority);
         validateForm();
     }
 
