@@ -61,6 +61,7 @@ public class HomePageController {
 
     private void setupTableColumns() {
         colTaskName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTitle().toUpperCase()));
+
         colProject.setCellValueFactory(data -> {
             long projectId = data.getValue().getProjectId();
             String title = allProjects.stream()
@@ -69,10 +70,24 @@ public class HomePageController {
                     .findFirst().orElse("UNKNOWN");
             return new SimpleStringProperty(title.toUpperCase());
         });
-        colPriority.setCellValueFactory(data -> {
-            int p = data.getValue().getPriority();
-            return new SimpleStringProperty(p >= 3 ? "HIGH" : (p == 2 ? "MEDIUM" : "LOW"));
+
+        colPriority.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    int level = getTableRow().getItem().getPriority();
+                    var p = com.rabbit.common.enums.Priority.fromLevel(level);
+                    setText(p.name());
+                    setStyle("-fx-text-fill: " + p.getColor() + "; -fx-font-weight: bold;");
+                }
+            }
         });
+
+        // ВИПРАВЛЕНИЙ ФОРМАТ ДАТИ В ТАБЛИЦІ
         colDueDate.setCellFactory(column -> new TableCell<>() {
             private final HBox container = new HBox(8);
             private final Label dateLabel = new Label();
@@ -92,7 +107,20 @@ public class HomePageController {
                 if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setGraphic(null);
                 } else {
-                    dateLabel.setText(getTableRow().getItem().getDeadline()); // Simplified for brevity
+                    String rawDeadline = getTableRow().getItem().getDeadline();
+                    String formattedDate = "NO DEADLINE";
+
+                    if (rawDeadline != null && !rawDeadline.isEmpty()) {
+                        try {
+                            // Сервер присилає LocalDateTime.toString(), парсимо його
+                            java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(rawDeadline);
+                            formattedDate = ldt.format(displayFormatter).toUpperCase();
+                        } catch (Exception e) {
+                            formattedDate = rawDeadline.toUpperCase();
+                        }
+                    }
+
+                    dateLabel.setText(formattedDate);
                     container.getChildren().clear();
                     if (warningIcon != null) container.getChildren().add(warningIcon);
                     container.getChildren().add(dateLabel);
@@ -117,15 +145,47 @@ public class HomePageController {
     private void loadData() {
         new Thread(() -> {
             try {
+                var currentUser = UserService.getInstance().getCurrentUser();
+                if (currentUser == null) return;
+                long myId = currentUser.getId();
+
                 HttpResponse<String> projResp = apiClient.get("/projects");
                 if (projResp.statusCode() != 200) return;
+
                 allProjects = mapper.readValue(projResp.body(), new TypeReference<>() {});
+
+                List<TaskDto> myTasks = new ArrayList<>();
+
+                for (ProjectDto project : allProjects) {
+                    HttpResponse<String> taskResp = apiClient.get("/tasks/" + project.getId());
+                    if (taskResp.statusCode() == 200) {
+                        List<TaskDto> projectTasks = mapper.readValue(taskResp.body(), new TypeReference<>() {});
+
+                        for (TaskDto t : projectTasks) {
+                            if (t.getAssignedTo() == (int) myId) {
+                                t.setProjectId(project.getId());
+                                myTasks.add(t);
+                            }
+                        }
+                    }
+                }
+                
+                myTasks.sort((t1, t2) -> {
+                    if (t1.getDeadline() == null && t2.getDeadline() == null) return 0;
+                    if (t1.getDeadline() == null) return 1;
+                    if (t2.getDeadline() == null) return -1;
+                    return t1.getDeadline().compareTo(t2.getDeadline());
+                });
 
                 Platform.runLater(() -> {
                     projectsContainer.getChildren().clear();
                     allProjects.forEach(this::addProjectCard);
+                    tasksTable.setItems(javafx.collections.FXCollections.observableArrayList(myTasks));
                 });
-            } catch (Exception e) { e.printStackTrace(); }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }).start();
     }
 
