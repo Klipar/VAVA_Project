@@ -4,58 +4,58 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.image.*?>
 
-<ScrollPane fitToHeight="true" fitToWidth="true"
-            style="-fx-background: #09263E; -fx-background-color: #09263E;"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.rabbit.client.ui.controllers.BoardController">
+<StackPane fx:id="rootStackPane" style="-fx-background-color: #09263E;"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rabbit.client.ui.controllers.BoardController">
 
-    <StackPane fx:id="rootStackPane" style="-fx-background-color: #09263E;">
-        <VBox spacing="25">
-            <padding>
-                <Insets top="30" left="30" right="30" bottom="30"/>
-            </padding>
+    <VBox spacing="25">
+        <padding>
+            <Insets top="30" left="30" right="30" bottom="30"/>
+        </padding>
 
-            <Label fx:id="projectNameLabel" text="Project_name_1"
-                   style="-fx-text-fill: white; -fx-font-size: 48px; -fx-font-weight: bold;"/>
+        <Label fx:id="projectNameLabel" text="PROJECT NAME"
+               style="-fx-text-fill: white; -fx-font-size: 48px; -fx-font-weight: bold;"/>
 
-            <HBox spacing="15" alignment="CENTER_LEFT">
-                <Button fx:id="boardBtn" text="BOARD" prefWidth="200" prefHeight="50"
-                        styleClass="top-nav-button, active-nav-button"/>
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Button fx:id="boardBtn" text="BOARD"
+                    prefWidth="200" prefHeight="50" minHeight="50"
+                    styleClass="top-nav-button, active-nav-button"/>
 
-                <Button fx:id="listBtn" text="LIST" prefWidth="200" prefHeight="50"
-                        styleClass="top-nav-button"/>
+            <Button fx:id="listBtn" text="LIST"
+                    prefWidth="200" prefHeight="50" minHeight="50"
+                    styleClass="top-nav-button"/>
 
-                <Button fx:id="tasksBtn" text="TASKS" prefWidth="200" prefHeight="50"
-                        styleClass="top-nav-button"/>
+            <Button fx:id="tasksBtn" text="TASKS"
+                    prefWidth="200" prefHeight="50" minHeight="50"
+                    styleClass="top-nav-button"/>
 
-                <Button fx:id="topCreateTaskBtn" text="CREATE TASK" visible="false" managed="false"
-                        prefWidth="200" prefHeight="50"
-                        styleClass="top-nav-button, create-task-button"/>
-            </HBox>
+            <Button fx:id="topCreateTaskBtn" text="CREATE TASK" visible="false" managed="false"
+                    prefWidth="200" prefHeight="50" minHeight="50"
+                    styleClass="top-nav-button, create-task-button"/>
+        </HBox>
 
-            <ScrollPane VBox.vgrow="ALWAYS" fitToHeight="true"
-                        style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
-                <content>
-                    <HBox fx:id="boardHBox" spacing="20" style="-fx-background-color: #09263E;">
-                        <padding>
-                            <Insets top="10" bottom="10"/>
-                        </padding>
-                    </HBox>
-                </content>
-            </ScrollPane>
-        </VBox>
+        <ScrollPane fx:id="boardScrollPane" VBox.vgrow="ALWAYS" fitToHeight="true"
+                    style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <content>
+                <HBox fx:id="boardHBox" spacing="20" style="-fx-background-color: #09263E;">
+                    <padding>
+                        <Insets top="10" bottom="10" right="50"/>
+                    </padding>
+                </HBox>
+            </content>
+        </ScrollPane>
+    </VBox>
 
-        <Button fx:id="floatingAddBtn" visible="false" managed="false"
-                styleClass="floating-add-button"
-                StackPane.alignment="BOTTOM_RIGHT">
-            <StackPane.margin>
-                <Insets bottom="30" right="30"/>
-            </StackPane.margin>
-            <graphic>
-                <ImageView fitHeight="70" fitWidth="70">
-                    <Image url="@../images/add.png"/>
-                </ImageView>
-            </graphic>
-        </Button>
-    </StackPane>
-</ScrollPane>
+    <Button fx:id="floatingAddBtn" visible="false" managed="false"
+            styleClass="floating-add-button"
+            StackPane.alignment="BOTTOM_RIGHT">
+        <StackPane.margin>
+            <Insets bottom="30" right="30"/>
+        </StackPane.margin>
+        <graphic>
+            <ImageView fitHeight="70" fitWidth="70">
+                <Image url="@../images/add.png"/>
+            </ImageView>
+        </graphic>
+    </Button>
+</StackPane>

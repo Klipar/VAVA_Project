@@ -10,14 +10,20 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import lombok.Setter;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 public class ProjectsTaskController {
 
@@ -29,6 +35,8 @@ public class ProjectsTaskController {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newHttpClient();
+
+    private final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy, HH:mm", Locale.ENGLISH);
 
     private int currentProjectId;
     private String currentProjectTitle;
@@ -109,8 +117,52 @@ public class ProjectsTaskController {
         assigneeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getAssignedTo() > 0 ? "Assigned" : "Unassigned"));
 
-        deadlineColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getDeadline() != null ? cellData.getValue().getDeadline() : "No deadline"));
+        deadlineColumn.setCellFactory(column -> new TableCell<>() {
+            private final HBox container = new HBox(8);
+            private final Label dateLabel = new Label();
+            private ImageView warningIcon;
 
+            {
+                container.setAlignment(Pos.CENTER_LEFT);
+                var stream = getClass().getResourceAsStream("/com/rabbit/client/images/worning.png");
+                if (stream != null) {
+                    warningIcon = new ImageView(new Image(stream));
+                    warningIcon.setFitWidth(16);
+                    warningIcon.setFitHeight(16);
+                }
+                dateLabel.setStyle("-fx-text-fill: #99AAB5;");
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    String deadlineStr = getTableRow().getItem().getDeadline();
+                    String formattedDate = formatDeadline(deadlineStr);
+
+                    dateLabel.setText(formattedDate);
+                    container.getChildren().clear();
+                    if (warningIcon != null) container.getChildren().add(warningIcon);
+                    container.getChildren().add(dateLabel);
+                    setGraphic(container);
+                }
+            }
+        });
+    }
+
+    private String formatDeadline(String deadlineStr) {
+        if (deadlineStr == null || deadlineStr.isBlank() || "null".equalsIgnoreCase(deadlineStr)) {
+            return "NO DEADLINE";
+        }
+        try {
+            if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) deadlineStr += "Z";
+            java.time.ZonedDateTime zdt = java.time.ZonedDateTime.parse(deadlineStr);
+            return zdt.format(displayFormatter).toUpperCase();
+        } catch (Exception e) {
+            return deadlineStr.toUpperCase();
+        }
     }
 }
