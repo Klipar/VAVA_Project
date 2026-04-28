@@ -51,6 +51,12 @@ public class BoardController {
     @FXML private Button listBtn;
     @FXML private Button tasksBtn;
 
+    @FXML private ScrollPane boardScrollPane;
+    private double mouseAnchorX;
+    private double mouseAnchorY;
+    private double scrollAnchorH;
+    private double scrollAnchorV;
+
     private final ApiClient apiClient = ApiClient.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final Map<TaskStatus, VBox> columnContainers = new HashMap<>();
@@ -69,10 +75,71 @@ public class BoardController {
         createColumns();
         loadTasksFromServer();
         setupNavigationButtons();
+        setupDragToScroll();
     }
 
     @FXML
     public void initialize() {
+    }
+
+    private void setupDragToScroll() {
+        if (boardScrollPane == null) return;
+
+        boardHBox.setOnMousePressed(event -> {
+            if (isNodeTaskCard(event.getTarget())) {
+                return;
+            }
+
+            mouseAnchorX = event.getSceneX();
+            mouseAnchorY = event.getSceneY();
+            scrollAnchorH = boardScrollPane.getHvalue();
+            scrollAnchorV = boardScrollPane.getVvalue();
+
+            boardHBox.setCursor(javafx.scene.Cursor.CLOSED_HAND);
+        });
+
+        boardHBox.setOnMouseReleased(event -> {
+            boardHBox.setCursor(javafx.scene.Cursor.DEFAULT);
+        });
+
+        boardHBox.setOnMouseDragged(event -> {
+            if (boardHBox.getCursor() != javafx.scene.Cursor.CLOSED_HAND) {
+                return;
+            }
+
+            if (event.isPrimaryButtonDown()) {
+                double deltaX = event.getSceneX() - mouseAnchorX;
+                double deltaY = event.getSceneY() - mouseAnchorY;
+
+                double contentWidth = boardHBox.getBoundsInLocal().getWidth();
+                double viewportWidth = boardScrollPane.getViewportBounds().getWidth();
+                double contentHeight = boardHBox.getBoundsInLocal().getHeight();
+                double viewportHeight = boardScrollPane.getViewportBounds().getHeight();
+
+                if (contentWidth > viewportWidth) {
+                    double hDelta = deltaX / (contentWidth - viewportWidth);
+                    boardScrollPane.setHvalue(scrollAnchorH - hDelta);
+                }
+
+                if (contentHeight > viewportHeight) {
+                    double vDelta = deltaY / (contentHeight - viewportHeight);
+                    boardScrollPane.setVvalue(scrollAnchorV - vDelta);
+                }
+            }
+        });
+    }
+
+    private boolean isNodeTaskCard(Object target) {
+        if (!(target instanceof javafx.scene.Node node)) return false;
+
+        javafx.scene.Node current = node;
+        while (current != null) {
+            if (current instanceof TaskCardComponent) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
     }
 
     private void setupNavigationButtons() {

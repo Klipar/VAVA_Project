@@ -8,10 +8,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import lombok.Setter;
 
 import java.net.URI;
@@ -122,33 +123,50 @@ public class MyTasksController {
         });
         statusColumn.setPrefWidth(110);
 
-        projectColumn.setCellValueFactory(cellData -> {
-            int projectId = cellData.getValue().getProjectId();
-            String name = projectNames.getOrDefault(projectId, "Project #" + projectId);
-            return new SimpleStringProperty(name);
-        });
-        projectColumn.setPrefWidth(160);
+        deadlineColumn.setCellFactory(column -> new TableCell<>() {
+            private final HBox container = new HBox(8);
+            private final Label dateLabel = new Label();
+            private ImageView warningIcon;
 
-        deadlineColumn.setCellValueFactory(cellData -> {
-            String deadlineStr = cellData.getValue().getDeadline();
-            if (deadlineStr == null || deadlineStr.isBlank() || "null".equalsIgnoreCase(deadlineStr)) {
-                return new SimpleStringProperty("No deadline");
-            }
-            try {
-                if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+") && !deadlineStr.contains("GMT")) {
-                    deadlineStr += "Z";
+            {
+                container.setAlignment(Pos.CENTER_LEFT);
+                var stream = getClass().getResourceAsStream("/com/rabbit/client/images/worning.png");
+                if (stream != null) {
+                    warningIcon = new ImageView(new Image(stream));
+                    warningIcon.setFitWidth(16);
+                    warningIcon.setFitHeight(16);
                 }
-                ZonedDateTime zdt = ZonedDateTime.parse(deadlineStr);
-                return new SimpleStringProperty(zdt.format(displayFormatter));
-            } catch (Exception e) {
-                try {
-                    LocalDateTime ldt = LocalDateTime.parse(deadlineStr);
-                    return new SimpleStringProperty(ldt.atZone(ZoneId.of("UTC")).format(displayFormatter));
-                } catch (Exception e2) {
-                    return new SimpleStringProperty(deadlineStr);
+                dateLabel.setStyle("-fx-text-fill: #99AAB5;");
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    String deadlineStr = getTableRow().getItem().getDeadline();
+                    String formattedDate = "NO DEADLINE";
+
+                    if (deadlineStr != null && !deadlineStr.isBlank() && !"null".equalsIgnoreCase(deadlineStr)) {
+                        try {
+                            if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) deadlineStr += "Z";
+                            java.time.ZonedDateTime zdt = java.time.ZonedDateTime.parse(deadlineStr);
+                            formattedDate = zdt.format(displayFormatter).toUpperCase();
+                        } catch (Exception e) {
+                            formattedDate = deadlineStr.toUpperCase();
+                        }
+                    }
+
+                    dateLabel.setText(formattedDate);
+                    container.getChildren().clear();
+                    if (warningIcon != null) container.getChildren().add(warningIcon);
+                    container.getChildren().add(dateLabel);
+                    setGraphic(container);
                 }
             }
         });
-        deadlineColumn.setPrefWidth(140);
+        deadlineColumn.setPrefWidth(180);
     }
 }
