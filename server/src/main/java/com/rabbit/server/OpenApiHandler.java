@@ -150,13 +150,6 @@ public class OpenApiHandler implements HttpHandler {
                                 "isRead": {"type": "boolean", "example": false}
                             }
                         },
-                        "CreateNotificationRequest": {
-                            "type": "object",
-                            "required": ["message"],
-                            "properties": {
-                                "message": {"type": "string", "example": "Task deadline approaching"}
-                            }
-                        },
                         "TaskDto": {
                             "type": "object",
                             "description": "Full task representation returned by the server",
@@ -429,7 +422,7 @@ public class OpenApiHandler implements HttpHandler {
                                 "404": {"description": "User not found"},
                                 "405": {"description": "Method not allowed"}
                             }
-                        }   
+                        } 
                     },
                     "/users/{userId}/update": {
                         "put": {
@@ -786,33 +779,6 @@ public class OpenApiHandler implements HttpHandler {
                                 "401": {"description": "Unauthorized"},
                                 "500": {"description": "Internal server error"}
                             }
-                        },
-                        "post": {
-                            "tags": ["Notification"],
-                            "summary": "Create a notification for current user",
-                            "description": "Create a new notification (automatically linked to authenticated user)",
-                            "security": [{"bearerAuth": []}],
-                            "requestBody": {
-                                "required": true,
-                                "content": {
-                                    "application/json": {
-                                        "schema": {"$ref": "#/components/schemas/CreateNotificationRequest"}
-                                    }
-                                }
-                            },
-                            "responses": {
-                                "201": {
-                                    "description": "Notification created successfully",
-                                    "content": {
-                                        "application/json": {
-                                            "schema": {"$ref": "#/components/schemas/NotificationDto"}
-                                        }
-                                    }
-                                },
-                                "400": {"description": "Bad request - invalid input"},
-                                "401": {"description": "Unauthorized"},
-                                "500": {"description": "Internal server error"}
-                            }
                         }
                     },
                     "/notifications/{notificationId}/read": {
@@ -1120,7 +1086,7 @@ public class OpenApiHandler implements HttpHandler {
                     }
                 }
             }
-        """;
+       \s""";
 
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(200, spec.getBytes().length);
