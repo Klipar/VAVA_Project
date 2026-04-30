@@ -105,20 +105,6 @@ public class ProfileController {
     }
 
     @FXML
-    private void handleChangePhoto() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select profile photo");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
-        );
-        File file = chooser.showOpenDialog(avatarCircle.getScene().getWindow());
-        if (file != null) {
-            javafx.scene.image.Image img = new javafx.scene.image.Image(file.toURI().toString());
-            avatarCircle.setFill(new javafx.scene.paint.ImagePattern(img));
-        }
-    }
-
-    @FXML
     private void handleExportSkills() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Export Skills");

@@ -6,7 +6,7 @@
 
 <HBox xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.rabbit.client.ui.controllers.ProfileController"
-      style="-fx-background-color: white;">
+      style="-fx-background-color: #09263E; -fx-background: #09263E; -fx-border-color: transparent;">
 
     <VBox HBox.hgrow="ALWAYS" style="-fx-padding: 30 30 30 30;">
 
@@ -16,7 +16,7 @@
         <HBox spacing="20">
             <!-- Form card -->
             <VBox HBox.hgrow="ALWAYS" spacing="12"
-                  style="-fx-background-color: #1e2d42; -fx-padding: 25; -fx-background-radius: 10;">
+                  style="-fx-background-color: #253447; -fx-padding: 25; -fx-background-radius: 10;">
 
                 <!-- Full name -->
                 <HBox alignment="CENTER_LEFT" spacing="8">
@@ -46,9 +46,6 @@
                 <HBox alignment="CENTER_LEFT" spacing="8">
                     <Label text="Password" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Show password"
-                            style="-fx-background-color: #3a4a5e; -fx-text-fill: white; -fx-background-radius: 20;"
-                            onAction="#handleShowPassword"/>
                     <Button text="Change password"
                             style="-fx-background-color: #3a4a5e; -fx-text-fill: white; -fx-background-radius: 20;"
                             onAction="#handleChangePassword"/>
@@ -60,21 +57,17 @@
                 <Label text="Detailed info about skills" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
                 <TextArea fx:id="skillsArea" prefHeight="150" style="-fx-background-radius: 5;"/>
 
-            </VBox>
+                <!-- Buttons under skills -->
+                <HBox spacing="10">
+                    <Button text="EXPORT SKILLS"
+                            style="-fx-background-color: #5ba3c9; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 20; -fx-background-radius: 8;"
+                            onAction="#handleExportSkills"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="LOGOUT"
+                            style="-fx-background-color: #ff5555; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 20; -fx-background-radius: 8;"
+                            onAction="#handleLogout"/>
+                </HBox>
 
-            <!-- Right panel -->
-            <VBox alignment="TOP_CENTER" spacing="15" prefWidth="200">
-                <Circle fx:id="avatarCircle" radius="80" style="-fx-fill: #3a4a5e;"/>
-                <Button text="Change photo"
-                        style="-fx-background-color: #3a4a5e; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 16;"
-                        onAction="#handleChangePhoto"/>
-                <Region VBox.vgrow="ALWAYS"/>
-                <Button text="EXPORT SKILLS"
-                        style="-fx-background-color: #5ba3c9; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 20; -fx-background-radius: 8;"
-                        onAction="#handleExportSkills"/>
-                <Button text="LOGOUT"
-                        style="-fx-background-color: #ff5555; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8;"
-                        onAction="#handleLogout"/>
             </VBox>
         </HBox>
     </VBox>
