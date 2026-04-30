@@ -109,24 +109,45 @@ public class ProfileController {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Export Skills");
         chooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        chooser.setInitialFileName("skills.txt");
+        chooser.setInitialFileName("skills.xml");
         chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text files (*.txt)", "*.txt"),
-                new FileChooser.ExtensionFilter("All files", "*.*")
+                new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml")
         );
         File file = chooser.showSaveDialog(skillsArea.getScene().getWindow());
         if (file == null) return;
         saveFieldSilent("skills", skillsArea.getText());
-        try (PrintWriter pw = new PrintWriter(file)) {
+        try (PrintWriter pw = new PrintWriter(file, "UTF-8")) {
             UserDto user = userService.getCurrentUser();
-            pw.println("User: " + (user != null ? user.getNickname() : ""));
-            pw.println("Name: " + (user != null ? user.getName() : ""));
-            pw.println("\nSkills:\n" + skillsArea.getText());
+            pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+            pw.println("<userSkills>");
+            pw.println("    <user>");
+            pw.println("        <nickname>" +
+                    escapeXml(user != null ? user.getNickname() : "") +
+                    "</nickname>");
+            pw.println("        <name>" +
+                    escapeXml(user != null ? user.getName() : "") +
+                    "</name>");
+            pw.println("    </user>");
+            pw.println("    <skills>");
+            pw.println("        <![CDATA[" + skillsArea.getText() + "]]>");
+            pw.println("    </skills>");
+            pw.println("</userSkills>");
             showAlert("Success", "Skills exported!");
         } catch (Exception e) {
             showAlert("Error", "Failed to export: " + e.getMessage());
         }
     }
+
+    private String escapeXml(String value) {
+        if (value == null) return "";
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
+    }
+
 
     @FXML
     private void handleLogout() {
