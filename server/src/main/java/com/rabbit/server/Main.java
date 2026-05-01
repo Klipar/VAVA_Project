@@ -82,6 +82,10 @@ public class Main {
                     userHandler.updateUser().handle(exchange);
                     return; 
                 }
+                // POST /users/create
+                else if (path.matches("/users/create$") && method.equals("POST")) {
+                    userHandler.createUser().handle(exchange);
+                }
                 // DELETE /users/{userId}/delete
                 else if (path.matches("/users/\\d+/delete$") && method.equals("DELETE")) {
                     userHandler.deleteUser().handle(exchange);
@@ -126,10 +130,6 @@ public class Main {
                 // GET /projects/{projectId}/users
                 else if (path.matches("/projects/\\d+/users$") && method.equals("GET")) {
                     userHandler.getAllUsersFromProject().handle(exchange);
-                }
-                // POST /projects/{projectId}/users/create
-                else if (path.matches("/projects/\\d+/users/create$") && method.equals("POST")) {
-                    userHandler.createUser().handle(exchange);
                 }
                 // POST /projects/{projectId}/users/{userId}/add
                 else if (path.matches("/projects/\\d+/users/\\d+/add$") && method.equals("POST")) {

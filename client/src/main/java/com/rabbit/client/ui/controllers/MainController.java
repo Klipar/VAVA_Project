@@ -77,6 +77,8 @@ public class MainController {
                 }
             } else if (controller instanceof MyTasksController myTasks) {
                 myTasks.setMainController(this);
+            } else if (controller instanceof AdminController admin) {
+                admin.setMainController(this);
             }
 
             rootPane.setCenter(view);

@@ -172,7 +172,7 @@ public class UserRepository {
      * @return generated user ID
      */
     public Long save(UserDto userDto, String passwordHash) {
-        String sql = "INSERT INTO users (name, nickname, email, password_hash, role, skills) VALUES (?, ?, ?, ?, CAST(? AS user_role)), ?";
+        String sql = "INSERT INTO users (name, nickname, email, password_hash, role, skills) VALUES (?, ?, ?, ?, CAST(? AS user_role), ?)";
 
         try {
             return dbService.insertAndGetId(

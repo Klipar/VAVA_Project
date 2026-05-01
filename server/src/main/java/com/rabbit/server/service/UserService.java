@@ -18,15 +18,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public UserDto createUser(UserDto userDto, String password, UserRole creatorRole, Long projectId) {
-        if (creatorRole == UserRole.MANAGER) {
-            userDto.setRole(UserRole.WORKER);
-        } else if (creatorRole == UserRole.TEAM_LEADER) {
-            userDto.setRole(UserRole.TEAM_LEADER);
-        } else {
-            throw new SecurityException("Only Manager or TeamLead can create users");
-        }
-
+    public UserDto createUser(UserDto userDto, String password) {
         if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("User with this email already exists");
         }
@@ -35,10 +27,6 @@ public class UserService {
 
         Long userId = userRepository.save(userDto, passwordHash);
         userDto.setId(userId);
-
-        if (projectId != null) {
-            userRepository.addUserToProject(userDto.getId(), projectId);
-        }
 
         return userDto;
     }

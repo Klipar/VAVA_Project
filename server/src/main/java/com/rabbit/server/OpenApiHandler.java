@@ -657,19 +657,12 @@ public class OpenApiHandler implements HttpHandler {
                             }
                         }
                     },
-                    "/projects/{projectId}/users/create": {
+                    "/users/create": {
                         "post": {
                             "tags": ["User"],
                             "summary": "Create a new user",
-                            "description": "Create a new user in the project (Manager creates WORKER, Team Leader creates TEAM_LEADER)",
+                            "description": "Create a new user",
                             "security": [{"bearerAuth": []}],
-                            "parameters": [{
-                                "name": "projectId",
-                                "in": "path",
-                                "required": true,
-                                "description": "ID of the project",
-                                "schema": {"type": "integer", "format": "int64", "example": 1}
-                            }],
                             "requestBody": {
                                 "required": true,
                                 "content": {
