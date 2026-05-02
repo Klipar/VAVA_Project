@@ -76,12 +76,17 @@ public class OpenApiHandler implements HttpHandler {
                         },
                         "CreateUserRequest": {
                             "type": "object",
-                            "required": ["name", "nickname", "email", "password"],
+                            "required": ["name", "nickname", "email", "password", "role"],
                             "properties": {
                                 "name": {"type": "string", "example": "John Doe"},
                                 "nickname": {"type": "string", "example": "johnd"},
                                 "email": {"type": "string", "format": "email", "example": "ivan@example.com"},
                                 "password": {"type": "string", "minLength": 6, "example": "qwerty"},
+                                "role": {
+                                    "type": "string",
+                                    "enum": ["MANAGER", "TEAM_LEADER", "WORKER"],
+                                    "example": "WORKER"
+                                },
                                 "skills": {"type": "string", "example": "java,spring"}
                             }
                         },
@@ -391,6 +396,30 @@ public class OpenApiHandler implements HttpHandler {
                                 "401": {"description": "Unauthorized - Bearer token required"},
                                 "403": {"description": "Forbidden - insufficient permissions"},
                                 "404": {"description": "User not found"},
+                                "405": {"description": "Method not allowed"}
+                            }
+                        }
+                    },
+                    "/users/all": {
+                        "get": {
+                            "tags": ["User"],
+                            "summary": "Get all users",
+                            "description": "Retrieve all users (Manager and Team Leader only)",
+                            "security": [{"bearerAuth": []}],
+                            "responses": {
+                                "200": {
+                                    "description": "Users list returned successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": {"$ref": "#/components/schemas/UserDto"}
+                                            }
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized - Bearer token required"},
+                                "403": {"description": "Forbidden - insufficient permissions"},
                                 "405": {"description": "Method not allowed"}
                             }
                         }

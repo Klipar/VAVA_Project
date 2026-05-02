@@ -1,269 +1,344 @@
 package com.rabbit.client.ui.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.client.service.ApiClient;
-import com.rabbit.client.service.UserService;
 import com.rabbit.common.dto.UserDto;
-import com.rabbit.common.enums.UserRole;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.control.ScrollBar;
 import lombok.Setter;
 
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class AdminController {
 
-    // Add user section
-    @FXML private TextField addLoginField;
-    @FXML private PasswordField addPasswordField;
-    @FXML private Button createUserButton;
-
-    // Edit user section
+    @FXML private StackPane overlayPane;
     @FXML private TextField searchLoginField;
+    @FXML private Button openAddUserButton;
     @FXML private Button searchButton;
-    @FXML private TextField editLoginField;
-    @FXML private TextField editEmailField;
-    @FXML private TextField editFullNameField;
-    @FXML private PasswordField editPasswordField;
-    @FXML private Button deleteUserButton;
-    @FXML private Button saveChangesButton;
+    @FXML private TableView<UserDto> usersTable;
+    @FXML private TableColumn<UserDto, String> loginColumn;
+    @FXML private TableColumn<UserDto, String> nameColumn;
+    @FXML private TableColumn<UserDto, String> emailColumn;
+    @FXML private TableColumn<UserDto, String> roleColumn;
+    @FXML private TableColumn<UserDto, Void> actionsColumn;
 
     private final ApiClient apiClient = ApiClient.getInstance();
-    private final UserService userService = UserService.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+    private final ObservableList<UserDto> users = FXCollections.observableArrayList();
+    private List<UserDto> allUsers = new ArrayList<>();
 
     @Setter
     private MainController mainController;
 
-    private UserDto currentEditingUser;
-
     @FXML
     public void initialize() {
-        setupButtonActions();
-    }
-
-    private void setupButtonActions() {
-        createUserButton.setOnAction(event -> handleCreateUser());
-        searchButton.setOnAction(event -> handleSearchUser());
-        deleteUserButton.setOnAction(event -> handleDeleteUser());
-        saveChangesButton.setOnAction(event -> handleSaveChanges());
-    }
-
-    private void handleCreateUser() {
-        String login = addLoginField.getText().trim();
-        String password = addPasswordField.getText().trim();
-
-        if (login.isEmpty() || password.isEmpty()) {
-            showAlert("Validation Error", "Please enter both login and password");
-            return;
+        configureTable();
+        if (searchButton != null) {
+            searchButton.setOnAction(event -> handleSearchUser());
         }
+        if (openAddUserButton != null) {
+            openAddUserButton.setOnAction(event -> openAddUserPopup());
+        }
+        loadAllUsers();
+    }
 
-        new Thread(() -> {
-            try {
-                System.out.println("[AdminController] Creating user with login: " + login);
-                
-                Map<String, Object> requestBody = new HashMap<>();
-                requestBody.put("nickname", login);
-                requestBody.put("email", login + "@example.com");
-                requestBody.put("password", password);
-                requestBody.put("name", login);
-                requestBody.put("role", "WORKER");
+    private void configureTable() {
+        usersTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        loginColumn.setCellValueFactory(data -> new SimpleStringProperty(valueOrDash(data.getValue().getNickname())));
+        nameColumn.setCellValueFactory(data -> new SimpleStringProperty(valueOrDash(data.getValue().getName())));
+        emailColumn.setCellValueFactory(data -> new SimpleStringProperty(valueOrDash(data.getValue().getEmail())));
+        roleColumn.setCellValueFactory(data -> new SimpleStringProperty(
+                data.getValue().getRole() != null ? data.getValue().getRole().name() : "-"
+        ));
+        actionsColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(null));
 
-                String jsonBody = mapper.writeValueAsString(requestBody);
-                System.out.println("[AdminController] Request body: " + jsonBody);
-                String path = "/users/create";
-                System.out.println("[AdminController] POST " + path);
-                HttpResponse<String> response = apiClient.post(path, jsonBody);
+        actionsColumn.setCellFactory(col -> new TableCell<>() {
+            private final Button editButton = new Button("\u270F");
+            private final Button deleteButton = new Button("\uD83D\uDDD1");
+            private final HBox actionsBox = new HBox(6, editButton, deleteButton);
 
-                System.out.println("[AdminController] Response status: " + response.statusCode());
-                System.out.println("[AdminController] Response body: " + response.body());
+            {
+                editButton.getStyleClass().add("admin-row-action-button");
+                deleteButton.getStyleClass().add("admin-row-action-button");
+                editButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #7fd6ff; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 2 6; -fx-background-radius: 5;");
+                deleteButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #f08080; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 2 6; -fx-background-radius: 5;");
 
-                Platform.runLater(() -> {
-                    if (apiClient.isSuccess(response)) {
-                        System.out.println("[AdminController] User created successfully: " + login);
-                        showAlert("Success", "User created successfully");
-                        addLoginField.clear();
-                        addPasswordField.clear();
-                    } else {
-                        String errorMsg = parseErrorMessage(response.body());
-                        System.out.println("[AdminController] Failed to create user: " + errorMsg);
-                        showAlert("Error", "Failed to create user: " + errorMsg);
-                    }
+                editButton.setOnMouseEntered(e -> editButton.setStyle("-fx-background-color: rgba(90,153,195,0.22); -fx-text-fill: #7fd6ff; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 2 6; -fx-background-radius: 5;"));
+                editButton.setOnMouseExited(e  -> editButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #7fd6ff; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 2 6; -fx-background-radius: 5;"));
+                deleteButton.setOnMouseEntered(e -> deleteButton.setStyle("-fx-background-color: rgba(198,95,133,0.22); -fx-text-fill: #f08080; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 2 6; -fx-background-radius: 5;"));
+                deleteButton.setOnMouseExited(e  -> deleteButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #f08080; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 2 6; -fx-background-radius: 5;"));
+
+                actionsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+                editButton.setOnAction(event -> {
+                    UserDto user = getCurrentTableRow();
+                    if (user != null) openEditUserPopup(user);
                 });
-            } catch (Exception e) {
-                System.out.println("[AdminController] Exception during user creation: " + e.getMessage());
-                e.printStackTrace();
-                Platform.runLater(() -> showAlert("Error", "Failed to create user: " + e.getMessage()));
-            }
-        }).start();
-    }
 
-    private void handleSearchUser() {
-        String login = searchLoginField.getText().trim();
-
-        if (login.isEmpty()) {
-            showAlert("Validation Error", "Please enter a login to search");
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                System.out.println("[AdminController] Searching for user with login: " + login);
-                HttpResponse<String> response = apiClient.get("/users/nickname/" + login);
-
-                System.out.println("[AdminController] Search response status: " + response.statusCode());
-                System.out.println("[AdminController] Search response body: " + response.body());
-
-                Platform.runLater(() -> {
-                    if (apiClient.isSuccess(response)) {
-                        try {
-                            currentEditingUser = mapper.readValue(response.body(), UserDto.class);
-                            System.out.println("[AdminController] User found: " + currentEditingUser.getNickname() + 
-                                             " (ID: " + currentEditingUser.getId() + ")");
-                            loadUserToEditForm();
-                        } catch (Exception e) {
-                            System.out.println("[AdminController] Failed to parse user data: " + e.getMessage());
-                            showAlert("Error", "Failed to parse user data: " + e.getMessage());
-                        }
-                    } else {
-                        System.out.println("[AdminController] User not found: " + login);
-                        showAlert("Not Found", "User with login '" + login + "' not found");
-                    }
+                deleteButton.setOnAction(event -> {
+                    UserDto user = getCurrentTableRow();
+                    if (user != null) openDeleteUserPopup(user);
                 });
-            } catch (Exception e) {
-                System.out.println("[AdminController] Exception during user search: " + e.getMessage());
-                e.printStackTrace();
-                Platform.runLater(() -> showAlert("Error", "Failed to search user: " + e.getMessage()));
             }
-        }).start();
-    }
 
-    private void loadUserToEditForm() {
-        if (currentEditingUser == null) return;
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : actionsBox);
+            }
 
-        editLoginField.setText(currentEditingUser.getNickname() != null ? currentEditingUser.getNickname() : "");
-        editEmailField.setText(currentEditingUser.getEmail() != null ? currentEditingUser.getEmail() : "");
-        editFullNameField.setText(currentEditingUser.getName() != null ? currentEditingUser.getName() : "");
-        editPasswordField.clear();
-    }
+            private UserDto getCurrentTableRow() {
+                if (getIndex() < 0 || getIndex() >= usersTable.getItems().size()) return null;
+                return usersTable.getItems().get(getIndex());
+            }
+        });
 
-    private void handleDeleteUser() {
-        if (currentEditingUser == null) {
-            showAlert("Error", "Please search for a user first");
-            return;
-        }
+        usersTable.setItems(users);
 
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Confirm Delete");
-        confirmation.setHeaderText("Delete User");
-        confirmation.setContentText("Are you sure you want to delete user '" + currentEditingUser.getNickname() + "'?");
-
-        if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
-            System.out.println("[AdminController] Delete operation cancelled by user");
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                System.out.println("[AdminController] Deleting user: " + currentEditingUser.getNickname() +
-                        " (ID: " + currentEditingUser.getId() + ")");
-                HttpResponse<String> response = apiClient.delete("/users/" + currentEditingUser.getId() + "/delete");
-
-                System.out.println("[AdminController] Delete response status: " + response.statusCode());
-                System.out.println("[AdminController] Delete response body: " + response.body());
-
-                Platform.runLater(() -> {
-                    if (apiClient.isSuccess(response)) {
-                        System.out.println("[AdminController] User deleted successfully: " + currentEditingUser.getNickname());
-                        showAlert("Success", "User deleted successfully");
-                        clearEditForm();
-                    } else {
-                        String errorMsg = parseErrorMessage(response.body());
-                        System.out.println("[AdminController] Failed to delete user: " + errorMsg);
-                        showAlert("Error", "Failed to delete user: " + errorMsg);
+        // left mouse drag panning for horizontal scroll
+        final double[] lastX = new double[1];
+        usersTable.setOnMousePressed(evt -> {
+            if (evt.isPrimaryButtonDown()) lastX[0] = evt.getScreenX();
+        });
+        usersTable.setOnMouseDragged(evt -> {
+            if (evt.isPrimaryButtonDown()) {
+                ScrollBar h = findHorizontalScrollBar();
+                if (h != null) {
+                    double dx = evt.getScreenX() - lastX[0];
+                    double range = h.getMax() - h.getMin();
+                    if (range > 0) {
+                        double delta = -dx / 8.0;
+                        double newVal = Math.min(h.getMax(), Math.max(h.getMin(), h.getValue() + delta));
+                        h.setValue(newVal);
                     }
-                });
-            } catch (Exception e) {
-                System.out.println("[AdminController] Exception during user deletion: " + e.getMessage());
-                e.printStackTrace();
-                Platform.runLater(() -> showAlert("Error", "Failed to delete user: " + e.getMessage()));
-            }
-        }).start();
-    }
-
-    private void handleSaveChanges() {
-        if (currentEditingUser == null) {
-            showAlert("Error", "Please search for a user first");
-            return;
-        }
-
-        String email = editEmailField.getText().trim();
-        String fullName = editFullNameField.getText().trim();
-        String password = editPasswordField.getText().trim();
-
-        if (email.isEmpty() || fullName.isEmpty()) {
-            showAlert("Validation Error", "Email and Full Name are required");
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                System.out.println("[AdminController] Updating user: " + currentEditingUser.getNickname() +
-                        " (ID: " + currentEditingUser.getId() + ")");
-                System.out.println("[AdminController] New email: " + email + ", Full name: " + fullName);
-
-                Map<String, Object> requestBody = new HashMap<>();
-                requestBody.put("email", email);
-                requestBody.put("name", fullName);
-
-                if (!password.isEmpty()) {
-                    requestBody.put("password", password);
-                    System.out.println("[AdminController] Password will be updated");
+                    lastX[0] = evt.getScreenX();
+                    evt.consume();
                 }
+            }
+        });
+    }
 
-                String jsonBody = mapper.writeValueAsString(requestBody);
-                System.out.println("[AdminController] Update request body: " + jsonBody);
-                HttpResponse<String> response = apiClient.put("/users/" + currentEditingUser.getId() + "/update", jsonBody);
+    @FXML
+    private void handleSearchUser() {
+        String query = searchLoginField.getText() == null ? "" : searchLoginField.getText().trim().toLowerCase();
+        if (query.isEmpty()) {
+            users.setAll(allUsers);
+            return;
+        }
+        List<UserDto> filtered = allUsers.stream()
+                .filter(user -> {
+                    String nick = user.getNickname() == null ? "" : user.getNickname().toLowerCase();
+                    return nick.contains(query);
+                })
+                .toList();
+        users.setAll(filtered);
+    }
 
-                System.out.println("[AdminController] Update response status: " + response.statusCode());
-                System.out.println("[AdminController] Update response body: " + response.body());
+    @FXML
+    private void openAddUserPopup() {
+        openPopupOverlay("/com/rabbit/client/fxml/add-user-popup.fxml", loader -> {
+            AddUserPopupController controller = loader.getController();
+            controller.setMainController(mainController);
+            controller.setup(() -> {
+                loadAllUsers();
+                if (mainController != null) {
+                    mainController.showGlobalNotification("User created successfully", "#5db583");
+                }
+            });
+        });
+    }
 
+    private void openEditUserPopup(UserDto user) {
+        openPopupOverlay("/com/rabbit/client/fxml/edit-user-popup.fxml", loader -> {
+            EditUserPopupController controller = loader.getController();
+            controller.setMainController(mainController);
+            controller.setup(user, updatedUser -> {
+                if (updatedUser != null) {
+                    // Find by ID
+                    for (int i = 0; i < users.size(); i++) {
+                        if (users.get(i).getId() != null && users.get(i).getId().equals(updatedUser.getId())) {
+                            users.set(i, updatedUser);
+                            break;
+                        }
+                    }
+                    for (int i = 0; i < allUsers.size(); i++) {
+                        if (allUsers.get(i).getId() != null && allUsers.get(i).getId().equals(updatedUser.getId())) {
+                            allUsers.set(i, updatedUser);
+                            break;
+                        }
+                    }
+                }
+                loadAllUsers();
+                if (mainController != null) {
+                    mainController.showGlobalNotification("User updated successfully", "#5db583");
+                }
+            });
+        });
+    }
+
+    private void openDeleteUserPopup(UserDto user) {
+        openPopupOverlay("/com/rabbit/client/fxml/delete-user-popup.fxml", loader -> {
+            DeleteUserPopupController controller = loader.getController();
+            controller.setMainController(mainController);
+            controller.setup(user, () -> {
+                loadAllUsers();
+                if (mainController != null) {
+                    mainController.showGlobalNotification("User deleted successfully", "#c65f85");
+                }
+            });
+        });
+    }
+
+    /**
+     * Loads the popup FXML and injects it directly into the scene's root Pane
+     * as a full-window overlay — no new Stage/window is opened.
+     *
+     * Each popup FXML root is a StackPane with styleClass="overlay" (dark semi-transparent
+     * background + centered card). Its own closePopup() removes it from its parent when dismissed.
+     */
+    private void openPopupOverlay(String fxmlPath, PopupConfigurer configurer) {
+        try {
+            java.net.URL url = getClass().getResource(fxmlPath);
+            if (url == null) {
+                showAlert("Error", "FXML resource not found: " + fxmlPath);
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent popupRoot = loader.load();
+            configurer.configure(loader);
+
+            Pane rootHost = getRootHost();
+            if (rootHost != null) {
+                // Stretch the overlay to cover the full root pane
+                if (popupRoot instanceof Region region) {
+                    region.prefWidthProperty().bind(rootHost.widthProperty());
+                    region.prefHeightProperty().bind(rootHost.heightProperty());
+                }
+                rootHost.getChildren().add(popupRoot);
+            } else {
+                showAlert("Error", "Cannot find root pane to display popup.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorWithDetails("Error", "Failed to open popup: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Returns the topmost Pane in the scene so we can inject full-window overlays.
+     * Prefers the scene root (covers sidebar + content); falls back to walking parents.
+     */
+    private Pane getRootHost() {
+        if (overlayPane != null && overlayPane.getScene() != null) {
+            Node sceneRoot = overlayPane.getScene().getRoot();
+            if (sceneRoot instanceof Pane pane) return pane;
+        }
+        // Walk up parent chain
+        Node current = overlayPane;
+        Pane topPane = null;
+        while (current != null) {
+            if (current instanceof Pane pane) topPane = pane;
+            current = current.getParent();
+        }
+        return topPane;
+    }
+
+    private void showErrorWithDetails(String title, String message, Exception e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String exceptionText = sw.toString();
+
+        javafx.scene.control.TextArea textArea = new javafx.scene.control.TextArea(exceptionText);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setMaxWidth(Double.MAX_VALUE);
+        textArea.setMaxHeight(Double.MAX_VALUE);
+
+        javafx.scene.layout.GridPane.setVgrow(textArea, javafx.scene.layout.Priority.ALWAYS);
+        javafx.scene.layout.GridPane.setHgrow(textArea, javafx.scene.layout.Priority.ALWAYS);
+
+        javafx.scene.layout.GridPane expContent = new javafx.scene.layout.GridPane();
+        expContent.setMaxWidth(Double.MAX_VALUE);
+        expContent.add(textArea, 0, 0);
+
+        alert.getDialogPane().setExpandableContent(expContent);
+        alert.showAndWait();
+    }
+
+    private ScrollBar findHorizontalScrollBar() {
+        for (Node n : usersTable.lookupAll(".scroll-bar")) {
+            if (n instanceof ScrollBar sb) {
+                if (sb.getOrientation() == javafx.geometry.Orientation.HORIZONTAL) return sb;
+            }
+        }
+        return null;
+    }
+
+    private void loadAllUsers() {
+        new Thread(() -> {
+            try {
+                HttpResponse<String> response = apiClient.get("/users/all");
                 Platform.runLater(() -> {
                     if (apiClient.isSuccess(response)) {
-                        System.out.println("[AdminController] User updated successfully: " + currentEditingUser.getNickname());
-                        showAlert("Success", "User updated successfully");
                         try {
-                            currentEditingUser = mapper.readValue(response.body(), UserDto.class);
-                            loadUserToEditForm();
+                            List<UserDto> loadedUsers = mapper.readValue(response.body(), new TypeReference<List<UserDto>>() {});
+                            allUsers = loadedUsers;
+                            users.setAll(loadedUsers);
                         } catch (Exception e) {
-                            // Ignore parsing errors on success
-                            System.out.println("[AdminController] Could not parse updated user data: " + e.getMessage());
+                            showAlert("Error", "Failed to parse users list: " + e.getMessage());
                         }
                     } else {
-                        String errorMsg = parseErrorMessage(response.body());
-                        System.out.println("[AdminController] Failed to update user: " + errorMsg);
-                        showAlert("Error", "Failed to update user: " + errorMsg);
+                        showAlert("Error", parseError(response.body()));
                     }
                 });
             } catch (Exception e) {
-                System.out.println("[AdminController] Exception during user update: " + e.getMessage());
-                e.printStackTrace();
-                Platform.runLater(() -> showAlert("Error", "Failed to update user: " + e.getMessage()));
+                Platform.runLater(() -> showAlert("Error", "Failed to load users: " + e.getMessage()));
             }
         }).start();
     }
 
-    private void clearEditForm() {
-        searchLoginField.clear();
-        editLoginField.clear();
-        editEmailField.clear();
-        editFullNameField.clear();
-        editPasswordField.clear();
-        currentEditingUser = null;
+    private String valueOrDash(String value) {
+        return value == null || value.isBlank() ? "-" : value;
+    }
+
+    private String parseError(String responseBody) {
+        try {
+            java.util.Map<String, Object> errorMap = mapper.readValue(responseBody, new TypeReference<java.util.Map<String, Object>>() {});
+            Object error = errorMap.get("error");
+            if (error != null) return error.toString();
+        } catch (Exception ignored) {}
+        return "Request failed";
     }
 
     private void showAlert(String title, String message) {
@@ -274,16 +349,8 @@ public class AdminController {
         alert.showAndWait();
     }
 
-    private String parseErrorMessage(String responseBody) {
-        try {
-            Map<String, Object> errorMap = mapper.readValue(responseBody, Map.class);
-            Object error = errorMap.get("error");
-            if (error != null) {
-                return error.toString();
-            }
-        } catch (Exception e) {
-            // Ignore parsing errors
-        }
-        return "Unknown error";
+    @FunctionalInterface
+    private interface PopupConfigurer {
+        void configure(FXMLLoader loader) throws Exception;
     }
 }

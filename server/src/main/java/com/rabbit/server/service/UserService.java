@@ -32,15 +32,27 @@ public class UserService {
     }
 
     public void deleteUser(Long userId, Long requestingUserId) {
-        if (!userId.equals(requestingUserId)) {
-            throw new SecurityException("You can only delete your own account");
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+        if (userRepository.findById(requestingUserId).isEmpty()) {
+            throw new IllegalArgumentException("Requesting user not found");
+        }
+        if (userRepository.findById(requestingUserId).get().getRole() == UserRole.WORKER) {
+            throw new IllegalArgumentException("Workers can't delete users");
         }
         userRepository.deleteById(userId);
     }
 
     public UserDto updateUser(Long userId, UserDto updatedData, String newPassword, Long requestingUserId) {
-        if (!userId.equals(requestingUserId)) {
-            throw new SecurityException("You can only update your own account");
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+        if (userRepository.findById(requestingUserId).isEmpty()) {
+            throw new IllegalArgumentException("Requesting user not found");
+        }
+        if (userRepository.findById(requestingUserId).get().getRole() == UserRole.WORKER) {
+            throw new IllegalArgumentException("Workers can't delete users");
         }
 
         UserDto existingUser = userRepository.findById(userId)
@@ -64,6 +76,9 @@ public class UserService {
             }
             existingUser.setEmail(updatedData.getEmail());
         }
+        if (updatedData.getRole() != null) {
+            existingUser.setRole(updatedData.getRole());
+        }
 
         userRepository.update(existingUser);
 
@@ -82,6 +97,10 @@ public class UserService {
     public UserDto getUserByNickname(String nickname) {
         return userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll();
     }
 
     public List<UserDto> getAllUsersFromProject(Long projectId) {

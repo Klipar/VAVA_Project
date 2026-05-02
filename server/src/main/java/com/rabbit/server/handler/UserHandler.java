@@ -83,6 +83,35 @@ public class UserHandler {
         };
     }
 
+    // GET /users/all
+    public HttpHandler getAllUsers() {
+        return exchange -> {
+            if (!exchange.getRequestMethod().equals("GET")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            Integer requestingUserId = resolveUserId(exchange);
+            if (requestingUserId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
+
+            try {
+                UserRole requesterRole = getUserRole(requestingUserId.longValue());
+                if (requesterRole != UserRole.MANAGER && requesterRole != UserRole.TEAM_LEADER) {
+                    send(exchange, 403, "{\"error\":\"Only Manager or Team Leader can view all users\"}");
+                    return;
+                }
+
+                List<UserDto> users = service.getAllUsers();
+                send(exchange, 200, mapper.writeValueAsString(users));
+            } catch (Exception e) {
+                send(exchange, 500, "{\"error\":\"Internal server error\"}");
+            }
+        };
+    }
+
     // GET /projects/{projectId}/users
     public HttpHandler getAllUsersFromProject() {
         return exchange -> {
@@ -171,6 +200,7 @@ public class UserHandler {
                 if (body.containsKey("nickname")) updatedData.setNickname((String) body.get("nickname"));
                 if (body.containsKey("email")) updatedData.setEmail((String) body.get("email"));
                 if (body.containsKey("skills")) updatedData.setSkills((String) body.get("skills"));
+                if (body.containsKey("role")) updatedData.setRole(UserRole.valueOf(((String) body.get("role")).toUpperCase()));
                 String newPassword = (String) body.get("password");
 
                 UserDto updatedUser = service.updateUser(targetUserId, updatedData, newPassword, requestingUserId.longValue());

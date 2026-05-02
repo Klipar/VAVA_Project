@@ -72,6 +72,11 @@ public class Main {
                     userHandler.getUserByNickname().handle(exchange);
                     return;
                 }
+                // GET /users/all
+                if (path.matches("/users/all$") && method.equals("GET")) {
+                    userHandler.getAllUsers().handle(exchange);
+                    return;
+                }
                 // GET /users/{userId}
                 if (path.matches("/users/\\d+$") && method.equals("GET")) {
                     userHandler.getUser().handle(exchange);
