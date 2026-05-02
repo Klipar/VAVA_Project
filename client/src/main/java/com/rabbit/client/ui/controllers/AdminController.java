@@ -20,6 +20,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.RadioButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -45,18 +47,25 @@ public class AdminController {
     @FXML private TableColumn<UserDto, String> emailColumn;
     @FXML private TableColumn<UserDto, String> roleColumn;
     @FXML private TableColumn<UserDto, Void> actionsColumn;
+    @FXML private RadioButton searchByLoginRadio;
+    @FXML private RadioButton searchByNameRadio;
+    @FXML private RadioButton searchByEmailRadio;
 
     private final ApiClient apiClient = ApiClient.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     private final ObservableList<UserDto> users = FXCollections.observableArrayList();
     private List<UserDto> allUsers = new ArrayList<>();
+    
+    private final ToggleGroup searchToggleGroup = new ToggleGroup();
 
     @Setter
     private MainController mainController;
 
     @FXML
     public void initialize() {
+        searchToggleGroup.getToggles().addAll(searchByLoginRadio, searchByNameRadio, searchByEmailRadio);
+
         configureTable();
         if (searchButton != null) {
             searchButton.setOnAction(event -> handleSearchUser());
@@ -132,7 +141,7 @@ public class AdminController {
                     double dx = evt.getScreenX() - lastX[0];
                     double range = h.getMax() - h.getMin();
                     if (range > 0) {
-                        double delta = -dx / 8.0;
+                        double delta = -dx / 2.0;
                         double newVal = Math.min(h.getMax(), Math.max(h.getMin(), h.getValue() + delta));
                         h.setValue(newVal);
                     }
@@ -145,18 +154,33 @@ public class AdminController {
 
     @FXML
     private void handleSearchUser() {
-        String query = searchLoginField.getText() == null ? "" : searchLoginField.getText().trim().toLowerCase();
+        String query = searchLoginField.getText().trim().toLowerCase();
         if (query.isEmpty()) {
             users.setAll(allUsers);
             return;
         }
-        List<UserDto> filtered = allUsers.stream()
-                .filter(user -> {
-                    String nick = user.getNickname() == null ? "" : user.getNickname().toLowerCase();
-                    return nick.contains(query);
-                })
-                .toList();
-        users.setAll(filtered);
+
+        new Thread(() -> {
+            try {
+                List<UserDto> filtered = new ArrayList<>();
+                for (UserDto user : allUsers) {
+                    String fieldToCheck = "";
+                    if (searchByLoginRadio.isSelected()) {
+                        fieldToCheck = user.getNickname();
+                    } else if (searchByNameRadio.isSelected()) {
+                        fieldToCheck = user.getName();
+                    } else if (searchByEmailRadio.isSelected()) {
+                        fieldToCheck = user.getEmail();
+                    }
+                    if (fieldToCheck != null && fieldToCheck.toLowerCase().contains(query)) {
+                        filtered.add(user);
+                    }
+                }
+                Platform.runLater(() -> users.setAll(filtered));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @FXML

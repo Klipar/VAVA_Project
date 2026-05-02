@@ -12,6 +12,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml/1"
            fx:id="overlayPane"
@@ -36,7 +38,14 @@
 
                     <VBox spacing="10" styleClass="admin-main-body">
                         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="admin-search-panel-inline">
-                            <Label text="Search:" styleClass="admin-inline-label"/>
+                            <Label text="Search by:" styleClass="admin-inline-label"/>
+                            <VBox spacing="10">
+                                <HBox spacing="16" alignment="CENTER_LEFT" styleClass="admin-radio-row">
+                                    <RadioButton fx:id="searchByLoginRadio" text="Login" selected="true"/>
+                                    <RadioButton fx:id="searchByNameRadio" text="Name"/>
+                                    <RadioButton fx:id="searchByEmailRadio" text="Email"/>
+                                </HBox>
+                            </VBox>
                             <TextField fx:id="searchLoginField" promptText="" HBox.hgrow="ALWAYS" styleClass="admin-search-field"/>
                             <Button fx:id="searchButton" text="⌕" prefWidth="28" prefHeight="28" styleClass="admin-search-icon-button" accessibleText="Search user" onAction="#handleSearchUser"/>
                         </HBox>
