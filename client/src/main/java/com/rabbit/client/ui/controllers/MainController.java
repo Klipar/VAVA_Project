@@ -1,6 +1,9 @@
 package com.rabbit.client.ui.controllers;
 
+import java.awt.*;
 import java.io.IOException;
+import java.util.Objects;
+
 import com.rabbit.client.service.UserService;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -10,11 +13,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import lombok.Getter;
+
+import javax.imageio.ImageIO;
 
 public class MainController {
     @Getter
@@ -28,6 +34,34 @@ public class MainController {
     public void initialize() {
         instance = this;
         com.rabbit.client.Config.getInstance().setMainController(this);
+
+        Platform.runLater(() -> {
+            try {
+                if (rootPane.getScene() != null && rootPane.getScene().getWindow() != null) {
+                    Stage stage = (Stage) rootPane.getScene().getWindow();
+                    String iconPath = "/com/rabbit/client/images/mega_cool_icon.png";
+
+                    Image fxImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream(iconPath)));
+                    stage.getIcons().add(fxImage);
+
+                    if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+                        java.awt.Image awtImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(iconPath)));
+
+                        java.awt.Image scaledImage = awtImage.getScaledInstance(512, 512, java.awt.Image.SCALE_SMOOTH);
+
+                        if (Taskbar.isTaskbarSupported()) {
+                            Taskbar taskbar = Taskbar.getTaskbar();
+                            if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                                taskbar.setIconImage(scaledImage);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Не вдалося встановити іконку: " + e.getMessage());
+            }
+        });
+
         if (!userService.isLoggedIn()) {
             redirectToLogin();
             return;
