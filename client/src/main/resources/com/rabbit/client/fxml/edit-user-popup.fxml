@@ -46,9 +46,9 @@
                     <Label text="Change the selected account details here." styleClass="admin-helper-text" wrapText="true"/>
                 </VBox>
 
-                <VBox spacing="6">
-                    <Label text="LOGIN" styleClass="field-label"/>
-                    <TextField fx:id="loginField" promptText="Login" styleClass="input-white"/>
+                <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="admin-field-card">
+                    <Label text="LOGIN" styleClass="admin-mini-label"/>
+                    <TextField fx:id="loginField" promptText="Login" styleClass="admin-mini-field"/>
                 </VBox>
 
                 <GridPane hgap="16" vgap="14">
@@ -73,17 +73,17 @@
                     </VBox>
                 </GridPane>
 
-                <VBox spacing="6">
-                    <Label text="PASSWORD" styleClass="field-label"/>
-                    <PasswordField fx:id="passwordField" promptText="Leave blank to keep current password" styleClass="input-white"/>
+                <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="admin-field-card">
+                    <Label text="PASSWORD" styleClass="admin-mini-label"/>
+                    <PasswordField fx:id="passwordField" promptText="Leave blank to keep current password" styleClass="admin-mini-field"/>
                 </VBox>
 
                 <VBox spacing="10">
                     <Label text="CHANGE USER MODE" styleClass="field-label"/>
                     <HBox spacing="16" alignment="CENTER_LEFT" styleClass="admin-radio-row">
                         <RadioButton fx:id="workerRoleRadio" text="Worker" selected="true"/>
-                        <RadioButton fx:id="managerRoleRadio" text="Manager" />
                         <RadioButton fx:id="teamLeaderRoleRadio" text="Team Leader"/>
+                        <RadioButton fx:id="managerRoleRadio" text="Manager" />
                     </HBox>
                 </VBox>
             </VBox>

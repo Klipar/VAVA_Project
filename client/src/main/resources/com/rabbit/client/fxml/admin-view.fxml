@@ -14,6 +14,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml/1"
            fx:id="overlayPane"
@@ -47,7 +49,15 @@
                                 </HBox>
                             </VBox>
                             <TextField fx:id="searchLoginField" promptText="" HBox.hgrow="ALWAYS" styleClass="admin-search-field"/>
-                            <Button fx:id="searchButton" text="⌕" prefWidth="28" prefHeight="28" styleClass="admin-search-icon-button" accessibleText="Search user" onAction="#handleSearchUser"/>
+                            <Button fx:id="searchButton"
+                                    onAction="#handleSearchUser"
+                                    styleClass="admin-search-icon-button">
+                                <graphic>
+                                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                        <Image url="@/com/rabbit/client/images/icons/search.png"/>
+                                    </ImageView>
+                                </graphic>
+                            </Button>
                         </HBox>
 
                         <VBox spacing="6" styleClass="admin-summary-card">

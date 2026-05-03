@@ -25,7 +25,7 @@
                       style="-fx-background-color: white; -fx-background-radius: 5;"/>
 
             <Separator style="-fx-background-color: #4a9eda;"/>
-            
+
             <Label text="Deadline" />
             <DatePicker fx:id="deadlinePicker" promptText="Select deadline" />
 
