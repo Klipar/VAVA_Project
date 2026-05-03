@@ -45,7 +45,7 @@
                 prefHeight="60"
                 onAction="#handleContinue"/>
 
-        <Button fx:id="importFirstBtn"
+        <Button fx:id="importFirstBtn" onAction="#handleImportSkills"
                 text="%import_skills_btn"
                 prefWidth="220"
                 prefHeight="60"/>
