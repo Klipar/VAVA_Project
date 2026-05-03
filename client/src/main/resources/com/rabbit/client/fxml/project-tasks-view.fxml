@@ -11,10 +11,10 @@
            style="-fx-text-fill: white; -fx-font-size: 48px; -fx-font-weight: bold;"/>
 
     <HBox spacing="15" alignment="CENTER_LEFT">
-        <Button fx:id="boardBtn" text="BOARD" prefWidth="200" prefHeight="50" styleClass="top-nav-button"/>
-        <Button fx:id="listBtn"  text="LIST"  prefWidth="200" prefHeight="50" styleClass="top-nav-button, active-nav-button"/>
-        <Button fx:id="tasksBtn" text="TASKS" prefWidth="200" prefHeight="50" styleClass="top-nav-button"/>
-        <Button fx:id="topCreateTaskBtn" text="CREATE TASK" visible="false" managed="false"
+        <Button fx:id="boardBtn" text="%board_btn" prefWidth="200" prefHeight="50" styleClass="top-nav-button"/>
+        <Button fx:id="listBtn"  text="%list_btn"  prefWidth="200" prefHeight="50" styleClass="top-nav-button, active-nav-button"/>
+        <Button fx:id="tasksBtn" text="%tasks_btn" prefWidth="200" prefHeight="50" styleClass="top-nav-button"/>
+        <Button fx:id="topCreateTaskBtn" text="%create_task_btn" visible="false" managed="false"
                 prefWidth="200" prefHeight="50" styleClass="top-nav-button, create-task-button"/>
     </HBox>
 
@@ -31,15 +31,15 @@
             </columnResizePolicy>
 
             <columns>
-                <TableColumn fx:id="titleColumn"       text="TASK NAME" />
-                <TableColumn fx:id="descriptionColumn" text="DESCRIPTION" />
-                <TableColumn fx:id="statusColumn"      text="STATUS" />
-                <TableColumn fx:id="assigneeColumn"    text="ASSIGNEE" />
-                <TableColumn fx:id="deadlineColumn"    text="DEADLINE" />
+                <TableColumn fx:id="titleColumn"       text="%col_task_name" />
+                <TableColumn fx:id="descriptionColumn" text="%col_description" />
+                <TableColumn fx:id="statusColumn"      text="%col_status" />
+                <TableColumn fx:id="assigneeColumn"    text="%col_assignee" />
+                <TableColumn fx:id="deadlineColumn"    text="%col_deadline" />
             </columns>
 
             <placeholder>
-                <Label text="No tasks in this project." style="-fx-text-fill: #6b7a99; -fx-font-size: 14px;"/>
+                <Label text="%no_tasks_project" style="-fx-text-fill: #6b7a99; -fx-font-size: 14px;"/>
             </placeholder>
         </TableView>
     </VBox>

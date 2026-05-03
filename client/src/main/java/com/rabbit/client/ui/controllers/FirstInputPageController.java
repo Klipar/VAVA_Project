@@ -73,7 +73,10 @@ public class FirstInputPageController
             Config.getInstance().setUser(user);
             System.out.println("Config user set: " + user.getName());
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/main-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/rabbit/client/fxml/main-view.fxml"),
+                Config.getInstance().getBundle()
+            );
             Scene scene = new Scene(loader.load(), 1000, 700);
             scene.getStylesheets().add(getClass().getResource("/com/rabbit/client/css/style.css").toExternalForm());
             Stage stage = (Stage) continueFirstBtn.getScene().getWindow();

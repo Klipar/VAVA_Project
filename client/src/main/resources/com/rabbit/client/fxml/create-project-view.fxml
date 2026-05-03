@@ -10,26 +10,25 @@
     <VBox spacing="20" style="-fx-background-color: #09263E;">
         <padding><Insets top="40" left="60" right="60" bottom="40"/></padding>
 
-        <Label text="CREATE PROJECT" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+        <Label text="%create_project_title" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
 
-        <!-- Card -->
         <VBox spacing="20" style="-fx-background-color: #0d2137; -fx-background-radius: 10; -fx-padding: 30;">
 
-            <Label text="NAME NEW PROJECT:" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Label text="%name_new_project" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
             <TextField fx:id="nameField" style="-fx-background-color: white; -fx-background-radius: 5;"/>
 
             <Separator style="-fx-background-color: #4a9eda;"/>
 
-            <Label text="DESCRIPTION:" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Label text="%description" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
             <TextArea fx:id="descriptionField" prefHeight="120"
                       style="-fx-background-color: white; -fx-background-radius: 5;"/>
 
             <Separator style="-fx-background-color: #4a9eda;"/>
-            
-            <Label text="Deadline" />
-            <DatePicker fx:id="deadlinePicker" promptText="Select deadline" />
 
-            <Label text="ASSIGNED:" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Label text="%deadline" />
+            <DatePicker fx:id="deadlinePicker" promptText="%select_deadline" />
+
+            <Label text="%assigned_label" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <TextField fx:id="assignField" prefWidth="400"
                            style="-fx-background-color: white; -fx-background-radius: 20; -fx-background-insets: 0; -fx-padding: 5 15 5 15;"/>
@@ -40,7 +39,7 @@
 
         </VBox>
 
-        <Button text="CREATE PROJECT" onAction="#handleCreateProject"
+        <Button text="%create_project_btn" onAction="#handleCreateProject"
                 maxWidth="1.7976931348623157E308"
                 style="-fx-background-color: #4a9eda; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12; -fx-background-radius: 5; -fx-cursor: hand;"/>
 

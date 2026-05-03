@@ -1,5 +1,6 @@
 package com.rabbit.client;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -8,14 +9,16 @@ import com.rabbit.common.dto.UserDto;
 
 public class Config {
     private UserDto user = null;
-    private ResourceBundle bundle = null;
-    private Locale currentLocale = null;
+    private ResourceBundle bundle;
+    private Locale currentLocale;
     private String token = null;
     private MainController mainController;
     private static final String BASE_URL = "http://localhost:6969";
 
     private Config() {
+        currentLocale = Locale.of("en");
         Locale.setDefault(Locale.US);
+        bundle = ResourceBundle.getBundle("com.rabbit.client.localization.messages", currentLocale);
     }
 
     private static class Holder {
@@ -52,13 +55,17 @@ public class Config {
 
     public void setUser(UserDto user) {
         this.user = user;
-        this.currentLocale = Locale.of("en"); // TODO: in future extract locale from user
-        // this.currentLocale = Locale.of("sk");
+    }
 
-        bundle = ResourceBundle.getBundle(
-            "com.rabbit.client.localization.messages",
-            currentLocale
-        );
+    public void setLocale(String localeCode) {
+        this.currentLocale = Locale.of(localeCode);
+        this.bundle = ResourceBundle.getBundle("com.rabbit.client.localization.messages", currentLocale);
+    }
+
+    public DateTimeFormatter getDateTimeFormatter() {
+        String pattern = bundle.getString("date_time_format");
+        Locale fmtLocale = "sk".equals(currentLocale.getLanguage()) ? currentLocale : Locale.ENGLISH;
+        return DateTimeFormatter.ofPattern(pattern, fmtLocale);
     }
 
     public void setBundle(ResourceBundle bundle) {

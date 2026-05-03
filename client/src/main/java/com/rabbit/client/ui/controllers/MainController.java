@@ -1,6 +1,7 @@
 package com.rabbit.client.ui.controllers;
 
 import java.io.IOException;
+import com.rabbit.client.Config;
 import com.rabbit.client.service.UserService;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -24,10 +25,14 @@ public class MainController {
     @FXML private StackPane overlayPane;
     private final UserService userService = UserService.getInstance();
 
+    private String currentViewFxml = "home-view.fxml";
+    private Integer currentProjectId = null;
+    private String currentProjectTitle = null;
+
     @FXML
     public void initialize() {
         instance = this;
-        com.rabbit.client.Config.getInstance().setMainController(this);
+        Config.getInstance().setMainController(this);
         if (!userService.isLoggedIn()) {
             redirectToLogin();
             return;
@@ -41,7 +46,10 @@ public class MainController {
 
     private void redirectToLogin() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/login_page.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/rabbit/client/fxml/login_page.fxml"),
+                Config.getInstance().getBundle()
+            );
             Scene scene = new Scene(loader.load(), 1000, 700);
             scene.getStylesheets().add(getClass().getResource("/com/rabbit/client/css/style.css").toExternalForm());
             Stage stage = (Stage) rootPane.getScene().getWindow();
@@ -51,6 +59,7 @@ public class MainController {
             e.printStackTrace();
         }
     }
+
     public void loadView(String fxmlName) {
         loadView(fxmlName, null, null);
     }
@@ -58,8 +67,15 @@ public class MainController {
     public void loadView(String fxmlName, Integer projectId, String projectName) {
         try {
             String path = "/com/rabbit/client/fxml/" + fxmlName;
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource(path),
+                Config.getInstance().getBundle()
+            );
             Parent view = loader.load();
+
+            this.currentViewFxml = fxmlName;
+            this.currentProjectId = projectId;
+            this.currentProjectTitle = projectName;
 
             Object controller = loader.getController();
 
@@ -84,6 +100,10 @@ public class MainController {
             System.err.println("Помилка завантаження FXML: " + fxmlName);
             e.printStackTrace();
         }
+    }
+
+    public void reloadCurrentView() {
+        loadView(currentViewFxml, currentProjectId, currentProjectTitle);
     }
 
     public void openProjectTasks(int projectId, String projectTitle) {
