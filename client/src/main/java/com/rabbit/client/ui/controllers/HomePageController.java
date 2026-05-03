@@ -22,7 +22,6 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,8 +35,6 @@ public class HomePageController {
 
     private final ApiClient apiClient = ApiClient.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
-    private DateTimeFormatter displayFormatter;
-
     @Setter
     private MainController mainController;
 
@@ -45,7 +42,6 @@ public class HomePageController {
 
     @FXML
     public void initialize() {
-        displayFormatter = Config.getInstance().getDateTimeFormatter();
         setupTableColumns();
         setupTableSelection();
         checkPermissions();
@@ -115,7 +111,7 @@ public class HomePageController {
                         try {
                             // Сервер присилає LocalDateTime.toString(), парсимо його
                             java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(rawDeadline);
-                            formattedDate = ldt.format(displayFormatter).toUpperCase();
+                            formattedDate = ldt.format(Config.getInstance().getDateTimeFormatter()).toUpperCase();
                         } catch (Exception e) {
                             formattedDate = rawDeadline.toUpperCase();
                         }

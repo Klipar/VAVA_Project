@@ -35,8 +35,6 @@ public class ProjectsTaskController {
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newHttpClient();
 
-    private DateTimeFormatter displayFormatter;
-
     private int currentProjectId;
     private String currentProjectTitle;
     @Setter
@@ -68,7 +66,6 @@ public class ProjectsTaskController {
 
     @FXML
     public void initialize() {
-        displayFormatter = Config.getInstance().getDateTimeFormatter();
         setupColumns();
     }
 
@@ -164,7 +161,7 @@ public class ProjectsTaskController {
         try {
             if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) deadlineStr += "Z";
             java.time.ZonedDateTime zdt = java.time.ZonedDateTime.parse(deadlineStr);
-            return zdt.format(displayFormatter).toUpperCase();
+            return zdt.format(Config.getInstance().getDateTimeFormatter()).toUpperCase();
         } catch (Exception e) {
             return deadlineStr.toUpperCase();
         }

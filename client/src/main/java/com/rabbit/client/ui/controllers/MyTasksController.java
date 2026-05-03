@@ -38,11 +38,8 @@ public class MyTasksController {
 
     @Setter
     private MainController mainController;
-    private DateTimeFormatter displayFormatter;
-
     @FXML
     public void initialize() {
-        displayFormatter = Config.getInstance().getDateTimeFormatter();
         setupColumns();
         loadTask();
     }
@@ -154,7 +151,7 @@ public class MyTasksController {
                         try {
                             if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) deadlineStr += "Z";
                             java.time.ZonedDateTime zdt = java.time.ZonedDateTime.parse(deadlineStr);
-                            formattedDate = zdt.format(displayFormatter).toUpperCase();
+                            formattedDate = zdt.format(Config.getInstance().getDateTimeFormatter()).toUpperCase();
                         } catch (Exception e) {
                             formattedDate = deadlineStr.toUpperCase();
                         }
