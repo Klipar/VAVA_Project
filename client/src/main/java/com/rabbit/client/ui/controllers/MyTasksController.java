@@ -38,10 +38,11 @@ public class MyTasksController {
 
     @Setter
     private MainController mainController;
-    private final DateTimeFormatter displayFormatter =
-            DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH);
+    private DateTimeFormatter displayFormatter;
+
     @FXML
     public void initialize() {
+        displayFormatter = Config.getInstance().getDateTimeFormatter();
         setupColumns();
         loadTask();
     }
@@ -49,7 +50,7 @@ public class MyTasksController {
     private void loadTask() {
         String token = Config.getInstance().getToken();
         if(token == null || token.isEmpty()){
-            statusLabel.setText("Please login to view your tasks");
+            statusLabel.setText(Config.getInstance().getBundle().getString("please_login"));
             return;
         }
 
@@ -63,7 +64,7 @@ public class MyTasksController {
             HttpResponse<String> projectRes = client.send(projectRequest,HttpResponse.BodyHandlers.ofString());
 
             if(projectRes.statusCode() != 200){
-                statusLabel.setText("Failed to load projects");
+                statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_projects"));
                 return;
             }
 
@@ -100,10 +101,10 @@ public class MyTasksController {
             }
             ObservableList<TaskDto> observableTasks = FXCollections.observableArrayList(myTasks);
             tasksTable.setItems(observableTasks);
-            statusLabel.setText("Tasks loaded");
+            statusLabel.setText(Config.getInstance().getBundle().getString("tasks_loaded"));
         }catch (Exception e){
             e.printStackTrace();
-            statusLabel.setText("Failed to load tasks");
+            statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_tasks"));
         }
     }
 
@@ -147,7 +148,7 @@ public class MyTasksController {
                     setText(null);
                 } else {
                     String deadlineStr = getTableRow().getItem().getDeadline();
-                    String formattedDate = "NO DEADLINE";
+                    String formattedDate = Config.getInstance().getBundle().getString("no_deadline");
 
                     if (deadlineStr != null && !deadlineStr.isBlank() && !"null".equalsIgnoreCase(deadlineStr)) {
                         try {

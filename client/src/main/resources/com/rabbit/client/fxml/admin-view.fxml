@@ -3,5 +3,5 @@
 <?import javafx.scene.control.Label?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml/1" style="-fx-background-color: #09263E;">
-    <Label text="This page ADMIN Panel" style="-fx-text-fill: white; -fx-font-size: 24px;"/>
+    <Label text="%admin_title" style="-fx-text-fill: white; -fx-font-size: 24px;"/>
 </StackPane>

@@ -194,7 +194,8 @@ public class BoardController {
     private void openCreateTaskPopup() {
         try {
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/com/rabbit/client/fxml/create-task-popup.fxml")
+                getClass().getResource("/com/rabbit/client/fxml/create-task-popup.fxml"),
+                com.rabbit.client.Config.getInstance().getBundle()
             );
             Pane overlay = loader.load();
 
@@ -216,7 +217,10 @@ public class BoardController {
             VBox column = new VBox(15);
             column.getStyleClass().add("column-container");
 
-            Label header = new Label(status.getValue().toUpperCase().replace("_", " "));
+            String statusKey = "status_" + status.getValue();
+            java.util.ResourceBundle rb = com.rabbit.client.Config.getInstance().getBundle();
+            String headerText = rb.containsKey(statusKey) ? rb.getString(statusKey) : status.getValue().toUpperCase().replace("_", " ");
+            Label header = new Label(headerText);
             header.getStyleClass().add("column-header-label");
             header.setMaxWidth(Double.MAX_VALUE);
             header.setAlignment(Pos.CENTER);

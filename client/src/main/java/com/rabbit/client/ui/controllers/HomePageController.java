@@ -2,6 +2,7 @@ package com.rabbit.client.ui.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabbit.client.Config;
 import com.rabbit.client.service.ApiClient;
 import com.rabbit.client.service.UserService;
 import com.rabbit.common.dto.ProjectDto;
@@ -24,7 +25,6 @@ import java.net.http.HttpResponse;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 public class HomePageController {
@@ -36,7 +36,7 @@ public class HomePageController {
 
     private final ApiClient apiClient = ApiClient.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
-    private final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy, HH:mm", Locale.ENGLISH);
+    private DateTimeFormatter displayFormatter;
 
     @Setter
     private MainController mainController;
@@ -45,6 +45,7 @@ public class HomePageController {
 
     @FXML
     public void initialize() {
+        displayFormatter = Config.getInstance().getDateTimeFormatter();
         setupTableColumns();
         setupTableSelection();
         checkPermissions();
@@ -108,7 +109,7 @@ public class HomePageController {
                     setGraphic(null);
                 } else {
                     String rawDeadline = getTableRow().getItem().getDeadline();
-                    String formattedDate = "NO DEADLINE";
+                    String formattedDate = Config.getInstance().getBundle().getString("no_deadline");
 
                     if (rawDeadline != null && !rawDeadline.isEmpty()) {
                         try {
@@ -211,7 +212,7 @@ public class HomePageController {
             header.getChildren().add(new ImageView(new Image(starStream)) {{ setFitWidth(18); setFitHeight(18); }});
         }
 
-        Hyperlink openTasks = new Hyperlink("VIEW OPEN TASKS");
+        Hyperlink openTasks = new Hyperlink(Config.getInstance().getBundle().getString("view_open_tasks"));
         openTasks.getStyleClass().add("project-link");
         openTasks.setOnAction(e -> navigateToProjectBoard(project));
 

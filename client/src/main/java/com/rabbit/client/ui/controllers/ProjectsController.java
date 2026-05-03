@@ -67,16 +67,17 @@ public class ProjectsController {
         Label title = new Label(project.getTitle());
         title.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
 
-        Button openTasks = new Button("VIEW OPEN TASKS");
+        java.util.ResourceBundle rb = Config.getInstance().getBundle();
+        Button openTasks = new Button(rb.getString("view_open_tasks"));
         openTasks.setStyle("-fx-background-color: transparent; -fx-text-fill: #fcfcfc; -fx-padding: 0; -fx-cursor: hand;");
 
-        Button assignedTasks = new Button("VIEW ASSIGNED TASKS");
+        Button assignedTasks = new Button(rb.getString("view_assigned_tasks"));
         assignedTasks.setStyle("-fx-background-color: transparent; -fx-text-fill: #fcfcfc; -fx-padding: 0; -fx-cursor: hand;");
 
         card.getChildren().addAll(title, openTasks, assignedTasks);
 
         if (project.getMasterId() == Config.getInstance().getUser().getId()) {
-            Button deleteBtn = new Button("DELETE");
+            Button deleteBtn = new Button(rb.getString("delete"));
             deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #e05555; -fx-padding: 0; -fx-cursor: hand;");
             deleteBtn.setOnAction(e -> {
                 if (confirmProjectDeletion(project.getTitle())) {
@@ -127,10 +128,11 @@ public class ProjectsController {
     }
 
     private boolean confirmProjectDeletion(String projectTitle) {
+        java.util.ResourceBundle rb = Config.getInstance().getBundle();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Project");
-        alert.setHeaderText("Delete project \"" + projectTitle + "\"?");
-        alert.setContentText("Are you sure you want to delete this project?");
+        alert.setTitle(rb.getString("delete_project_title"));
+        alert.setHeaderText(rb.getString("delete_project_header") + " \"" + projectTitle + "\"");
+        alert.setContentText(rb.getString("delete_project_confirm"));
 
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
