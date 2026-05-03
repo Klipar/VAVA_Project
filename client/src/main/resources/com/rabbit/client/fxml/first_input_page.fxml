@@ -48,7 +48,7 @@
                 onAction="#handleContinue"
                 />
 
-        <Button fx:id="importFirstBtn"
+        <Button fx:id="importFirstBtn" onAction="#handleImportSkills"
                 text="IMPORT SKILLS"
                 prefWidth="220"
                 prefHeight="60"
