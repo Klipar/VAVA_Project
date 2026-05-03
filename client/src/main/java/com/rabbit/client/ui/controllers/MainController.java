@@ -1,6 +1,7 @@
 package com.rabbit.client.ui.controllers;
 
 import java.io.IOException;
+import com.rabbit.client.service.NotificationPollingService;
 import com.rabbit.client.service.UserService;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -36,6 +37,9 @@ public class MainController {
             sidebarController.setMainController(this);
             sidebarController.initMenu();
         }
+
+        NotificationPollingService.getInstance().start();
+
         loadView("home-view.fxml");
     }
 
@@ -77,6 +81,9 @@ public class MainController {
                 }
             } else if (controller instanceof MyTasksController myTasks) {
                 myTasks.setMainController(this);
+            } else if (controller instanceof NotificationCenterController notifications) {
+                notifications.setMainController(this);
+                notifications.loadNotifications();
             }
 
             rootPane.setCenter(view);
@@ -128,5 +135,9 @@ public class MainController {
             fadeIn.play();
             fadeOut.play();
         });
+    }
+
+    public void shutdown() {
+        NotificationPollingService.getInstance().stop();
     }
 }
