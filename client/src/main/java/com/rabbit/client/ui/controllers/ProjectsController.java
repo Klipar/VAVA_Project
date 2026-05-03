@@ -60,17 +60,26 @@ public class ProjectsController {
 
     private VBox createProjectCard(ProjectDto project) {
         VBox card = new VBox(10);
-        card.setPrefWidth(220);
-        card.setPrefHeight(120);
+        card.setPrefSize(240, 140);
+        card.setCursor(javafx.scene.Cursor.HAND);
+        card.setOnMouseClicked(e -> navigateToProjectBoard(project));
+
         card.setStyle("-fx-background-color: #0d2137; -fx-background-radius: 8; -fx-padding: 15;");
 
         Label title = new Label(project.getTitle());
         title.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
 
         Button openTasks = new Button("VIEW OPEN TASKS");
+        openTasks.setOnAction(e -> navigateToProjectTasks(project));
         openTasks.setStyle("-fx-background-color: transparent; -fx-text-fill: #fcfcfc; -fx-padding: 0; -fx-cursor: hand;");
 
-        Button assignedTasks = new Button("VIEW ASSIGNED TASKS");
+        UserDto user = Config.getInstance().getUser();
+        Button assignedTasks = new Button();
+        if (user.getRole() != UserRole.MANAGER) {
+            assignedTasks = new Button("VIEW ASSIGNED TASKS");
+            assignedTasks.setOnAction(e -> navigateToAssignedTasks(project));
+        }
+
         assignedTasks.setStyle("-fx-background-color: transparent; -fx-text-fill: #fcfcfc; -fx-padding: 0; -fx-cursor: hand;");
 
         card.getChildren().addAll(title, openTasks, assignedTasks);
@@ -134,5 +143,17 @@ public class ProjectsController {
 
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
+    }
+
+    private void navigateToProjectBoard(ProjectDto project) {
+        Config.getInstance().getMainController().loadView("board-page.fxml", project.getId(), project.getTitle());
+    }
+
+    private void navigateToAssignedTasks(ProjectDto project) {
+        Config.getInstance().getMainController().loadView("my-tasks-view.fxml", project.getId(), project.getTitle());
+    }
+
+    private void navigateToProjectTasks(ProjectDto project) {
+        Config.getInstance().getMainController().loadView("project-tasks-view.fxml", project.getId(), project.getTitle());
     }
 }
