@@ -122,8 +122,9 @@ public class SidebarController {
 
         container.getChildren().add(buildLanguageRow("ENGLISH", "en", current.equals("en")));
 
-        Separator sep = new Separator();
-        sep.setStyle("-fx-background-color: #1e3a5f;");
+        javafx.scene.layout.Region sep = new javafx.scene.layout.Region();
+        sep.setPrefHeight(1);
+        sep.setStyle("-fx-background-color: rgba(107,114,128,0.4);");
         container.getChildren().add(sep);
 
         container.getChildren().add(buildLanguageRow("SLOVAK", "sk", current.equals("sk")));
