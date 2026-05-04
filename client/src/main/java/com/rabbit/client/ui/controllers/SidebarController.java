@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 
 import com.rabbit.client.Config;
+import com.rabbit.client.service.NotificationPollingService;
 import com.rabbit.common.dto.UserDto;
 import com.rabbit.common.enums.UserRole;
 
@@ -44,7 +45,7 @@ public class SidebarController {
         if (user.getRole() == UserRole.MANAGER || user.getRole() == UserRole.TEAM_LEADER)
             createButton(rb.getString("admin_panel"), "admin-view.fxml", "settings.png");
 
-        createButton(rb.getString("notifications"), "notifications-view.fxml", "notificatios.png");
+        createNotificationButton(rb.getString("notifications"), "notificatios.png");
         createButton(rb.getString("profile"), "profile-view.fxml", "person.png");
 
         setupLanguageButton(rb.getString("language_btn"));
@@ -89,6 +90,36 @@ public class SidebarController {
 
         btn.setOnAction(event -> {
             if (mainController != null) mainController.loadView(fxmlName);
+        });
+
+        menuItemsContainer.getChildren().add(btn);
+    }
+
+    private void createNotificationButton(String text, String iconName) {
+        Button btn = new Button(text);
+
+        try {
+            String imagePath = "/com/rabbit/client/images/icons/" + iconName;
+            javafx.scene.image.Image image = new javafx.scene.image.Image(getClass().getResourceAsStream(imagePath));
+            javafx.scene.image.ImageView imageView = new javafx.scene.image.ImageView(image);
+
+            imageView.setFitWidth(18);
+            imageView.setFitHeight(18);
+
+            imageView.getStyleClass().add("button-icon");
+
+            btn.setGraphic(imageView);
+            btn.setGraphicTextGap(12);
+        } catch (Exception e) {
+            System.err.println("Icon not found: " + iconName);
+        }
+
+        btn.getStyleClass().add("sidebar-button");
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        btn.setOnAction(event -> {
+            NotificationPollingService.getInstance().showNotificationPopup();
         });
 
         menuItemsContainer.getChildren().add(btn);

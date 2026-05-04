@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import com.rabbit.client.Config;
+import com.rabbit.client.service.NotificationPollingService;
 import com.rabbit.client.service.UserService;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -28,6 +29,7 @@ public class MainController {
     private static MainController instance;
     @FXML private BorderPane rootPane;
     @FXML private SidebarController sidebarController;
+    @Getter
     @FXML private StackPane overlayPane;
     private final UserService userService = UserService.getInstance();
 
@@ -76,6 +78,9 @@ public class MainController {
             sidebarController.setMainController(this);
             sidebarController.initMenu();
         }
+
+        NotificationPollingService.getInstance().start();
+
         loadView("home-view.fxml");
     }
 
@@ -185,5 +190,9 @@ public class MainController {
             fadeIn.play();
             fadeOut.play();
         });
+    }
+
+    public void shutdown() {
+        NotificationPollingService.getInstance().stop();
     }
 }

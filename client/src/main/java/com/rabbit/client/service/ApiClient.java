@@ -1,14 +1,17 @@
 package com.rabbit.client.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.client.Config;
+import com.rabbit.common.dto.NotificationDto;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.List;
 
 public class ApiClient {
     private static ApiClient instance;
@@ -141,5 +144,18 @@ public class ApiClient {
 
     public boolean isNotFound(HttpResponse<String> response) {
         return response.statusCode() == 404;
+    }
+
+    public List<NotificationDto> getNotifications() throws Exception {
+        HttpResponse<String> response = get("/notifications");
+        if (isSuccess(response)) {
+            return objectMapper.readValue(response.body(), new TypeReference<List<NotificationDto>>() {});
+        }
+        return List.of();
+    }
+
+    public boolean markNotificationAsRead(long notificationId) throws Exception {
+        HttpResponse<String> response = put("/notifications/" + notificationId + "/read", "{}");
+        return isSuccess(response);
     }
 }

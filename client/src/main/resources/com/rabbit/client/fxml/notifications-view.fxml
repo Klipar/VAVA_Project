@@ -1,6 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.control.Label?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml/1" style="-fx-background-color: #09263E;">
     <Label text="%notifications_title" style="-fx-text-fill: white; -fx-font-size: 24px;"/>

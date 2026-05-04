@@ -1,6 +1,7 @@
 package com.rabbit.client;
 
 import com.rabbit.client.service.UserService;
+import com.rabbit.client.ui.controllers.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -34,6 +35,14 @@ public class MainApp extends Application {
 
         stage.setTitle("Rabbit Client");
         stage.setScene(scene);
+
+        stage.setOnCloseRequest(event -> {
+            MainController mainController = MainController.getInstance();
+            if (mainController != null) {
+                mainController.shutdown();
+            }
+        });
+
         stage.show();
     }
 
