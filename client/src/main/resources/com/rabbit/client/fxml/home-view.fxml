@@ -11,15 +11,15 @@
     <VBox spacing="30" style="-fx-background-color: transparent;">
         <padding><Insets top="30" left="30" right="30" bottom="30"/></padding>
 
-        <Label text="HOMEPAGE" style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;"/>
+        <Label text="%homepage" style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;"/>
 
         <VBox spacing="20">
-            <Label text="RECENT PROJECTS" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Label text="%recent_projects" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
             <FlowPane fx:id="projectsContainer" hgap="20" vgap="20" />
         </VBox>
 
         <VBox fx:id="tasksSection" spacing="20">
-            <Label text="YOUR TASKS, WHICH ARE ABOUT TO EXPIRE"
+            <Label text="%tasks_expiring"
                    style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
 
             <TableView fx:id="tasksTable" prefHeight="300" styleClass="dark-table"
@@ -29,10 +29,10 @@
                               -fx-border-color: transparent;
                               -fx-background-insets: 0;">
                 <columns>
-                    <TableColumn fx:id="colTaskName" text="TASK NAME" prefWidth="250" />
-                    <TableColumn fx:id="colProject" text="FROM PROJECT" prefWidth="200" />
-                    <TableColumn fx:id="colPriority" text="PRIORITY" prefWidth="120" />
-                    <TableColumn fx:id="colDueDate" text="DUE DATE" prefWidth="250" />
+                    <TableColumn fx:id="colTaskName" text="%col_task_name" prefWidth="250" />
+                    <TableColumn fx:id="colProject" text="%col_from_project" prefWidth="200" />
+                    <TableColumn fx:id="colPriority" text="%col_priority" prefWidth="120" />
+                    <TableColumn fx:id="colDueDate" text="%col_due_date" prefWidth="250" />
                 </columns>
                 <columnResizePolicy>
                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

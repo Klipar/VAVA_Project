@@ -1,5 +1,6 @@
 package com.rabbit.client.component;
 
+import com.rabbit.client.Config;
 import com.rabbit.common.dto.TaskDto;
 import com.rabbit.common.enums.Priority; // Імпортуємо наш енум
 import javafx.geometry.Pos;
@@ -10,14 +11,11 @@ import javafx.scene.layout.*;
 import lombok.Getter;
 
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Objects;
 
 public class TaskCardComponent extends VBox {
     @Getter
     private final TaskDto task;
-    private final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy, HH:mm", Locale.ENGLISH);
 
     public TaskCardComponent(TaskDto task) {
         this.task = task;
@@ -62,13 +60,14 @@ public class TaskCardComponent extends VBox {
     }
 
     private String formatDeadline(String deadlineStr) {
-        if (deadlineStr == null || deadlineStr.isEmpty() || "null".equals(deadlineStr)) return "No deadline";
+        if (deadlineStr == null || deadlineStr.isEmpty() || "null".equals(deadlineStr))
+            return Config.getInstance().getBundle().getString("no_deadline");
         try {
             if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) {
                 deadlineStr += "Z";
             }
             ZonedDateTime zdt = ZonedDateTime.parse(deadlineStr);
-            return zdt.format(displayFormatter);
+            return zdt.format(Config.getInstance().getDateTimeFormatter());
         } catch (Exception e) {
             return deadlineStr;
         }

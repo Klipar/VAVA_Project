@@ -10,15 +10,15 @@
     <VBox spacing="30" style="-fx-background-color: transparent;">
         <padding><Insets top="30" left="30" right="30" bottom="40"/></padding>
 
-        <Label text="MY PROJECTS" style="-fx-text-fill: #fcfcfc; -fx-font-size: 36px; -fx-font-weight: bold;"/>
+        <Label text="%my_projects_title" style="-fx-text-fill: #fcfcfc; -fx-font-size: 36px; -fx-font-weight: bold;"/>
 
         <VBox spacing="20">
-            <Label text="RECENT PROJECTS" style="-fx-text-fill: #fcfcfc; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Label text="%recent_projects_section" style="-fx-text-fill: #fcfcfc; -fx-font-size: 20px; -fx-font-weight: bold;"/>
             <FlowPane fx:id="recentProjectsPane" hgap="20" vgap="20"/>
         </VBox>
 
         <VBox spacing="20">
-            <Label text="YOUR PROJECTS" style="-fx-text-fill: #fcfcfc; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Label text="%your_projects" style="-fx-text-fill: #fcfcfc; -fx-font-size: 20px; -fx-font-weight: bold;"/>
             <FlowPane fx:id="yourProjectsPane" hgap="20" vgap="20"/>
         </VBox>
 

@@ -2,7 +2,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.Region?>
 
 <VBox fx:id="sidebarContainer" prefWidth="250.0" spacing="10.0"
       style="-fx-background-color: #051020;" xmlns="http://javafx.com/javafx/17"
@@ -13,7 +12,7 @@
                 <Insets bottom="20.0" left="15.0" right="15.0" top="20.0" />
             </padding>
         </VBox>
-        <Button maxWidth="1.7976931348623157E308" fx:id="change_language" text="LANGUAGE" styleClass="sidebar-button">
+        <Button fx:id="languageBtn" maxWidth="1.7976931348623157E308" styleClass="sidebar-button">
             <VBox.margin>
                 <Insets bottom="20.0" left="15.0" right="15.0" />
             </VBox.margin>

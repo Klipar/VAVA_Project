@@ -10,60 +10,53 @@
 
     <VBox HBox.hgrow="ALWAYS" style="-fx-padding: 30 30 30 30;">
 
-        <Label text="ABOUT YOU"
+        <Label text="%about_you"
                style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-padding: 0 0 20 0;"/>
 
         <HBox spacing="20">
-            <!-- Form card -->
             <VBox HBox.hgrow="ALWAYS" spacing="12"
                   style="-fx-background-color: #253447; -fx-padding: 25; -fx-background-radius: 10;">
 
-                <!-- Full name -->
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Full name" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <Label text="%full_name" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Change name"
+                    <Button text="%change_name"
                             style="-fx-background-color: #3a4a5e; -fx-text-fill: white; -fx-background-radius: 20;"
                             onAction="#handleChangeName"/>
                 </HBox>
                 <TextField fx:id="fullNameField" style="-fx-background-radius: 5;" editable="false"/>
 
-                <!-- Login -->
-                <Label text="Your Login" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                <Label text="%your_login" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
                 <TextField fx:id="loginField" style="-fx-background-radius: 5;" editable="false"/>
 
-                <!-- Email -->
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Email address" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <Label text="%email_address" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Change Email"
+                    <Button text="%change_email"
                             style="-fx-background-color: #3a4a5e; -fx-text-fill: white; -fx-background-radius: 20;"
                             onAction="#handleChangeEmail"/>
                 </HBox>
                 <TextField fx:id="emailField" style="-fx-background-radius: 5;" editable="false"/>
 
-                <!-- Password -->
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Password" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                    <Label text="%password" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Change password"
+                    <Button text="%change_password"
                             style="-fx-background-color: #3a4a5e; -fx-text-fill: white; -fx-background-radius: 20;"
                             onAction="#handleChangePassword"/>
                 </HBox>
                 <PasswordField fx:id="passwordField" promptText="••••••••••••"
                                style="-fx-background-radius: 5;" editable="false"/>
 
-                <!-- Skills -->
-                <Label text="Detailed info about skills" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                <Label text="%skills_details" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
                 <TextArea fx:id="skillsArea" prefHeight="150" style="-fx-background-radius: 5;"/>
 
-                <!-- Buttons under skills -->
                 <HBox spacing="10">
-                    <Button text="EXPORT SKILLS"
+                    <Button text="%export_skills"
                             style="-fx-background-color: #5ba3c9; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 20; -fx-background-radius: 8;"
                             onAction="#handleExportSkills"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="LOGOUT"
+                    <Button text="%logout"
                             style="-fx-background-color: #ff5555; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 20; -fx-background-radius: 8;"
                             onAction="#handleLogout"/>
                 </HBox>

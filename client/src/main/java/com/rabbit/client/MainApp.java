@@ -25,7 +25,10 @@ public class MainApp extends Application {
             fxmlPath = "/com/rabbit/client/fxml/login_page.fxml";
         }
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
+        FXMLLoader fxmlLoader = new FXMLLoader(
+            getClass().getResource(fxmlPath),
+            com.rabbit.client.Config.getInstance().getBundle()
+        );
         Scene scene = new Scene(fxmlLoader.load(), 1000, 700);
         scene.getStylesheets().add(getClass().getResource("/com/rabbit/client/css/style.css").toExternalForm());
 

@@ -33,7 +33,7 @@
 
                 <VBox spacing="0" styleClass="admin-main-card">
                     <HBox spacing="12" alignment="CENTER_LEFT" styleClass="admin-main-header">
-                        <Label text="Admin panel" styleClass="admin-page-title"/>
+                        <Label text="%admin_title" styleClass="admin-page-title"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button fx:id="openAddUserButton" text="Add new user" styleClass="admin-primary-button" onAction="#openAddUserPopup"/>
                     </HBox>
