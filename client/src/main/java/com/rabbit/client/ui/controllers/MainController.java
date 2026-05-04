@@ -22,6 +22,7 @@ public class MainController {
     private static MainController instance;
     @FXML private BorderPane rootPane;
     @FXML private SidebarController sidebarController;
+    @Getter
     @FXML private StackPane overlayPane;
     private final UserService userService = UserService.getInstance();
 
@@ -81,9 +82,6 @@ public class MainController {
                 }
             } else if (controller instanceof MyTasksController myTasks) {
                 myTasks.setMainController(this);
-            } else if (controller instanceof NotificationCenterController notifications) {
-                notifications.setMainController(this);
-                notifications.loadNotifications();
             }
 
             rootPane.setCenter(view);

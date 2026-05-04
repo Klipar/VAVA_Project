@@ -2,48 +2,35 @@ package com.rabbit.client.ui.controllers;
 
 import com.rabbit.client.service.NotificationPollingService;
 import com.rabbit.common.dto.NotificationDto;
-import javafx.animation.TranslateTransition;
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
 import javafx.util.Duration;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Slf4j
 public class NotificationPopupController {
-    @FXML private VBox rootContainer;
-    @FXML private ScrollPane notificationsScrollPane;
+
+    @FXML private StackPane overlayPane;
+    @FXML private VBox popupCard;
     @FXML private VBox notificationsContainer;
-    @FXML private Button closeButton;
-    @FXML private Button lessButton;
+    @FXML private Button refreshButton;
+    @FXML private Label countLabel;
 
     private final NotificationPollingService pollingService = NotificationPollingService.getInstance();
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("HH:mm");
-    private Stage popupStage;
-    private MainController mainController;
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     @FXML
     public void initialize() {
-        lessButton.setOnAction(event -> handleOpenNotificationCenter());
+        refreshButton.setOnAction(e -> loadNotifications());
         loadNotifications();
-    }
-
-    public void setStage(Stage stage) {
-        this.popupStage = stage;
-    }
-
-    public void setMainController(MainController mainController) {
-        this.mainController = mainController;
+        playOpenAnimation();
     }
 
     private void loadNotifications() {
@@ -51,90 +38,111 @@ public class NotificationPopupController {
         notificationsContainer.getChildren().clear();
 
         if (notifications == null || notifications.isEmpty()) {
-            Label emptyLabel = new Label("No notifications");
-            emptyLabel.setStyle("-fx-text-fill: #8ab0c2; -fx-font-size: 14px;");
-            notificationsContainer.getChildren().add(emptyLabel);
+            Label empty = new Label("No notifications");
+            empty.setStyle("-fx-text-fill: #8ab0c2; -fx-font-size: 14px;");
+            notificationsContainer.getChildren().add(empty);
+            countLabel.setText("0");
         } else {
-            int count = Math.min(5, notifications.size());
-            for (int i = 0; i < count; i++) {
-                NotificationDto notification = notifications.get(i);
-                notificationsContainer.getChildren().add(createNotificationItem(notification));
+            int unread = 0;
+            for (NotificationDto n : notifications) {
+                if (Boolean.FALSE.equals(n.getIsRead())) unread++;
+                notificationsContainer.getChildren().add(buildItem(n));
             }
+            countLabel.setText(notifications.size() + " total, " + unread + " unread");
         }
     }
 
-    private VBox createNotificationItem(NotificationDto notification) {
-        VBox itemBox = new VBox(5);
-        itemBox.setStyle(
-                "-fx-background-color: #0f2844; " +
-                "-fx-border-color: #1e3a5f; " +
-                "-fx-border-width: 1; " +
-                "-fx-border-radius: 5; " +
-                "-fx-background-radius: 5; " +
-                "-fx-padding: 12;"
+    private VBox buildItem(NotificationDto notification) {
+        VBox box = new VBox(6);
+        box.setStyle(
+                "-fx-background-color: #112233; " +
+                        "-fx-border-color: #1e3a5f; " +
+                        "-fx-border-width: 1; " +
+                        "-fx-border-radius: 6; " +
+                        "-fx-background-radius: 6; " +
+                        "-fx-padding: 12;"
         );
 
-        Label messageLabel = new Label(notification.getMessage());
-        messageLabel.setWrapText(true);
-        messageLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-line-spacing: 2;");
-        itemBox.getChildren().add(messageLabel);
+        Label message = new Label(notification.getMessage());
+        message.setWrapText(true);
+        message.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
 
-        HBox bottomRow = new HBox(10);
-        bottomRow.setAlignment(Pos.CENTER_LEFT);
+        HBox bottom = new HBox(8);
+        bottom.setAlignment(Pos.CENTER_LEFT);
 
-        Label timeLabel = new Label();
+        Label time = new Label();
         if (notification.getCreated_at() != null) {
-            timeLabel.setText(notification.getCreated_at().format(dateFormatter));
+            time.setText(notification.getCreated_at().format(timeFormatter));
         }
-        timeLabel.setStyle("-fx-text-fill: #8ab0c2; -fx-font-size: 11px;");
+        time.setStyle("-fx-text-fill: #8ab0c2; -fx-font-size: 11px;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         if (Boolean.FALSE.equals(notification.getIsRead())) {
-            Label badgeLabel = new Label("New!");
-            badgeLabel.setStyle(
-                    "-fx-background-color: #ff6b6b;" +
-                    "-fx-text-fill: white; " +
-                    "-fx-padding: 2 8; " +
-                    "-fx-font-size: 10px; " +
-                    "-fx-border-radius: 10; " +
-                    "-fx-background-radius: 10;"
+            Button markReadBtn = new Button("✓ Mark read");
+            markReadBtn.setStyle(
+                    "-fx-background-color: #1e90ff; " +
+                            "-fx-text-fill: white; " +
+                            "-fx-font-size: 11px; " +
+                            "-fx-cursor: hand; " +
+                            "-fx-background-radius: 3; " +
+                            "-fx-padding: 3 8;"
             );
-            bottomRow.getChildren().addAll(timeLabel, spacer, badgeLabel);
+            markReadBtn.setOnAction(e -> {
+                markReadBtn.setDisable(true);
+                pollingService.markAsRead(notification.getId(), this::loadNotifications);
+            });
+            bottom.getChildren().addAll(time, spacer, markReadBtn);
         } else {
-            bottomRow.getChildren().addAll(timeLabel, spacer);
+            Label readLabel = new Label("✓ Read");
+            readLabel.setStyle("-fx-text-fill: #5a7a5a; -fx-font-size: 11px;");
+            bottom.getChildren().addAll(time, spacer, readLabel);
         }
 
-        itemBox.getChildren().add(bottomRow);
-        return itemBox;
+        box.getChildren().addAll(message, bottom);
+        return box;
     }
 
     @FXML
     private void handleClose() {
-        if (popupStage != null) {
-            TranslateTransition exitTransition = new TranslateTransition(Duration.millis(300), rootContainer);
-            exitTransition.setByX(450);
-            exitTransition.setOnFinished(event -> popupStage.close());
-            exitTransition.play();
+        FadeTransition fade = new FadeTransition(Duration.millis(150), overlayPane);
+        ScaleTransition scale = new ScaleTransition(Duration.millis(150), popupCard);
+        fade.setToValue(0);
+        scale.setToX(0.9);
+        scale.setToY(0.9);
+        fade.setOnFinished(e -> {
+            if (overlayPane.getParent() instanceof Pane parent) {
+                parent.getChildren().remove(overlayPane);
+            }
+            NotificationPollingService.getInstance().onPopupClosed();
+        });
+        fade.play();
+        scale.play();
+    }
+
+    @FXML
+    private void handleOverlayClick(MouseEvent e) {
+        if (e.getTarget() == overlayPane) {
+            handleClose();
         }
     }
 
-    private void handleOpenNotificationCenter() {
-        handleClose();
-        if (mainController != null) {
-            mainController.loadView("notifications-view.fxml");
-        }
+    @FXML
+    private void consumeClick(MouseEvent e) {
+        e.consume();
     }
 
-    public void animateIn() {
-        if (rootContainer != null) {
-            rootContainer.setTranslateX(450);
-            TranslateTransition enterTransition = new TranslateTransition(Duration.millis(300), rootContainer);
-            enterTransition.setToX(0);
-            enterTransition.play();
-        }
+    private void playOpenAnimation() {
+        overlayPane.setOpacity(0);
+        popupCard.setScaleX(0.9);
+        popupCard.setScaleY(0.9);
+        FadeTransition fade = new FadeTransition(Duration.millis(200), overlayPane);
+        ScaleTransition scale = new ScaleTransition(Duration.millis(200), popupCard);
+        fade.setToValue(1);
+        scale.setToX(1);
+        scale.setToY(1);
+        fade.play();
+        scale.play();
     }
 }
-
-

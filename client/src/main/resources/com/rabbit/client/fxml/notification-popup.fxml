@@ -1,46 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.rabbit.client.ui.controllers.NotificationPopupController"
-      style="-fx-background-color: #1a2a3a; -fx-border-color: #6a5acd; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-radius: 10;"
-      spacing="10"
-      prefWidth="400"
-      maxWidth="400">
-    <padding>
-        <Insets top="15" bottom="15" left="15" right="15"/>
-    </padding>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="overlayPane"
+           fx:controller="com.rabbit.client.ui.controllers.NotificationPopupController"
+           style="-fx-background-color: rgba(0,0,0,0.6);"
+           onMouseClicked="#handleOverlayClick">
 
+    <VBox fx:id="popupCard"
+          maxWidth="450"
+          prefWidth="420"
+          maxHeight="600"
+          fillWidth="true"
+          alignment="CENTER"
+          spacing="0"
+          onMouseClicked="#consumeClick"
+          style="-fx-background-color: #0d1b2e; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, 0, 10);">
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="📬 Inbox"
-               style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
-        <javafx.scene.layout.Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="closeButton"
-                text="✕"
-                style="-fx-padding: 5 10; -fx-background-color: transparent; -fx-text-fill: #888888; -fx-font-size: 14px; -fx-cursor: hand;"
-                onAction="#handleClose"/>
-    </HBox>
+        <HBox alignment="CENTER_LEFT" spacing="12"
+              style="-fx-padding: 16 20 10 20; -fx-background-color: #091420; -fx-background-radius: 12 12 0 0;">
+            <Label text="📬 Inbox" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="✕" onAction="#handleClose"
+                    style="-fx-background-color: transparent; -fx-text-fill: #8ab0c2; -fx-font-size: 16px; -fx-cursor: hand;"/>
+        </HBox>
 
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                    style="-fx-background: #0d1b2e; -fx-background-color: #0d1b2e; -fx-border-color: transparent;">
+            <VBox fx:id="notificationsContainer" spacing="8"
+                  style="-fx-padding: 12 16 12 16; -fx-background-color: #0d1b2e;"/>
+        </ScrollPane>
 
-    <ScrollPane fx:id="notificationsScrollPane"
-                VBox.vgrow="ALWAYS"
-                style="-fx-background-color: #1a2a3a; -fx-control-inner-background: #1a2a3a; -fx-border-color: transparent;"
-                fitToWidth="true">
-        <VBox fx:id="notificationsContainer"
-              spacing="10"
-              style="-fx-padding: 10; -fx-background-color: #1a2a3a;"/>
-    </ScrollPane>
-
-
-    <Button fx:id="lessButton"
-            text="Open Notification Center"
-            style="-fx-padding: 10 20; -fx-background-color: #1a1a1a; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-radius: 5; -fx-background-radius: 5; -fx-min-width: 100%;"/>
-</VBox>
-
-
+        <HBox spacing="10" alignment="CENTER_RIGHT"
+              style="-fx-padding: 12 20 16 20; -fx-background-color: #091420; -fx-background-radius: 0 0 12 12;">
+            <Button fx:id="refreshButton" text="🔄 Refresh"
+                    style="-fx-background-color: #1e90ff; -fx-text-fill: white; -fx-font-size: 12px; -fx-cursor: hand; -fx-background-radius: 4; -fx-padding: 6 14;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="countLabel" style="-fx-text-fill: #8ab0c2; -fx-font-size: 12px;"/>
+        </HBox>
+    </VBox>
+</StackPane>

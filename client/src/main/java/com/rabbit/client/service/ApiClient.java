@@ -155,7 +155,7 @@ public class ApiClient {
     }
 
     public boolean markNotificationAsRead(long notificationId) throws Exception {
-        HttpResponse<String> response = put("/notifications/" + notificationId, "{\"isRead\": true}");
+        HttpResponse<String> response = put("/notifications/" + notificationId + "/read", "{}");
         return isSuccess(response);
     }
 }
