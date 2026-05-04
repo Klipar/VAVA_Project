@@ -128,6 +128,10 @@ public class Main {
                 else if (path.matches("/projects/\\d+$") && method.equals("PUT")) {
                     projectHandler.update().handle(exchange);
                 }
+                // GET /projects/{projectId}/role
+                else if (path.matches("/projects/\\d+/role$") && method.equals("GET")) {
+                    projectHandler.getUserRole().handle(exchange);
+                }
                 // DELETE /projects/{id}
                 else if (path.matches("/projects/\\d+$") && method.equals("DELETE")) {
                     projectHandler.delete().handle(exchange);

@@ -3,7 +3,9 @@ package com.rabbit.server.handler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +24,39 @@ public class ProjectHandler {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     private final AuthMiddleware auth = AuthMiddleware.getInstanse();
+
+
+    public HttpHandler getUserRole() {
+        return exchange -> {
+            if (!exchange.getRequestMethod().equals("GET")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            Integer userId = resolveUserId(exchange);
+            if (userId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
+
+            try {
+                int projectId = extractId(exchange.getRequestURI().getPath(), 2);
+                String role = service.getUserRoleInProject(projectId, userId);
+
+                Map<String, String> response = new HashMap<>();
+                response.put("role", role);
+                send(exchange, 200, mapper.writeValueAsString(response));
+            } catch (IllegalArgumentException e) {
+                send(exchange, 404, "{\"error\":\"" + e.getMessage() + "\"}");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                send(exchange, 500, "{\"error\":\"Database error\"}");
+            } catch (Exception e) {
+                e.printStackTrace();
+                send(exchange, 500, "{\"error\":\"Internal server error\"}");
+            }
+        };
+    }
 
     public HttpHandler getAll() {
         return exchange -> {

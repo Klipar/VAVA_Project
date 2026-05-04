@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.client.component.TaskCardComponent;
 import com.rabbit.client.service.ApiClient;
 import com.rabbit.client.service.UserService;
+import com.rabbit.common.dto.ProjectDto;
 import com.rabbit.common.dto.TaskDto;
 import com.rabbit.common.enums.TaskStatus;
 import com.rabbit.common.enums.UserRole;
@@ -65,12 +66,15 @@ public class BoardController {
     @Setter
     private MainController mainController;
 
+    private boolean isProjectAdmin = false;
+
     private int currentProjectId;
     private String projectName;
 
     public void setCurrentProject(int id, String name) {
         this.currentProjectId = id;
         this.projectName = name;
+        this.isProjectAdmin = "master".equals(getCurrentProjectRole());
 
         projectNameLabel.setText(projectName.toUpperCase());
         setupUserPermissions();
@@ -78,6 +82,24 @@ public class BoardController {
         loadTasksFromServer();
         setupNavigationButtons();
         setupDragToScroll();
+    }
+
+    private String getCurrentProjectRole() {
+        try {
+            var response = apiClient.get("/projects/" + currentProjectId + "/role");
+            if (!apiClient.isSuccess(response)) {
+                return "none";
+            }
+
+            Map<String, String> result = mapper.readValue(response.body(), new TypeReference<>() {});
+            String role = result.get("role");
+
+            // role môže byť "master", "member", alebo "none"
+            return role != null ? role : "none";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "none";
+        }
     }
 
     @FXML
@@ -162,15 +184,12 @@ public class BoardController {
     }
 
     private void setupUserPermissions() {
-        UserRole role = UserService.getInstance().getCurrentUser().getRole();
-        boolean isManager = (role == UserRole.MANAGER || role == UserRole.TEAM_LEADER);
+        topCreateTaskBtn.setVisible(isProjectAdmin);
+        topCreateTaskBtn.setManaged(isProjectAdmin);
+        floatingAddBtn.setVisible(isProjectAdmin);
+        floatingAddBtn.setManaged(isProjectAdmin);
 
-        topCreateTaskBtn.setVisible(isManager);
-        topCreateTaskBtn.setManaged(isManager);
-        floatingAddBtn.setVisible(isManager);
-        floatingAddBtn.setManaged(isManager);
-
-        if (isManager) {
+        if (isProjectAdmin) {
             try {
                 Image addIcon = new Image(getClass().getResourceAsStream("/com/rabbit/client/images/add.png"));
                 floatingAddBtn.setGraphic(new ImageView(addIcon) {{
