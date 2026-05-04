@@ -49,6 +49,17 @@ public class ProjectRepository {
                 .findFirst();
     }
 
+    public String getUserRoleInProject(int userId, int projectId) throws SQLException {
+        List<Map<String, Object>> result = db.query(
+                "SELECT role FROM user_projects WHERE user_id = ? AND project_id = ?",
+                userId, projectId
+        );
+        if (result.isEmpty()) {
+            return "none";
+        }
+        return result.get(0).get("role").toString();
+    }
+
     public int create(ProjectDto dto, int creatorId) throws SQLException {
         List<Map<String, Object>> result = db.query("""
             INSERT INTO projects (title, description, deadline, status)

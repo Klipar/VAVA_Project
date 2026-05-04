@@ -21,7 +21,7 @@
           styleClass="popup-card">
 
         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="popup-header">
-            <Label text="CREATE TASK" styleClass="popup-title"/>
+            <Label text="%create_task_title" styleClass="popup-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="✕" onAction="#handleCancel" styleClass="close-btn"/>
         </HBox>
@@ -34,13 +34,13 @@
                 <padding><Insets top="24" left="24" right="24" bottom="16"/></padding>
 
                 <VBox spacing="6">
-                    <Label text="TASK NAME:" styleClass="field-label"/>
-                    <TextField fx:id="titleField" promptText="Enter task name..." styleClass="input-white"/>
+                    <Label text="%task_name_label" styleClass="field-label"/>
+                    <TextField fx:id="titleField" promptText="%enter_task_name" styleClass="input-white"/>
                 </VBox>
 
                 <VBox spacing="6">
-                    <Label text="DESCRIPTION:" styleClass="field-label"/>
-                    <TextArea fx:id="descriptionField" promptText="Describe the task..."
+                    <Label text="%description_label" styleClass="field-label"/>
+                    <TextArea fx:id="descriptionField" promptText="%describe_task"
                               prefHeight="100" wrapText="true" styleClass="input-white"/>
                 </VBox>
 
@@ -48,15 +48,15 @@
 
                 <HBox spacing="16" alignment="TOP_LEFT">
                     <VBox spacing="10" HBox.hgrow="ALWAYS">
-                        <DatePicker fx:id="deadlinePicker" promptText="Select deadline"
+                        <DatePicker fx:id="deadlinePicker" promptText="%select_deadline"
                                     maxWidth="1.7976931348623157E308" styleClass="date-input"/>
                         <HBox styleClass="status-box" alignment="CENTER_LEFT" spacing="8">
-                            <Label text="Status:" styleClass="status-label"/>
-                            <Label text="BACKLOG" styleClass="status-value"/>
+                            <Label text="%status_prefix" styleClass="status-label"/>
+                            <Label text="%backlog" styleClass="status-value"/>
                         </HBox>
                     </VBox>
                     <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="priority-box-container">
-                        <Label text="PRIORITY:" styleClass="field-label" maxWidth="1.7976931348623157E308"/>
+                        <Label text="%priority_label" styleClass="field-label" maxWidth="1.7976931348623157E308"/>
                         <HBox fx:id="priorityBox" spacing="10" alignment="CENTER"/>
                     </VBox>
                 </HBox>
@@ -64,8 +64,8 @@
                 <Separator styleClass="divider"/>
 
                 <HBox spacing="16" alignment="CENTER_LEFT">
-                    <Label text="Assigned:" styleClass="assigned-label"/>
-                    <ComboBox fx:id="assigneeCombo" promptText="-- pick worker --"
+                    <Label text="%assigned_label2" styleClass="assigned-label"/>
+                    <ComboBox fx:id="assigneeCombo" promptText="%pick_worker"
                               maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"
                               styleClass="combo-input"/>
                 </HBox>
@@ -73,14 +73,13 @@
                 <VBox spacing="12" styleClass="ai-card">
                     <HBox spacing="10" alignment="CENTER_LEFT">
                         <Label text="🐇" styleClass="ai-icon"/>
-                        <Label text="Try our AI to pick a suitable worker for this task:"
-                               styleClass="ai-header-text"/>
+                        <Label text="%ai_header" styleClass="ai-header-text"/>
                     </HBox>
                     <HBox spacing="10" alignment="CENTER">
                         <TextField fx:id="skillsField"
-                                   promptText="SKILLS FOR THIS TASK...(devide by comma)"
+                                   promptText="%ai_skills_prompt"
                                    HBox.hgrow="ALWAYS" styleClass="input-dark"/>
-                        <Button fx:id="aiSuggestBtn" text="ADVICE FROM AI"
+                        <Button fx:id="aiSuggestBtn" text="%advice_from_ai"
                                 onAction="#handleAiSuggest" styleClass="ai-btn"/>
                     </HBox>
                     <ProgressIndicator fx:id="aiLoadingIndicator"
@@ -88,7 +87,7 @@
                                        prefWidth="30" prefHeight="30"/>
                     <VBox fx:id="aiResultsBox" spacing="0" visible="false" managed="false">
                         <Label fx:id="aiResultsTitle"
-                               text="AI thinks those are the best candidates to assign this task:"
+                               text="%ai_results_title_text"
                                styleClass="ai-results-title"/>
                     </VBox>
                 </VBox>
@@ -97,9 +96,9 @@
         </ScrollPane>
 
         <HBox styleClass="popup-footer">
-            <Button text="Cancel" onAction="#handleCancel" styleClass="btn-cancel"/>
+            <Button text="%cancel_btn" onAction="#handleCancel" styleClass="btn-cancel"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="createBtn" text="Create Task" onAction="#handleCreateTask"
+            <Button fx:id="createBtn" text="%create_task_btn_text" onAction="#handleCreateTask"
                     styleClass="btn-create"/>
         </HBox>
 

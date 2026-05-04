@@ -35,7 +35,7 @@ public class LoginPageController {
         String password = passwordField.getText().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            errorLabel.setText("Please fill in all fields");
+            errorLabel.setText(Config.getInstance().getBundle().getString("fill_all_fields"));
             return;
         }
 
@@ -47,7 +47,7 @@ public class LoginPageController {
             HttpResponse<String> loginResponse = apiClient.postPublic("/users/login", loginBody);
 
             if (loginResponse.statusCode() != 201) {
-                errorLabel.setText("Invalid email or password");
+                errorLabel.setText(Config.getInstance().getBundle().getString("invalid_credentials"));
                 loginBtn.setDisable(false);
                 return;
             }
@@ -65,7 +65,10 @@ public class LoginPageController {
                     ? "first_input_page.fxml"
                     : "main-view.fxml";
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/" + nextFxml));
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/rabbit/client/fxml/" + nextFxml),
+                Config.getInstance().getBundle()
+            );
             Scene scene = new Scene(loader.load(), 1000, 700);
             scene.getStylesheets().add(getClass().getResource("/com/rabbit/client/css/style.css").toExternalForm());
 
@@ -75,7 +78,7 @@ public class LoginPageController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            errorLabel.setText("Connection error. Is the server running?");
+            errorLabel.setText(Config.getInstance().getBundle().getString("connection_error"));
             loginBtn.setDisable(false);
         }
     }

@@ -14,6 +14,15 @@ public class ProjectService {
         return repo.findAll();
     }
 
+    public String getUserRoleInProject(int projectId, int userId) throws SQLException {
+        Optional<ProjectDto> project = repo.findById(projectId);
+        if (project.isEmpty()) {
+            throw new IllegalArgumentException("Project not found");
+        }
+        return repo.getUserRoleInProject(userId, projectId);
+    }
+
+
     public List<ProjectDto> getProjectsForUser(int userId) throws SQLException {
         return repo.findAllByUserId(userId);
     }

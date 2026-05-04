@@ -23,7 +23,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 
 public class ProjectsTaskController {
 
@@ -35,8 +34,6 @@ public class ProjectsTaskController {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newHttpClient();
-
-    private final DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy, HH:mm", Locale.ENGLISH);
 
     private int currentProjectId;
     private String currentProjectTitle;
@@ -75,7 +72,7 @@ public class ProjectsTaskController {
     private void loadTasksForProject() {
         String token = Config.getInstance().getToken();
         if(token == null || token.isEmpty()){
-            statusLabel.setText("Please login to view tasks");
+            statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_tasks_login"));
             return;
         }
 
@@ -89,16 +86,16 @@ public class ProjectsTaskController {
             HttpResponse<String> response = client.send(taskRequest, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200){
-                statusLabel.setText("Failed to load tasks");
+                statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_tasks_msg"));
                 return;
             }
             List<TaskDto> tasks = mapper.readValue(response.body(), new TypeReference<>() {});
             ObservableList<TaskDto> observableTasks = FXCollections.observableArrayList(tasks);
             tasksTable.setItems(observableTasks);
-            statusLabel.setText("Tasks in project " + currentProjectTitle);
+            statusLabel.setText(Config.getInstance().getBundle().getString("tasks_in_project") + " " + currentProjectTitle);
         }catch (Exception e){
             e.printStackTrace();
-            statusLabel.setText("Failed to load tasks");
+            statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_tasks_msg"));
         }
     }
 
@@ -114,8 +111,12 @@ public class ProjectsTaskController {
             return new SimpleStringProperty(raw != null ? raw.toUpperCase().replace("_", " ") : "");
         });
 
-        assigneeColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getAssignedTo() > 0 ? "Assigned" : "Unassigned"));
+        assigneeColumn.setCellValueFactory(cellData -> {
+            java.util.ResourceBundle rb = Config.getInstance().getBundle();
+            return new SimpleStringProperty(
+                cellData.getValue().getAssignedTo() > 0 ? rb.getString("assigned") : rb.getString("unassigned")
+            );
+        });
 
         deadlineColumn.setCellFactory(column -> new TableCell<>() {
             private final HBox container = new HBox(8);
@@ -155,12 +156,12 @@ public class ProjectsTaskController {
 
     private String formatDeadline(String deadlineStr) {
         if (deadlineStr == null || deadlineStr.isBlank() || "null".equalsIgnoreCase(deadlineStr)) {
-            return "NO DEADLINE";
+            return Config.getInstance().getBundle().getString("no_deadline");
         }
         try {
             if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) deadlineStr += "Z";
             java.time.ZonedDateTime zdt = java.time.ZonedDateTime.parse(deadlineStr);
-            return zdt.format(displayFormatter).toUpperCase();
+            return zdt.format(Config.getInstance().getDateTimeFormatter()).toUpperCase();
         } catch (Exception e) {
             return deadlineStr.toUpperCase();
         }

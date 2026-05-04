@@ -26,7 +26,7 @@
           HBox.hgrow="ALWAYS"
           style="-fx-background-color: #0b1a32; -fx-padding: 60px;">
 
-        <Label text="WELCOME"
+        <Label text="%welcome"
                style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
 
         <Label fx:id="errorLabel"
@@ -34,7 +34,7 @@
                style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;"/>
 
         <TextField fx:id="emailField"
-                   promptText="EMAIL"
+                   promptText="%email_placeholder"
                    maxWidth="300"
                    style="-fx-background-color: #e0e0e0;
                           -fx-background-radius: 6;
@@ -42,7 +42,7 @@
                           -fx-font-size: 14px;"/>
 
         <PasswordField fx:id="passwordField"
-                       promptText="PASSWORD"
+                       promptText="%password_placeholder"
                        maxWidth="300"
                        style="-fx-background-color: #e0e0e0;
                               -fx-background-radius: 6;
@@ -50,7 +50,7 @@
                               -fx-font-size: 14px;"/>
 
         <Button fx:id="loginBtn"
-                text="LOGIN"
+                text="%login_btn"
                 prefWidth="300"
                 prefHeight="45"
                 onAction="#handleLogin"
@@ -60,7 +60,7 @@
                        -fx-font-weight: bold;
                        -fx-background-radius: 6;"/>
 
-        <Label text="CONTACT US"
+        <Label text="%contact_us"
                style="-fx-text-fill: #b0b0b0; -fx-font-size: 12px;"/>
     </VBox>
 

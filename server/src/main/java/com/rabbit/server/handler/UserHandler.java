@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -82,6 +83,35 @@ public class UserHandler {
         };
     }
 
+    // GET /users/all
+    public HttpHandler getAllUsers() {
+        return exchange -> {
+            if (!exchange.getRequestMethod().equals("GET")) {
+                send(exchange, 405, "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            Integer requestingUserId = resolveUserId(exchange);
+            if (requestingUserId == null) {
+                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
+                return;
+            }
+
+            try {
+                UserRole requesterRole = getUserRole(requestingUserId.longValue());
+                if (requesterRole != UserRole.MANAGER && requesterRole != UserRole.TEAM_LEADER) {
+                    send(exchange, 403, "{\"error\":\"Only Manager or Team Leader can view all users\"}");
+                    return;
+                }
+
+                List<UserDto> users = service.getAllUsers();
+                send(exchange, 200, mapper.writeValueAsString(users));
+            } catch (Exception e) {
+                send(exchange, 500, "{\"error\":\"Internal server error\"}");
+            }
+        };
+    }
+
     // GET /projects/{projectId}/users
     public HttpHandler getAllUsersFromProject() {
         return exchange -> {
@@ -106,8 +136,7 @@ public class UserHandler {
         };
     }
 
-    // POST /projects/{projectId}/users/create
-    @SuppressWarnings("unchecked")
+    // POST /users/create
     public HttpHandler createUser() {
         return exchange -> {
             if (!exchange.getRequestMethod().equals("POST")) {
@@ -115,30 +144,26 @@ public class UserHandler {
                 return;
             }
 
-            Integer creatorId = resolveUserId(exchange);
-            if (creatorId == null) {
-                send(exchange, 401, "{\"error\":\"Unauthorized\"}");
-                return;
-            }
-
             try {
-                long projectId = extractId(exchange.getRequestURI().getPath(), 2);
-
-                // Retrieve the creator role from the database
-                UserRole creatorRole = getUserRole(creatorId.longValue());
-
                 // Parse the request body
-                Map<String, Object> requestBody = mapper.readValue(exchange.getRequestBody(), Map.class);
+                Map<String, Object> requestBody = mapper.readValue(exchange.getRequestBody(), new TypeReference<Map<String, Object>>() {});
+
+                // Validate required fields
+                String roleStr = (String) requestBody.get("role");
+                if (roleStr == null || roleStr.isEmpty()) {
+                    send(exchange, 400, "{\"error\":\"Role is required\"}");
+                    return;
+                }
 
                 UserDto userDto = new UserDto();
                 userDto.setName((String) requestBody.get("name"));
                 userDto.setNickname((String) requestBody.get("nickname"));
                 userDto.setEmail((String) requestBody.get("email"));
+                userDto.setRole(UserRole.valueOf(roleStr.toUpperCase()));
 
                 String password = (String) requestBody.get("password");
 
-                UserDto createdUser = service.createUser(userDto, password, creatorRole, projectId);
-                service.addUserToProject(createdUser.getId(), projectId);
+                UserDto createdUser = service.createUser(userDto, password);
 
                 send(exchange, 201, mapper.writeValueAsString(createdUser));
             } catch (SecurityException e) {
@@ -153,7 +178,6 @@ public class UserHandler {
     }
 
     // PUT /users/{userId}/update
-    @SuppressWarnings("unchecked")
     public HttpHandler updateUser() {
         return exchange -> {
             if (!exchange.getRequestMethod().equals("PUT")) {
@@ -169,13 +193,14 @@ public class UserHandler {
 
             try {
                 long targetUserId = extractId(exchange.getRequestURI().getPath(), 2);
-                Map<String, Object> body = mapper.readValue(exchange.getRequestBody(), Map.class);
+                Map<String, Object> body = mapper.readValue(exchange.getRequestBody(), new TypeReference<Map<String, Object>>() {});
 
                 UserDto updatedData = new UserDto();
                 if (body.containsKey("name")) updatedData.setName((String) body.get("name"));
                 if (body.containsKey("nickname")) updatedData.setNickname((String) body.get("nickname"));
                 if (body.containsKey("email")) updatedData.setEmail((String) body.get("email"));
                 if (body.containsKey("skills")) updatedData.setSkills((String) body.get("skills"));
+                if (body.containsKey("role")) updatedData.setRole(UserRole.valueOf(((String) body.get("role")).toUpperCase()));
                 String newPassword = (String) body.get("password");
 
                 UserDto updatedUser = service.updateUser(targetUserId, updatedData, newPassword, requestingUserId.longValue());
@@ -329,7 +354,6 @@ public class UserHandler {
     }
 
     // POST /users/login
-    @SuppressWarnings("unchecked")
     public HttpHandler loginUser() {
         return exchange -> {
             if (!exchange.getRequestMethod().equals("POST")) {
@@ -338,7 +362,7 @@ public class UserHandler {
             }
 
             try {
-                Map<String, Object> requestBody = mapper.readValue(exchange.getRequestBody(), Map.class);
+                Map<String, Object> requestBody = mapper.readValue(exchange.getRequestBody(), new TypeReference<Map<String, Object>>() {});
 
                 SuccessAuthDto dto = service.loginUser(
                     requestBody.get("email").toString(),

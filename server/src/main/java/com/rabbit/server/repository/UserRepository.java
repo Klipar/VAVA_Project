@@ -61,6 +61,23 @@ public class UserRepository {
     }
 
     /**
+     * Get all users.
+     *
+     * @return list of all users
+     */
+    public List<UserDto> findAll() {
+        String sql = "SELECT id, name, nickname, email, role, created_at, skills FROM users";
+        try {
+            List<Map<String, Object>> results = dbService.query(sql);
+            return results.stream()
+                    .map(this::mapToUserDto)
+                    .collect(Collectors.toList());
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find all users", e);
+        }
+    }
+
+    /**
      * Get all users from a specific project.
      *
      * @param projectId project ID
@@ -87,13 +104,14 @@ public class UserRepository {
      * @param userDto user with updated data
      */
     public void update(UserDto userDto) {
-        String sql = "UPDATE users SET name = ?, nickname = ?, email = ?, skills = ? WHERE id = ?";
+        String sql = "UPDATE users SET name = ?, nickname = ?, email = ?, skills = ?, role = CAST(? AS user_role) WHERE id = ?";
         try {
             dbService.update(sql,
                     userDto.getName(),
                     userDto.getNickname(),
                     userDto.getEmail(),
                     userDto.getSkills(),
+                    userDto.getRole() != null ? userDto.getRole().name().toLowerCase() : null,
                     userDto.getId());
         } catch (SQLException e) {
             throw new RuntimeException("Failed to update user: " + userDto.getId(), e);
@@ -172,7 +190,7 @@ public class UserRepository {
      * @return generated user ID
      */
     public Long save(UserDto userDto, String passwordHash) {
-        String sql = "INSERT INTO users (name, nickname, email, password_hash, role, skills) VALUES (?, ?, ?, ?, CAST(? AS user_role)), ?";
+        String sql = "INSERT INTO users (name, nickname, email, password_hash, role, skills) VALUES (?, ?, ?, ?, CAST(? AS user_role), ?)";
 
         try {
             return dbService.insertAndGetId(

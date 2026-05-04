@@ -80,15 +80,15 @@ public class ProfileController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Password");
         alert.setHeaderText(null);
-        alert.setContentText("Password is stored securely on the server and cannot be shown.");
+        alert.setContentText(Config.getInstance().getBundle().getString("password_secure"));
         alert.showAndWait();
     }
 
     @FXML
     private void handleChangePassword() {
         Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Change Password");
-        dialog.setHeaderText("Enter new password:");
+        dialog.setTitle(Config.getInstance().getBundle().getString("change_password"));
+        dialog.setHeaderText(Config.getInstance().getBundle().getString("enter_new_password"));
 
         PasswordField pwField = new PasswordField();
         dialog.getDialogPane().setContent(pwField);
@@ -132,9 +132,9 @@ public class ProfileController {
             pw.println("        <![CDATA[" + skillsArea.getText() + "]]>");
             pw.println("    </skills>");
             pw.println("</userSkills>");
-            showAlert("Success", "Skills exported!");
+            showAlert("Success", Config.getInstance().getBundle().getString("skills_exported"));
         } catch (Exception e) {
-            showAlert("Error", "Failed to export: " + e.getMessage());
+            showAlert("Failed", Config.getInstance().getBundle().getString("export_failed") + ": " + e.getMessage());
         }
     }
 
@@ -157,7 +157,8 @@ public class ProfileController {
             Config.getInstance().setUser(null);
 
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/rabbit/client/fxml/login_page.fxml")
+                    getClass().getResource("/com/rabbit/client/fxml/login_page.fxml"),
+                    Config.getInstance().getBundle()
             );
             Scene scene = new Scene(loader.load(), 1000, 700);
             scene.getStylesheets().add(
@@ -188,9 +189,9 @@ public class ProfileController {
                     UserDto updated = mapper.readValue(response.body(), UserDto.class);
                     Config.getInstance().setUser(updated);
                     userService.getCurrentSession().setUser(updated);
-                    Platform.runLater(() -> showAlert("Success", field + " updated!"));
+                    Platform.runLater(() -> showAlert("Success", Config.getInstance().getBundle().getString("field_updated")));
                 } else {
-                    Platform.runLater(() -> showAlert("Error", "Failed: " + response.body()));
+                    Platform.runLater(() -> showAlert("Failed", Config.getInstance().getBundle().getString("update_failed") + ": " + response.body()));
                 }
             } catch (Exception e) {
                 Platform.runLater(() -> showAlert("Error", e.getMessage()));

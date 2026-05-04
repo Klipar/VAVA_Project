@@ -76,12 +76,17 @@ public class OpenApiHandler implements HttpHandler {
                         },
                         "CreateUserRequest": {
                             "type": "object",
-                            "required": ["name", "nickname", "email", "password"],
+                            "required": ["name", "nickname", "email", "password", "role"],
                             "properties": {
                                 "name": {"type": "string", "example": "John Doe"},
                                 "nickname": {"type": "string", "example": "johnd"},
                                 "email": {"type": "string", "format": "email", "example": "ivan@example.com"},
                                 "password": {"type": "string", "minLength": 6, "example": "qwerty"},
+                                "role": {
+                                    "type": "string",
+                                    "enum": ["MANAGER", "TEAM_LEADER", "WORKER"],
+                                    "example": "WORKER"
+                                },
                                 "skills": {"type": "string", "example": "java,spring"}
                             }
                         },
@@ -395,6 +400,30 @@ public class OpenApiHandler implements HttpHandler {
                             }
                         }
                     },
+                    "/users/all": {
+                        "get": {
+                            "tags": ["User"],
+                            "summary": "Get all users",
+                            "description": "Retrieve all users (Manager and Team Leader only)",
+                            "security": [{"bearerAuth": []}],
+                            "responses": {
+                                "200": {
+                                    "description": "Users list returned successfully",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": {"$ref": "#/components/schemas/UserDto"}
+                                            }
+                                        }
+                                    }
+                                },
+                                "401": {"description": "Unauthorized - Bearer token required"},
+                                "403": {"description": "Forbidden - insufficient permissions"},
+                                "405": {"description": "Method not allowed"}
+                            }
+                        }
+                    },
                     "/users/nickname/{nickname}": {
                         "get": {
                             "tags": ["User"],
@@ -657,19 +686,12 @@ public class OpenApiHandler implements HttpHandler {
                             }
                         }
                     },
-                    "/projects/{projectId}/users/create": {
+                    "/users/create": {
                         "post": {
                             "tags": ["User"],
                             "summary": "Create a new user",
-                            "description": "Create a new user in the project (Manager creates WORKER, Team Leader creates TEAM_LEADER)",
+                            "description": "Create a new user",
                             "security": [{"bearerAuth": []}],
-                            "parameters": [{
-                                "name": "projectId",
-                                "in": "path",
-                                "required": true,
-                                "description": "ID of the project",
-                                "schema": {"type": "integer", "format": "int64", "example": 1}
-                            }],
                             "requestBody": {
                                 "required": true,
                                 "content": {

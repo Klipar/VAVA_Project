@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.RadioButton?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="overlayPane"
+           fx:controller="com.rabbit.client.ui.controllers.EditUserPopupController"
+           styleClass="overlay"
+           onMouseClicked="#handleOverlayClick">
+
+        <VBox fx:id="popupCard"
+            maxWidth="520"
+            prefWidth="480"
+            maxHeight="640"
+          fillWidth="true"
+          alignment="CENTER"
+          StackPane.alignment="CENTER"
+          spacing="0"
+          onMouseClicked="#consumeClick"
+          styleClass="popup-card">
+
+        <HBox alignment="CENTER" spacing="12" styleClass="popup-header">
+            <Label text="EDIT USER" styleClass="popup-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" fitToHeight="true" styleClass="popup-scroll">
+            <VBox spacing="18" styleClass="popup-body admin-popup-body">
+                <padding>
+                    <Insets top="24" left="24" right="24" bottom="18"/>
+                </padding>
+
+                <VBox spacing="6">
+                    <Label fx:id="currentUserLabel" text="Selected user" styleClass="field-label"/>
+                    <Label text="Change the selected account details here." styleClass="admin-helper-text" wrapText="true"/>
+                </VBox>
+
+                <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="admin-field-card">
+                    <Label text="LOGIN" styleClass="admin-mini-label"/>
+                    <TextField fx:id="loginField" promptText="Login" styleClass="admin-mini-field"/>
+                </VBox>
+
+                <GridPane hgap="16" vgap="14">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50" hgrow="ALWAYS"/>
+                        <ColumnConstraints percentWidth="50" hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="admin-field-card">
+                        <Label text="FULL NAME" styleClass="admin-mini-label"/>
+                        <TextField fx:id="fullNameField" promptText="Full name" styleClass="admin-mini-field"/>
+                    </VBox>
+
+                    <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="admin-field-card">
+                        <Label text="EMAIL" styleClass="admin-mini-label"/>
+                        <TextField fx:id="emailField" promptText="Email" styleClass="admin-mini-field"/>
+                    </VBox>
+
+                    <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="admin-field-card">
+                        <Label text="SKILLS" styleClass="admin-mini-label"/>
+                        <TextField fx:id="skillsField" promptText="Skills separated by comma" styleClass="admin-mini-field"/>
+                    </VBox>
+                </GridPane>
+
+                <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="admin-field-card">
+                    <Label text="PASSWORD" styleClass="admin-mini-label"/>
+                    <PasswordField fx:id="passwordField" promptText="Leave blank to keep current password" styleClass="admin-mini-field"/>
+                </VBox>
+
+                <VBox spacing="10">
+                    <Label text="CHANGE USER MODE" styleClass="field-label"/>
+                    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="admin-radio-row">
+                        <RadioButton fx:id="workerRoleRadio" text="Worker" selected="true"/>
+                        <RadioButton fx:id="teamLeaderRoleRadio" text="Team Leader"/>
+                        <RadioButton fx:id="managerRoleRadio" text="Manager" />
+                    </HBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+
+        <HBox style="-fx-background-color: #0f1c2a; -fx-background-radius: 0 0 16 16; -fx-padding: 16 18 18 18;">
+            <Button text="Cancel" onAction="#handleCancel" styleClass="btn-cancel"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="saveBtn" text="Save changes" onAction="#handleSave" styleClass="btn-create"/>
+        </HBox>
+
+    </VBox>
+</StackPane>

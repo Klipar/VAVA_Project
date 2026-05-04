@@ -40,14 +40,15 @@ public class CreateProjectController {
 
         boolean alreadyAdded = assignedUsers.stream()
                 .anyMatch(u -> u.getNickname() != null && u.getNickname().equalsIgnoreCase(name));
+        java.util.ResourceBundle rb = Config.getInstance().getBundle();
         if (alreadyAdded) {
-            showAlert("User already assigned: " + name);
+            showAlert(rb.getString("user_already_assigned") + ": " + name);
             return;
         }
 
         UserDto currentUser = Config.getInstance().getUser();
         if (currentUser.getNickname() != null && currentUser.getNickname().equalsIgnoreCase(name)) {
-            showAlert("You are already the project creator and will be added automatically.");
+            showAlert(rb.getString("creator_auto_added"));
             return;
         }
 
@@ -81,11 +82,11 @@ public class CreateProjectController {
                 chip.getChildren().addAll(nameLabel, removeBtn);
                 assignedChipsPane.getChildren().add(chip);
             } else {
-                showAlert("User not found: " + name);
+                showAlert(rb.getString("user_not_found") + ": " + name);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Error occurred while fetching user information.");
+            showAlert(rb.getString("error_fetch_user"));
         }
 
     }
@@ -94,7 +95,7 @@ public class CreateProjectController {
         try {
                 String token = Config.getInstance().getToken();
                 if (token == null || token.isBlank()) {
-                    showAlert("You are not logged in. Please login again.");
+                    showAlert(Config.getInstance().getBundle().getString("not_logged_in"));
                     return false;
                 }
                 
@@ -134,27 +135,28 @@ public class CreateProjectController {
     @FXML
     private void handleCreateProject() {
         UserDto userTest = Config.getInstance().getUser();
+        java.util.ResourceBundle rb = Config.getInstance().getBundle();
         if (!(userTest.getRole() == UserRole.MANAGER || userTest.getRole() == UserRole.TEAM_LEADER)) {
-            showAlert("You do not have permission to create a project.");
+            showAlert(rb.getString("no_permission_project"));
             return;
         }
 
         String name = nameField.getText().trim();
         if (name.isBlank()) {
-            showAlert("Please enter a project name.");
+            showAlert(rb.getString("enter_project_name"));
             return;
         }
 
         LocalDate deadlineDate = deadlinePicker.getValue();
         if (deadlineDate == null) {
-            showAlert("Please select a deadline.");
+            showAlert(rb.getString("select_deadline_msg"));
             return;
         }
 
         try {
             String token = Config.getInstance().getToken();
             if (token == null || token.isBlank()) {
-                showAlert("You are not logged in. Please login again.");
+                showAlert(rb.getString("not_logged_in"));
                 return;
             }
 
@@ -189,20 +191,20 @@ public class CreateProjectController {
                     handleAddingAssigned(user, projectId);
                 }
 
-                showAlert("Project created successfully!");
+                showAlert(rb.getString("project_created"));
                 Config.getInstance().getMainController().loadView("projects-view.fxml");
                 return;
             } else if (status == 401) {
-                showAlert("Unauthorized (401). Your session is invalid or expired. Please login again.");
+                showAlert(rb.getString("unauthorized_msg"));
             } else if (status == 403) {
-                showAlert("Forbidden (403). You are authenticated but do not have permission.");
+                showAlert(rb.getString("forbidden_msg"));
             } else {
-                showAlert("Failed to create project (" + status + "): " + responseBody);
+                showAlert(rb.getString("update_failed") + " (" + status + "): " + responseBody);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Connection error.");
+            showAlert(rb.getString("connection_error"));
         }
     }
 

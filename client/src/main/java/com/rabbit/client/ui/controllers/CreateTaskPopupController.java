@@ -148,7 +148,7 @@ public class CreateTaskPopupController {
     @FXML
     private void handleAiSuggest() {
         String skills = skillsField.getText().trim();
-        if (skills.isBlank()) { showAiError("Please enter at least one skill."); return; }
+        if (skills.isBlank()) { showAiError(com.rabbit.client.Config.getInstance().getBundle().getString("enter_skill")); return; }
 
         setAiLoading(true);
         clearAiResults();
@@ -296,7 +296,7 @@ public class CreateTaskPopupController {
         payload.put("status",      "backlog");
 
         createBtn.setDisable(true);
-        createBtn.setText("Creating...");
+        createBtn.setText(com.rabbit.client.Config.getInstance().getBundle().getString("creating"));
 
         new Thread(() -> {
             try {
@@ -308,13 +308,16 @@ public class CreateTaskPopupController {
                         closePopup();
                     } else {
                         createBtn.setDisable(false);
-                        createBtn.setText("Create Task");
+                        createBtn.setText(com.rabbit.client.Config.getInstance().getBundle().getString("create_task_btn_text"));
                         MainController mc = MainController.getInstance();
-                        if (mc != null) mc.showGlobalNotification("Failed: " + resp.statusCode(), "#ED4245");
+                        if (mc != null) mc.showGlobalNotification(com.rabbit.client.Config.getInstance().getBundle().getString("update_failed") + ": " + resp.statusCode(), "#ED4245");
                     }
                 });
             } catch (Exception e) {
-                Platform.runLater(() -> { createBtn.setDisable(false); createBtn.setText("Create Task"); });
+                Platform.runLater(() -> {
+                    createBtn.setDisable(false);
+                    createBtn.setText(com.rabbit.client.Config.getInstance().getBundle().getString("create_task_btn_text"));
+                });
             }
         }).start();
     }

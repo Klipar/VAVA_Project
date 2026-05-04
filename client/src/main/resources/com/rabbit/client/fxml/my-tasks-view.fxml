@@ -5,14 +5,14 @@
 
 <VBox xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.rabbit.client.ui.controllers.MyTasksController"
-      style="-fx-background-color: #0d1b2e;"
+      style="-fx-background-color: #09263E;"
       spacing="20.0">
 
     <padding>
         <Insets top="30.0" bottom="30.0" left="40.0" right="40.0"/>
     </padding>
 
-    <Label text="MY TASKS"
+    <Label text="%my_tasks_title"
            style="-fx-text-fill: #ffffff; -fx-font-size: 36px; -fx-font-weight: bold;"/>
 
     <VBox style="-fx-background-color: #1a2840;
@@ -30,11 +30,11 @@
             </columnResizePolicy>
 
             <columns>
-                <TableColumn fx:id="titleColumn" text="TASK NAME" />
-                <TableColumn fx:id="descriptionColumn" text="DESCRIPTION" />
-                <TableColumn fx:id="statusColumn" text="STATUS" />
-                <TableColumn fx:id="projectColumn" text="PROJECT NAME" />
-                <TableColumn fx:id="deadlineColumn" text="DEADLINE" />
+                <TableColumn fx:id="titleColumn" text="%col_task_name" />
+                <TableColumn fx:id="descriptionColumn" text="%col_description" />
+                <TableColumn fx:id="statusColumn" text="%col_status" />
+                <TableColumn fx:id="projectColumn" text="%col_project_name" />
+                <TableColumn fx:id="deadlineColumn" text="%col_deadline" />
             </columns>
         </TableView>
     </VBox>
