@@ -3,18 +3,23 @@ package com.rabbit.client.ui.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbit.client.Config;
+import com.rabbit.client.service.ApiClient;
 import com.rabbit.client.service.UserService;
 import com.rabbit.common.dto.TaskDto;
 import com.rabbit.common.enums.UserRole;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import lombok.Setter;
 
 import java.net.URI;
@@ -23,20 +28,24 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 public class ProjectsTaskController {
 
+    @FXML private StackPane rootStackPane;
     @FXML private TableView<TaskDto> tasksTable;
-    @FXML private TableColumn<TaskDto, String> titleColumn, descriptionColumn,statusColumn, assigneeColumn, deadlineColumn;
+    @FXML private TableColumn<TaskDto, String> titleColumn, descriptionColumn, statusColumn, assigneeColumn, deadlineColumn;
     @FXML private Label statusLabel;
     @FXML private Button boardBtn, listBtn, tasksBtn, topCreateTaskBtn;
     @FXML private Label projectTitleLabel;
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newHttpClient();
+    private final ApiClient apiClient = ApiClient.getInstance();
 
     private int currentProjectId;
     private String currentProjectTitle;
+    private boolean isMaster = false;
     @Setter
     private MainController mainController;
 
@@ -61,6 +70,51 @@ public class ProjectsTaskController {
                 UserService.getInstance().getCurrentUser().getRole() == UserRole.TEAM_LEADER;
         topCreateTaskBtn.setVisible(isAdmin);
         topCreateTaskBtn.setManaged(isAdmin);
+
+        // Check project-level role asynchronously
+        new Thread(() -> {
+            try {
+                var resp = apiClient.get("/projects/" + projectId + "/role");
+                if (apiClient.isSuccess(resp)) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> result = mapper.readValue(resp.body(), Map.class);
+                    String role = result.getOrDefault("role", "none");
+                    Platform.runLater(() -> this.isMaster = "master".equals(role));
+                }
+            } catch (Exception ignored) {}
+        }).start();
+
+        setupRowClickHandler();
+    }
+
+    private void setupRowClickHandler() {
+        tasksTable.setRowFactory(tv -> {
+            TableRow<TaskDto> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (!row.isEmpty() && event.getClickCount() == 1) {
+                    openTaskDetailPopup(row.getItem());
+                }
+            });
+            return row;
+        });
+    }
+
+    private void openTaskDetailPopup(TaskDto task) {
+        if (rootStackPane == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/rabbit/client/fxml/task-detail-popup.fxml"),
+                    Config.getInstance().getBundle()
+            );
+            Pane overlay = loader.load();
+            TaskDetailPopupController controller = loader.getController();
+            controller.setup(task, isMaster, currentProjectId, this::loadTasksForProject);
+            rootStackPane.getChildren().add(overlay);
+            overlay.prefWidthProperty().bind(rootStackPane.widthProperty());
+            overlay.prefHeightProperty().bind(rootStackPane.heightProperty());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -114,7 +168,7 @@ public class ProjectsTaskController {
         assigneeColumn.setCellValueFactory(cellData -> {
             java.util.ResourceBundle rb = Config.getInstance().getBundle();
             return new SimpleStringProperty(
-                cellData.getValue().getAssignedTo() > 0 ? rb.getString("assigned") : rb.getString("unassigned")
+                    cellData.getValue().getAssignedTo() > 0 ? rb.getString("assigned") : rb.getString("unassigned")
             );
         });
 
