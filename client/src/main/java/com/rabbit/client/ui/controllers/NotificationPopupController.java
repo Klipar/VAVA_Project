@@ -1,5 +1,6 @@
 package com.rabbit.client.ui.controllers;
 
+import com.rabbit.client.Config;
 import com.rabbit.client.service.NotificationPollingService;
 import com.rabbit.common.dto.NotificationDto;
 import javafx.animation.FadeTransition;
@@ -12,8 +13,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class NotificationPopupController {
 
@@ -21,13 +22,18 @@ public class NotificationPopupController {
     @FXML private VBox popupCard;
     @FXML private VBox notificationsContainer;
     @FXML private Button refreshButton;
+    @FXML private Button closeButton;
+    @FXML private Label inboxLabel;
     @FXML private Label countLabel;
 
     private final NotificationPollingService pollingService = NotificationPollingService.getInstance();
-    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     @FXML
     public void initialize() {
+        ResourceBundle rb = Config.getInstance().getBundle();
+        inboxLabel.setText(rb.getString("notif_inbox"));
+        closeButton.setText(rb.getString("notif_close"));
+        refreshButton.setText(rb.getString("notif_refresh"));
         refreshButton.setOnAction(e -> loadNotifications());
         loadNotifications();
         playOpenAnimation();
@@ -37,8 +43,9 @@ public class NotificationPopupController {
         List<NotificationDto> notifications = pollingService.getCurrentNotifications();
         notificationsContainer.getChildren().clear();
 
+        ResourceBundle rb = Config.getInstance().getBundle();
         if (notifications == null || notifications.isEmpty()) {
-            Label empty = new Label("No notifications");
+            Label empty = new Label(rb.getString("notif_no_notifications"));
             empty.setStyle("-fx-text-fill: #8ab0c2; -fx-font-size: 14px;");
             notificationsContainer.getChildren().add(empty);
             countLabel.setText("0");
@@ -48,7 +55,7 @@ public class NotificationPopupController {
                 if (Boolean.FALSE.equals(n.getIsRead())) unread++;
                 notificationsContainer.getChildren().add(buildItem(n));
             }
-            countLabel.setText(notifications.size() + " total, " + unread + " unread");
+            countLabel.setText(String.format(rb.getString("notif_total"), notifications.size(), unread));
         }
     }
 
@@ -72,15 +79,16 @@ public class NotificationPopupController {
 
         Label time = new Label();
         if (notification.getCreated_at() != null) {
-            time.setText(notification.getCreated_at().format(timeFormatter));
+            time.setText(notification.getCreated_at().format(Config.getInstance().getDateTimeFormatter()));
         }
         time.setStyle("-fx-text-fill: #8ab0c2; -fx-font-size: 11px;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        ResourceBundle rb = Config.getInstance().getBundle();
         if (Boolean.FALSE.equals(notification.getIsRead())) {
-            Button markReadBtn = new Button("✓ Mark read");
+            Button markReadBtn = new Button(rb.getString("notif_mark_read"));
             markReadBtn.setStyle(
                     "-fx-background-color: #1e90ff; " +
                             "-fx-text-fill: white; " +
@@ -95,7 +103,7 @@ public class NotificationPopupController {
             });
             bottom.getChildren().addAll(time, spacer, markReadBtn);
         } else {
-            Label readLabel = new Label("✓ Read");
+            Label readLabel = new Label(rb.getString("notif_read"));
             readLabel.setStyle("-fx-text-fill: #5a7a5a; -fx-font-size: 11px;");
             bottom.getChildren().addAll(time, spacer, readLabel);
         }

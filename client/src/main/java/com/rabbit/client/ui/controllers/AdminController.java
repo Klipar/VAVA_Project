@@ -3,6 +3,7 @@ package com.rabbit.client.ui.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbit.client.Config;
 import com.rabbit.client.service.ApiClient;
 import com.rabbit.common.dto.UserDto;
 import javafx.application.Platform;
@@ -68,6 +69,18 @@ public class AdminController {
 
     @FXML
     public void initialize() {
+        var rb = Config.getInstance().getBundle();
+        searchByLoginRadio.setText(rb.getString("admin_search_login"));
+        searchByNameRadio.setText(rb.getString("admin_search_name"));
+        searchByEmailRadio.setText(rb.getString("admin_search_email"));
+        if (openAddUserButton != null) openAddUserButton.setText(rb.getString("admin_add_user"));
+        if (searchLoginField != null) searchLoginField.setPromptText(rb.getString("admin_search_placeholder"));
+        loginColumn.setText(rb.getString("admin_col_login"));
+        nameColumn.setText(rb.getString("admin_col_full_name"));
+        emailColumn.setText(rb.getString("admin_col_email"));
+        roleColumn.setText(rb.getString("admin_col_role"));
+        actionsColumn.setText(rb.getString("admin_col_actions"));
+
         searchToggleGroup.getToggles().addAll(searchByLoginRadio, searchByNameRadio, searchByEmailRadio);
 
         configureTable();

@@ -9,7 +9,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class NotificationService {
-    private static final NotificationRepository repo = new NotificationRepository(DatabaseService.getInstance());
+    private final NotificationRepository repo;
+
+    public NotificationService() {
+        this.repo = new NotificationRepository(DatabaseService.getInstance());
+    }
+
+    NotificationService(NotificationRepository repo) {
+        this.repo = repo;
+    }
 
     public List<NotificationDto> getNotificationsForUser(int userId) throws SQLException {
         return repo.findByUserId(userId);
@@ -22,6 +30,7 @@ public class NotificationService {
     }
 
     public static void sendSystemNotification(int usedId, String message) {
+        NotificationRepository staticRepo = new NotificationRepository(DatabaseService.getInstance());
         try {
             NotificationDto dto = new NotificationDto();
             dto.setMessage(message);
@@ -29,8 +38,8 @@ public class NotificationService {
             dto.setIsRead(false);
             dto.setId(0L);
 
-            long notificationId = repo.save(dto);
-            repo.linkToUser(notificationId,usedId);
+            long notificationId = staticRepo.save(dto);
+            staticRepo.linkToUser(notificationId, usedId);
             System.out.println("System notification sent to" +usedId + ": " + message);
         }catch (SQLException e){
             e.printStackTrace();

@@ -2,6 +2,7 @@ package com.rabbit.client.ui.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbit.client.Config;
 import com.rabbit.client.service.ApiClient;
 import com.rabbit.common.enums.UserRole;
 import javafx.animation.FadeTransition;
@@ -10,6 +11,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
@@ -34,6 +36,8 @@ public class AddUserPopupController {
     @FXML private RadioButton workerRoleRadio;
     @FXML private RadioButton managerRoleRadio;
     @FXML private RadioButton teamLeaderRoleRadio;
+    @FXML private Label titleLabel;
+    @FXML private Button cancelBtn;
     @FXML private Button createBtn;
 
     private final ApiClient apiClient = ApiClient.getInstance();
@@ -47,6 +51,13 @@ public class AddUserPopupController {
 
     @FXML
     public void initialize() {
+        var rb = Config.getInstance().getBundle();
+        titleLabel.setText(rb.getString("add_user_title"));
+        cancelBtn.setText(rb.getString("add_user_cancel"));
+        workerRoleRadio.setText(rb.getString("add_user_role_worker"));
+        teamLeaderRoleRadio.setText(rb.getString("add_user_role_team_leader"));
+        managerRoleRadio.setText(rb.getString("add_user_role_manager"));
+        createBtn.setText(rb.getString("add_user_create"));
         workerRoleRadio.setToggleGroup(roleGroup);
         managerRoleRadio.setToggleGroup(roleGroup);
         teamLeaderRoleRadio.setToggleGroup(roleGroup);
@@ -64,7 +75,8 @@ public class AddUserPopupController {
         String password = passwordField.getText().trim();
 
         if (login.isBlank() || password.isBlank()) {
-            showAlert("Validation Error", "Please enter both login and password");
+            var rb = Config.getInstance().getBundle();
+            showAlert(rb.getString("error"), rb.getString("add_user_validation"));
             return;
         }
 
@@ -91,15 +103,15 @@ public class AddUserPopupController {
                         closePopup();
                     } else {
                         createBtn.setDisable(false);
-                        createBtn.setText("Create user");
-                        showAlert("Error", parseError(response.body()));
+                        createBtn.setText(Config.getInstance().getBundle().getString("add_user_create"));
+                        showAlert(Config.getInstance().getBundle().getString("error"), parseError(response.body()));
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     createBtn.setDisable(false);
-                    createBtn.setText("Create user");
-                    showAlert("Error", e.getMessage());
+                    createBtn.setText(Config.getInstance().getBundle().getString("add_user_create"));
+                    showAlert(Config.getInstance().getBundle().getString("error"), e.getMessage());
                 });
             }
         }).start();
@@ -144,9 +156,9 @@ public class AddUserPopupController {
         try {
             Map<?, ?> errorMap = mapper.readValue(responseBody, Map.class);
             Object error = errorMap.get("error");
-            return error != null ? error.toString() : "Unknown error";
+            return error != null ? error.toString() : Config.getInstance().getBundle().getString("add_user_unknown_error");
         } catch (Exception e) {
-            return "Unknown error";
+            return Config.getInstance().getBundle().getString("add_user_unknown_error");
         }
     }
 

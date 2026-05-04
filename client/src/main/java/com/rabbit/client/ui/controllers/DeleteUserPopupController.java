@@ -2,6 +2,7 @@ package com.rabbit.client.ui.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbit.client.Config;
 import com.rabbit.client.service.ApiClient;
 import com.rabbit.common.dto.UserDto;
 import javafx.animation.FadeTransition;
@@ -45,10 +46,10 @@ public class DeleteUserPopupController {
     public void setup(UserDto user, Runnable onDeleted) {
         this.user = user;
         this.onDeleted = onDeleted;
-        currentUserLabel.setText(user != null && user.getNickname() != null ? user.getNickname() : "Selected user");
-        confirmTextLabel.setText(user != null && user.getNickname() != null
-                ? "Do you want to permanently delete user: " + user.getNickname()
-                : "Do you want to permanently delete this user?");
+        var rb = Config.getInstance().getBundle();
+        currentUserLabel.setText(user != null && user.getNickname() != null
+                ? user.getNickname() : rb.getString("delete_user_selected"));
+        confirmTextLabel.setText(rb.getString("delete_user_confirm"));
     }
 
     @FXML
@@ -72,15 +73,15 @@ public class DeleteUserPopupController {
                         closePopup();
                     } else {
                         deleteBtn.setDisable(false);
-                        deleteBtn.setText("Delete");
-                        showAlert("Error", parseError(response.body()));
+                        deleteBtn.setText(Config.getInstance().getBundle().getString("delete_user_btn"));
+                        showAlert(Config.getInstance().getBundle().getString("error"), parseError(response.body()));
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     deleteBtn.setDisable(false);
-                    deleteBtn.setText("Delete");
-                    showAlert("Error", e.getMessage());
+                    deleteBtn.setText(Config.getInstance().getBundle().getString("delete_user_btn"));
+                    showAlert(Config.getInstance().getBundle().getString("error"), e.getMessage());
                 });
             }
         }).start();
@@ -115,9 +116,9 @@ public class DeleteUserPopupController {
         try {
             java.util.Map<?, ?> errorMap = mapper.readValue(responseBody, java.util.Map.class);
             Object error = errorMap.get("error");
-            return error != null ? error.toString() : "Unknown error";
+            return error != null ? error.toString() : Config.getInstance().getBundle().getString("add_user_unknown_error");
         } catch (Exception e) {
-            return "Unknown error";
+            return Config.getInstance().getBundle().getString("add_user_unknown_error");
         }
     }
 

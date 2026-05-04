@@ -29,7 +29,7 @@
           styleClass="popup-card">
 
         <HBox alignment="CENTER" spacing="12" styleClass="popup-header">
-            <Label text="ADD USER" styleClass="popup-title"/>
+            <Label fx:id="titleLabel" styleClass="popup-title"/>
             <Region HBox.hgrow="ALWAYS"/>
         </HBox>
 
@@ -61,7 +61,7 @@
         </ScrollPane>
 
         <HBox style="-fx-background-color: #0f1c2a; -fx-background-radius: 0 0 16 16; -fx-padding: 16 18 18 18;">
-            <Button text="Cancel" onAction="#handleCancel" styleClass="btn-cancel"/>
+            <Button fx:id="cancelBtn" onAction="#handleCancel" styleClass="btn-cancel"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="createBtn" text="Create user" onAction="#handleCreate" styleClass="btn-create"/>
         </HBox>

@@ -2,6 +2,7 @@ package com.rabbit.client.ui.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbit.client.Config;
 import com.rabbit.client.service.ApiClient;
 import com.rabbit.common.dto.UserDto;
 import com.rabbit.common.enums.UserRole;
@@ -54,6 +55,11 @@ public class EditUserPopupController {
 
     @FXML
     public void initialize() {
+        var rb = Config.getInstance().getBundle();
+        workerRoleRadio.setText(rb.getString("add_user_role_worker"));
+        teamLeaderRoleRadio.setText(rb.getString("add_user_role_team_leader"));
+        managerRoleRadio.setText(rb.getString("add_user_role_manager"));
+        saveBtn.setText(rb.getString("edit_user_save"));
         playOpenAnimation();
         ToggleGroup roleGroup = new ToggleGroup();
         workerRoleRadio.setToggleGroup(roleGroup);
@@ -64,7 +70,8 @@ public class EditUserPopupController {
     public void setup(UserDto user, Consumer<UserDto> onSaved) {
         this.user = user;
         this.onSaved = onSaved;
-        currentUserLabel.setText(user != null && user.getNickname() != null ? user.getNickname() : "Selected user");
+        currentUserLabel.setText(user != null && user.getNickname() != null
+                ? user.getNickname() : Config.getInstance().getBundle().getString("edit_user_selected"));
         loginField.setText(user != null && user.getNickname() != null ? user.getNickname() : "");
         fullNameField.setText(user != null && user.getName() != null ? user.getName() : "");
         emailField.setText(user != null && user.getEmail() != null ? user.getEmail() : "");
@@ -89,7 +96,8 @@ public class EditUserPopupController {
         UserRole role = getSelectedRole();
 
         if (nickname.isBlank() || fullName.isBlank() || email.isBlank()) {
-            showAlert("Validation Error", "Login, full name and email are required");
+            var rb = Config.getInstance().getBundle();
+            showAlert(rb.getString("validation_error"), rb.getString("edit_user_validation"));
             return;
         }
 
@@ -128,15 +136,15 @@ public class EditUserPopupController {
                         }
                     } else {
                         saveBtn.setDisable(false);
-                        saveBtn.setText("Save changes");
-                        showAlert("Error", parseError(response.body()));
+                        saveBtn.setText(Config.getInstance().getBundle().getString("edit_user_save"));
+                        showAlert(Config.getInstance().getBundle().getString("error"), parseError(response.body()));
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     saveBtn.setDisable(false);
-                    saveBtn.setText("Save changes");
-                    showAlert("Error", e.getMessage());
+                    saveBtn.setText(Config.getInstance().getBundle().getString("edit_user_save"));
+                    showAlert(Config.getInstance().getBundle().getString("error"), e.getMessage());
                 });
             }
         }).start();
@@ -171,9 +179,9 @@ public class EditUserPopupController {
         try {
             Map<?, ?> errorMap = mapper.readValue(responseBody, Map.class);
             Object error = errorMap.get("error");
-            return error != null ? error.toString() : "Unknown error";
+            return error != null ? error.toString() : Config.getInstance().getBundle().getString("add_user_unknown_error");
         } catch (Exception e) {
-            return "Unknown error";
+            return Config.getInstance().getBundle().getString("add_user_unknown_error");
         }
     }
 
