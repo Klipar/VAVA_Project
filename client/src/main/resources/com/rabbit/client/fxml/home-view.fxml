@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
 <ScrollPane fitToWidth="true"
             style="-fx-background-color: #09263E; -fx-background: #09263E; -fx-border-color: transparent;"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.rabbit.client.ui.controllers.HomePageController">
-    <VBox spacing="25" style="-fx-background-color: transparent; -fx-padding: 30;">
 
-        <Label text="%homepage" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
+    <VBox spacing="30" style="-fx-background-color: transparent;">
+        <padding><Insets top="30" left="30" right="30" bottom="30"/></padding>
 
-        <VBox spacing="15">
-            <Label text="%recent_projects" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <Label text="%homepage" style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;"/>
+
+        <VBox spacing="20">
+            <Label text="%recent_projects" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
             <FlowPane fx:id="projectsContainer" hgap="20" vgap="20" />
         </VBox>
 
-        <VBox fx:id="tasksSection" spacing="15">
+        <VBox fx:id="tasksSection" spacing="20">
             <Label text="%tasks_expiring"
-                   style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                   style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
 
             <TableView fx:id="tasksTable" prefHeight="300" styleClass="dark-table"
                        style="-fx-background-color: #253447;

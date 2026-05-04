@@ -64,7 +64,7 @@ public class ProjectsController {
         card.setCursor(javafx.scene.Cursor.HAND);
         card.setOnMouseClicked(e -> navigateToProjectBoard(project));
 
-        card.setStyle("-fx-background-color: #0d2137; -fx-background-radius: 8; -fx-padding: 15;");
+        card.setStyle("-fx-background-color: #253447; -fx-background-radius: 8; -fx-padding: 15;");
 
         Label title = new Label(project.getTitle());
         title.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");

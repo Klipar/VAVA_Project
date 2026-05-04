@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="overlayPane"
+           fx:controller="com.rabbit.client.ui.controllers.DeleteUserPopupController"
+           style="-fx-background-color: rgba(0,0,0,0.6); -fx-alignment: center;"
+           onMouseClicked="#handleOverlayClick">
+
+    <VBox fx:id="popupCard"
+          maxWidth="420"
+          prefWidth="380"
+          minHeight="-Infinity"
+          prefHeight="-Infinity"
+          maxHeight="-Infinity"
+          fillWidth="true"
+          alignment="TOP_CENTER"
+          StackPane.alignment="CENTER"
+          spacing="0"
+          onMouseClicked="#consumeClick"
+          style="-fx-background-color: #1a2533; -fx-background-radius: 16; -fx-border-color: #3E6273; -fx-border-radius: 16; -fx-border-width: 2; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 50, 0, 0, 12);">
+
+        <HBox alignment="CENTER" spacing="12"
+              style="-fx-background-color: #0d1b2a; -fx-background-radius: 16 16 0 0; -fx-padding: 18 24; -fx-border-color: transparent transparent #3E6273 transparent; -fx-border-width: 0 0 2 0;">
+            <Label text="DELETE USER" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <VBox spacing="10" style="-fx-background-color: #152638; -fx-padding: 16 24 16 24;">
+            <Label fx:id="currentUserLabel" text="Selected user"
+                   style="-fx-text-fill: #ffecf2; -fx-font-size: 20px; -fx-font-weight: 900;" wrapText="true"/>
+            <Label fx:id="confirmTextLabel" text="Do you want to permanently delete this user?"
+                   style="-fx-text-fill: #a9c0d0; -fx-font-size: 12px;" wrapText="true"/>
+        </VBox>
+
+        <HBox style="-fx-background-color: #0f1c2a; -fx-background-radius: 0 0 16 16; -fx-padding: 16 18 18 18;">
+            <Button text="Cancel" onAction="#handleCancel" styleClass="btn-cancel"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="deleteBtn" text="Delete" onAction="#handleDelete" styleClass="btn-danger"/>
+        </HBox>
+
+    </VBox>
+</StackPane>
