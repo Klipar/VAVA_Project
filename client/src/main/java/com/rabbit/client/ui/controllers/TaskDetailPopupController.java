@@ -297,6 +297,7 @@ public class TaskDetailPopupController {
                         currentTask.setAssignedTo(assignee.getId().intValue());
 
                         if (onTaskChanged != null) onTaskChanged.run();
+                        populateViewMode(currentTask);
                         handleCancelEdit();
 
                         MainController mc = MainController.getInstance();
