@@ -1,5 +1,6 @@
 package com.rabbit.client.ui.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbit.client.Config;
@@ -8,10 +9,12 @@ import com.rabbit.common.dto.UserDto;
 import com.rabbit.common.enums.ProjectStatus;
 import com.rabbit.common.enums.UserRole;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,6 +23,7 @@ import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CreateProjectController {
     @FXML private TextField nameField;
@@ -27,11 +31,190 @@ public class CreateProjectController {
     @FXML private TextField assignField;
     @FXML private FlowPane assignedChipsPane;
     @FXML private DatePicker deadlinePicker;
+    @FXML private ListView<String> suggestionsListView;
+    @FXML private StackPane suggestionsPane;
 
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final List<String> assignedPeople = new ArrayList<>();
     private final List<UserDto> assignedUsers = new ArrayList<>();
+    private List<UserDto> allUsers = new ArrayList<>();
+
+    @FXML
+    public void initialize() {
+        setupSuggestionsListView();
+        setupAssignFieldListener();
+        loadAllUsers();
+    }
+
+    private void setupSuggestionsListView() {
+        suggestionsListView.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                }
+            }
+        });
+        
+        suggestionsListView.setOnMouseClicked(event -> {
+            String selected = suggestionsListView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                assignField.setText(selected);
+                hideSuggestions();
+                addUserByNickname(selected);
+            }
+        });
+    }
+
+     private void setupAssignFieldListener() {
+        assignField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null || newVal.isBlank()) {
+                hideSuggestions();
+                return;
+            }
+            String query = newVal.trim().toLowerCase();
+            List<String> matches = allUsers.stream()
+                .filter(u -> u.getNickname() != null &&
+                             u.getNickname().toLowerCase().contains(query) &&
+                             !isAlreadyAssigned(u))
+                .map(UserDto::getNickname)
+                .limit(8)
+                .collect(Collectors.toList());
+ 
+            if (matches.isEmpty()) {
+                hideSuggestions();
+            } else {
+                suggestionsListView.getItems().setAll(matches);
+                // Adjust height: 36px per item, max 180
+                suggestionsListView.setPrefHeight(Math.min(matches.size() * 36, 180));
+                showSuggestions();
+            }
+        });
+ 
+        // Hide on focus lost
+        assignField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused) {
+                // Slight delay so click on list item can register first
+                new Thread(() -> {
+                    try { Thread.sleep(150); } catch (InterruptedException ignored) {}
+                    Platform.runLater(this::hideSuggestions);
+                }).start();
+            }
+        });
+    }
+ 
+    private void showSuggestions() {
+        suggestionsListView.setVisible(true);
+        suggestionsListView.setManaged(true);
+    }
+ 
+    private void hideSuggestions() {
+        suggestionsListView.setVisible(false);
+        suggestionsListView.setManaged(false);
+        suggestionsListView.getSelectionModel().clearSelection();
+    }
+
+     private boolean isAlreadyAssigned(UserDto user) {
+        return assignedUsers.stream().anyMatch(u ->
+            u.getId() != null && user.getId() != null &&
+            u.getId().longValue() == user.getId().longValue()
+        );
+    }
+ 
+    /** Fetch all users once so autocomplete works offline/fast. */
+    private void loadAllUsers() {
+        new Thread(() -> {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:6969/users/all"))
+                    .header("Authorization", "Bearer " + Config.getInstance().getToken())
+                    .GET()
+                    .build();
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    List<UserDto> users = mapper.readValue(response.body(), new TypeReference<>() {});
+                    Platform.runLater(() -> allUsers = users);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void addUserByNickname(String name) {
+        java.util.ResourceBundle rb = Config.getInstance().getBundle();
+ 
+        boolean alreadyAdded = assignedUsers.stream()
+            .anyMatch(u -> u.getNickname() != null && u.getNickname().equalsIgnoreCase(name));
+        if (alreadyAdded) {
+            showAlert(rb.getString("user_already_assigned") + ": " + name);
+            return;
+        }
+ 
+        UserDto currentUser = Config.getInstance().getUser();
+        if (currentUser.getNickname() != null && currentUser.getNickname().equalsIgnoreCase(name)) {
+            showAlert(rb.getString("creator_auto_added"));
+            return;
+        }
+ 
+        // Try to resolve from already-loaded list first (fast path)
+        UserDto cached = allUsers.stream()
+            .filter(u -> u.getNickname() != null && u.getNickname().equalsIgnoreCase(name))
+            .findFirst()
+            .orElse(null);
+ 
+        if (cached != null) {
+            addChip(cached);
+            assignField.clear();
+            return;
+        }
+ 
+        // Fallback: fetch from server
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:6969/users/nickname/" + name))
+            .header("Authorization", "Bearer " + Config.getInstance().getToken())
+            .GET()
+            .build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                UserDto fetchedUser = mapper.readValue(response.body(), UserDto.class);
+                addChip(fetchedUser);
+                assignField.clear();
+            } else {
+                showAlert(rb.getString("user_not_found") + ": " + name);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(rb.getString("error_fetch_user"));
+        }
+    }
+ 
+    private void addChip(UserDto user) {
+        assignedPeople.add(user.getNickname());
+        assignedUsers.add(user);
+ 
+        HBox chip = new HBox(5);
+        chip.getStyleClass().add("assign-chip");
+        Label nameLabel = new Label(user.getNickname());
+        nameLabel.getStyleClass().add("assign-chip-label");
+        Button removeBtn = new Button("✕");
+        removeBtn.getStyleClass().add("assign-chip-remove");
+        removeBtn.setOnAction(e -> {
+            assignedPeople.remove(user.getNickname());
+            assignedUsers.removeIf(u ->
+                u.getId() != null && user.getId() != null &&
+                u.getId().longValue() == user.getId().longValue()
+            );
+            assignedChipsPane.getChildren().remove(chip);
+        });
+        chip.getChildren().addAll(nameLabel, removeBtn);
+        assignedChipsPane.getChildren().add(chip);
+    }
 
     @FXML
     private void handleAddAssign() {
