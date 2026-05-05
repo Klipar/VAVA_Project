@@ -240,7 +240,6 @@ public class CreateTaskPopupController {
             right.setStyle("-fx-background-color:white;-fx-background-radius:0 9 9 0;");
             HBox.setHgrow(right, Priority.ALWAYS);
 
-            // collapsed/expanded behavior - expand label height only (no modal)
             final double COLLAPSED_HEIGHT = 22.0;
             explLbl.setTextOverrun(OverrunStyle.ELLIPSIS);
             explLbl.setMinHeight(COLLAPSED_HEIGHT);
@@ -250,12 +249,11 @@ public class CreateTaskPopupController {
             final boolean[] expanded = {false};
             javafx.event.EventHandler<MouseEvent> toggleHandler = e -> {
                 if (!expanded[0]) {
-                    // compute preferred height for current available width
                     Platform.runLater(() -> {
                         explLbl.applyCss();
                         double availableWidth = right.getWidth() - (right.getPadding().getLeft() + right.getPadding().getRight());
                         if (availableWidth <= 0) {
-                            availableWidth = popupCard.getWidth() - 200; // fallback estimate
+                            availableWidth = popupCard.getWidth() - 200;
                         }
                         explLbl.setPrefWidth(availableWidth);
 
