@@ -89,16 +89,13 @@ public class CreateProjectController {
                 hideSuggestions();
             } else {
                 suggestionsListView.getItems().setAll(matches);
-                // Adjust height: 36px per item, max 180
                 suggestionsListView.setPrefHeight(Math.min(matches.size() * 36, 180));
                 showSuggestions();
             }
         });
 
-        // Hide on focus lost
         assignField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
-                // Slight delay so click on list item can register first
                 new Thread(() -> {
                     try { Thread.sleep(150); } catch (InterruptedException ignored) {}
                     Platform.runLater(this::hideSuggestions);

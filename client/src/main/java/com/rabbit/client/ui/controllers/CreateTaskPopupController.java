@@ -15,9 +15,12 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.Cursor;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+// modal imports removed; using inline expansion instead
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -228,6 +231,7 @@ public class CreateTaskPopupController {
             Label explLbl = new Label("• " + expl);
             explLbl.setStyle("-fx-text-fill:#333;-fx-font-size:13px;");
             explLbl.setWrapText(true);
+            explLbl.setMaxWidth(Double.MAX_VALUE);
             HBox.setHgrow(explLbl, Priority.ALWAYS);
 
             HBox right = new HBox(explLbl);
@@ -235,6 +239,59 @@ public class CreateTaskPopupController {
             right.setPadding(new Insets(12, 14, 12, 14));
             right.setStyle("-fx-background-color:white;-fx-background-radius:0 9 9 0;");
             HBox.setHgrow(right, Priority.ALWAYS);
+
+            // collapsed/expanded behavior - expand label height only (no modal)
+            final double COLLAPSED_HEIGHT = 22.0;
+            explLbl.setTextOverrun(OverrunStyle.ELLIPSIS);
+            explLbl.setMinHeight(COLLAPSED_HEIGHT);
+            explLbl.setPrefHeight(COLLAPSED_HEIGHT);
+            explLbl.setMaxHeight(COLLAPSED_HEIGHT);
+
+            final boolean[] expanded = {false};
+            javafx.event.EventHandler<MouseEvent> toggleHandler = e -> {
+                if (!expanded[0]) {
+                    // compute preferred height for current available width
+                    Platform.runLater(() -> {
+                        explLbl.applyCss();
+                        double availableWidth = right.getWidth() - (right.getPadding().getLeft() + right.getPadding().getRight());
+                        if (availableWidth <= 0) {
+                            availableWidth = popupCard.getWidth() - 200; // fallback estimate
+                        }
+                        explLbl.setPrefWidth(availableWidth);
+
+                        Text measureText = new Text(explLbl.getText());
+                        measureText.setFont(explLbl.getFont());
+                        measureText.setWrappingWidth(availableWidth);
+
+                        double explanationHeight = Math.ceil(measureText.getLayoutBounds().getHeight());
+                        Insets padding = right.getPadding();
+                        double targetH = Math.max(
+                                explanationHeight + padding.getTop() + padding.getBottom() + 4,
+                                COLLAPSED_HEIGHT
+                        );
+                        explLbl.setMinHeight(targetH);
+                        explLbl.setPrefHeight(targetH);
+                        explLbl.setMaxHeight(targetH);
+                        expanded[0] = true;
+                        right.requestLayout();
+                        aiResultsBox.requestLayout();
+                    });
+                } else {
+                    explLbl.setTextOverrun(OverrunStyle.ELLIPSIS);
+                    explLbl.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                    explLbl.setMinHeight(COLLAPSED_HEIGHT);
+                    explLbl.setPrefHeight(COLLAPSED_HEIGHT);
+                    explLbl.setMaxHeight(COLLAPSED_HEIGHT);
+                    expanded[0] = false;
+                    Platform.runLater(() -> { right.requestLayout(); aiResultsBox.requestLayout(); });
+                }
+                e.consume();
+            };
+
+            right.setCursor(Cursor.HAND);
+            explLbl.setCursor(Cursor.HAND);
+            explLbl.setOnMouseClicked(toggleHandler);
+            right.setOnMouseClicked(toggleHandler);
 
             HBox row = new HBox(left, right);
             row.setStyle("-fx-border-color:#3E6273;-fx-border-radius:10;-fx-border-width:2;-fx-background-radius:10;");
@@ -254,6 +311,9 @@ public class CreateTaskPopupController {
         aiResultsBox.setVisible(false);
         aiResultsBox.setManaged(false);
     }
+
+
+    
 
     private void showAiResults() {
         aiResultsBox.setVisible(true);
