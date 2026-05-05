@@ -57,3 +57,5 @@ _in future this endpoint may not exist_
 ``` bash
 mvn clean compile javafx:run -pl client
 ```
+This is the Git repository of the project:
+https://github.com/Klipar/VAVA_Project.git
