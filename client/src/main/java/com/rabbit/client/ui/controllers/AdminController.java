@@ -232,6 +232,7 @@ public class AdminController {
             java.net.URL url = getClass().getResource(fxmlPath);
             if (url == null) return;
             FXMLLoader loader = new FXMLLoader(url);
+            loader.setResources(Config.getInstance().getBundle());
             Parent popupRoot = loader.load();
             configurer.configure(loader);
             Pane rootHost = getRootHost();

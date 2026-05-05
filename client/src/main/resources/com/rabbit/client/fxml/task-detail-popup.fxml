@@ -36,7 +36,7 @@
 
                     <!-- Description -->
                     <VBox spacing="8">
-                        <Label text="Description:" styleClass="field-label"/>
+                        <Label fx:id="viewDescriptionLabel" styleClass="field-label"/>
                         <TextArea fx:id="viewDescription"
                                   editable="false"
                                   wrapText="true"
@@ -51,12 +51,12 @@
                     <HBox spacing="20" alignment="CENTER_LEFT">
                         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="status-box"
                               style="-fx-padding: 10 20; -fx-min-width: 220;">
-                            <Label text="Status:" styleClass="status-label"/>
+                            <Label fx:id="viewStatusLabel" styleClass="status-label"/>
                             <Label fx:id="viewStatus" styleClass="status-value" text="IN REVIEW"/>
                         </HBox>
                         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="status-box"
                               style="-fx-padding: 10 20; -fx-min-width: 220;">
-                            <Label text="Priority:" styleClass="status-label"/>
+                            <Label fx:id="viewPriorityLabel" styleClass="status-label"/>
                             <Label fx:id="viewPriority" text="HIGH"
                                    style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
                         </HBox>
@@ -76,7 +76,7 @@
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <HBox spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS"
                               style="-fx-background-color: #0a1f33; -fx-background-radius: 10; -fx-padding: 12 16; -fx-border-color: #3E6273; -fx-border-radius: 10; -fx-border-width: 2.5;">
-                            <Label text="Reporter:" styleClass="status-label" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="viewReporterLabel" styleClass="status-label" style="-fx-font-weight: bold;"/>
                             <Label fx:id="viewReporter" text="Mamut R."
                                    style="-fx-text-fill: white; -fx-font-size: 13px;"/>
                             <Region HBox.hgrow="ALWAYS"/>
@@ -86,7 +86,7 @@
                         </HBox>
                         <HBox spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS"
                               style="-fx-background-color: #0a1f33; -fx-background-radius: 10; -fx-padding: 12 16; -fx-border-color: #3E6273; -fx-border-radius: 10; -fx-border-width: 2.5;">
-                            <Label text="Assignee:" styleClass="status-label" style="-fx-font-weight: bold;"/>
+                            <Label fx:id="viewAssigneeLabel" styleClass="status-label" style="-fx-font-weight: bold;"/>
                             <Label fx:id="viewAssignee" text="Mamut R."
                                    style="-fx-text-fill: white; -fx-font-size: 13px;"/>
                             <Region HBox.hgrow="ALWAYS"/>
@@ -108,13 +108,13 @@
 
                     <!-- Task name field -->
                     <HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="Task name:" styleClass="field-label" minWidth="100"/>
+                        <Label fx:id="editTaskNameLabel" styleClass="field-label" minWidth="100"/>
                         <TextField fx:id="editTitleField" HBox.hgrow="ALWAYS" styleClass="input-white"/>
                     </HBox>
 
                     <!-- Description -->
                     <VBox spacing="6">
-                        <Label text="Description:" styleClass="field-label"/>
+                        <Label fx:id="editDescriptionLabel" styleClass="field-label"/>
                         <TextArea fx:id="editDescriptionField"
                                   wrapText="true"
                                   prefHeight="100"
@@ -140,12 +140,12 @@
                     <HBox spacing="20" alignment="CENTER_LEFT">
                         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="status-box"
                               style="-fx-padding: 10 20; -fx-min-width: 220;">
-                            <Label text="Status:" styleClass="status-label"/>
+                            <Label fx:id="editStatusStaticLabel" styleClass="status-label"/>
                             <Label fx:id="editStatusLabel" text="IN REVIEW" styleClass="status-value"/>
                         </HBox>
                         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="priority-box-container"
                               style="-fx-padding: 10 14;">
-                            <Label text="Priority:" styleClass="status-label"/>
+                            <Label fx:id="editPriorityLabel" styleClass="status-label"/>
                             <HBox fx:id="editPriorityBox" spacing="8" alignment="CENTER"/>
                         </HBox>
                     </HBox>
@@ -154,7 +154,7 @@
 
                     <!-- Assignee -->
                     <HBox spacing="16" alignment="CENTER_LEFT">
-                        <Label text="Assigned:" styleClass="field-label" minWidth="80"/>
+                        <Label fx:id="editAssignedLabel" styleClass="field-label" minWidth="80"/>
                         <ComboBox fx:id="editAssigneeCombo"
                                   maxWidth="1.7976931348623157E308"
                                   HBox.hgrow="ALWAYS"
@@ -189,10 +189,10 @@
 
             <!-- Edit Footer -->
             <HBox styleClass="popup-footer" spacing="10" alignment="CENTER_LEFT">
-                <Button text="Cancel" onAction="#handleCancelEdit" styleClass="btn-cancel"/>
+                <Button fx:id="cancelEditBtn" onAction="#handleCancelEdit" styleClass="btn-cancel"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Delete task" onAction="#handleDeleteTask" styleClass="btn-danger"/>
-                <Button fx:id="saveBtn" text="Save changes" onAction="#handleSaveChanges" styleClass="btn-create"/>
+                <Button fx:id="deleteTaskBtn" onAction="#handleDeleteTask" styleClass="btn-danger"/>
+                <Button fx:id="saveBtn" onAction="#handleSaveChanges" styleClass="btn-create"/>
             </HBox>
         </VBox>
 

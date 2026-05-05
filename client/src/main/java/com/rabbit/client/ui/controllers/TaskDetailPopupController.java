@@ -39,6 +39,11 @@ public class TaskDetailPopupController {
 
     // View mode
     @FXML private VBox viewModeBox;
+    @FXML private Label viewDescriptionLabel;
+    @FXML private Label viewStatusLabel;
+    @FXML private Label viewPriorityLabel;
+    @FXML private Label viewReporterLabel;
+    @FXML private Label viewAssigneeLabel;
     @FXML private TextArea viewDescription;
     @FXML private Label viewStatus;
     @FXML private Label viewPriority;
@@ -48,6 +53,13 @@ public class TaskDetailPopupController {
 
     // Edit mode
     @FXML private VBox editModeBox;
+    @FXML private Label editTaskNameLabel;
+    @FXML private Label editDescriptionLabel;
+    @FXML private Label editStatusStaticLabel;
+    @FXML private Label editPriorityLabel;
+    @FXML private Label editAssignedLabel;
+    @FXML private Button cancelEditBtn;
+    @FXML private Button deleteTaskBtn;
     @FXML private TextField editTitleField;
     @FXML private TextArea editDescriptionField;
     @FXML private DatePicker editDeadlinePicker;
@@ -76,6 +88,21 @@ public class TaskDetailPopupController {
 
     @FXML
     public void initialize() {
+        var rb = Config.getInstance().getBundle();
+        viewDescriptionLabel.setText(rb.getString("task_detail_description"));
+        viewStatusLabel.setText(rb.getString("task_detail_status"));
+        viewPriorityLabel.setText(rb.getString("task_detail_priority"));
+        viewReporterLabel.setText(rb.getString("task_detail_reporter"));
+        viewAssigneeLabel.setText(rb.getString("task_detail_assignee"));
+        editTaskNameLabel.setText(rb.getString("task_detail_task_name"));
+        editDescriptionLabel.setText(rb.getString("task_detail_description"));
+        editStatusStaticLabel.setText(rb.getString("task_detail_status"));
+        editPriorityLabel.setText(rb.getString("task_detail_priority"));
+        editAssignedLabel.setText(rb.getString("task_detail_assigned"));
+        cancelEditBtn.setText(rb.getString("cancel_btn"));
+        deleteTaskBtn.setText(rb.getString("task_detail_delete_task"));
+        saveBtn.setText(rb.getString("edit_user_save"));
+
         buildPriorityButtons();
         configureAssigneeCombo();
         playOpenAnimation();
@@ -255,17 +282,18 @@ public class TaskDetailPopupController {
     @FXML
     private void handleSaveChanges() {
         UserDto assignee = editAssigneeCombo.getValue();
+        var rb = Config.getInstance().getBundle();
         if (assignee == null || selectedPriority == -1) {
-            showError("Please fill all fields and select priority.");
+            showError(rb.getString("task_detail_fill_fields"));
             return;
         }
         if (editTitleField.getText().isBlank()) {
-            showError("Task name cannot be empty.");
+            showError(rb.getString("task_detail_name_empty"));
             return;
         }
 
         saveBtn.setDisable(true);
-        saveBtn.setText("Saving...");
+        saveBtn.setText(rb.getString("task_detail_saving"));
 
         String deadline = null;
         if (editDeadlinePicker.getValue() != null) {
@@ -301,18 +329,18 @@ public class TaskDetailPopupController {
                         handleCancelEdit();
 
                         MainController mc = MainController.getInstance();
-                        if (mc != null) mc.showGlobalNotification("Task updated successfully!", "#6aa896");
+                        if (mc != null) mc.showGlobalNotification(Config.getInstance().getBundle().getString("task_detail_updated"), "#6aa896");
                     } else {
                         saveBtn.setDisable(false);
-                        saveBtn.setText("Save changes");
+                        saveBtn.setText(Config.getInstance().getBundle().getString("edit_user_save"));
                         MainController mc = MainController.getInstance();
-                        if (mc != null) mc.showGlobalNotification("Failed to update: " + resp.statusCode(), "#ED4245");
+                        if (mc != null) mc.showGlobalNotification(Config.getInstance().getBundle().getString("task_detail_update_failed") + ": " + resp.statusCode(), "#ED4245");
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     saveBtn.setDisable(false);
-                    saveBtn.setText("Save changes");
+                    saveBtn.setText(Config.getInstance().getBundle().getString("edit_user_save"));
                 });
             }
         }).start();
@@ -320,10 +348,11 @@ public class TaskDetailPopupController {
 
     @FXML
     private void handleDeleteTask() {
+        var rb = Config.getInstance().getBundle();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Task");
-        alert.setHeaderText("Delete this task?");
-        alert.setContentText("Are you sure you want to delete \"" + currentTask.getTitle() + "\"?");
+        alert.setTitle(rb.getString("task_detail_delete_title"));
+        alert.setHeaderText(rb.getString("task_detail_delete_header"));
+        alert.setContentText(rb.getString("task_detail_delete_body") + " \"" + currentTask.getTitle() + "\"?");
         alert.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
                 new Thread(() -> {
@@ -334,16 +363,16 @@ public class TaskDetailPopupController {
                                 if (onTaskChanged != null) onTaskChanged.run();
                                 closePopup();
                                 MainController mc = MainController.getInstance();
-                                if (mc != null) mc.showGlobalNotification("Task deleted.", "#6aa896");
+                                if (mc != null) mc.showGlobalNotification(Config.getInstance().getBundle().getString("task_detail_deleted"), "#6aa896");
                             } else {
                                 MainController mc = MainController.getInstance();
-                                if (mc != null) mc.showGlobalNotification("Delete failed: " + resp.statusCode(), "#ED4245");
+                                if (mc != null) mc.showGlobalNotification(Config.getInstance().getBundle().getString("task_detail_delete_failed") + ": " + resp.statusCode(), "#ED4245");
                             }
                         });
                     } catch (Exception e) {
                         Platform.runLater(() -> {
                             MainController mc = MainController.getInstance();
-                            if (mc != null) mc.showGlobalNotification("Error deleting task.", "#ED4245");
+                            if (mc != null) mc.showGlobalNotification(Config.getInstance().getBundle().getString("task_detail_error_deleting"), "#ED4245");
                         });
                     }
                 }).start();
@@ -402,7 +431,7 @@ public class TaskDetailPopupController {
                     Platform.runLater(() -> { setAiLoading(false); showAiError("AI error: " + aiResp.statusCode()); });
                 }
             } catch (Exception e) {
-                Platform.runLater(() -> { setAiLoading(false); showAiError("Failed to connect to AI service."); });
+                Platform.runLater(() -> { setAiLoading(false); showAiError(Config.getInstance().getBundle().getString("task_detail_ai_connect_failed")); });
             }
         }).start();
     }

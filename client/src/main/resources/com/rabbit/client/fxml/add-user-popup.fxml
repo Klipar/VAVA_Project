@@ -40,17 +40,17 @@
                 </padding>
 
                 <VBox spacing="6" styleClass="admin-field-card">
-                    <Label text="LOGIN" styleClass="field-label"/>
+                    <Label text="%add_user_login" styleClass="field-label"/>
                     <TextField fx:id="loginField" promptText="Type user login" styleClass="input-white"/>
                 </VBox>
 
                 <VBox spacing="6" styleClass="admin-field-card">
-                    <Label text="PASSWORD" styleClass="field-label"/>
+                    <Label text="%add_user_password" styleClass="field-label"/>
                     <PasswordField fx:id="passwordField" promptText="Type password" styleClass="input-white"/>
                 </VBox>
 
                 <VBox spacing="10">
-                    <Label text="USER MODE" styleClass="field-label"/>
+                    <Label text="%add_user_mode" styleClass="field-label"/>
                     <HBox spacing="16" alignment="CENTER_LEFT" styleClass="admin-radio-row">
                         <RadioButton fx:id="workerRoleRadio" text="Worker" selected="true"/>
                         <RadioButton fx:id="teamLeaderRoleRadio" text="Team Leader"/>
