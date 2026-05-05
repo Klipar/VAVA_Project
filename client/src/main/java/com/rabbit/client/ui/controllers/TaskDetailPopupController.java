@@ -103,6 +103,8 @@ public class TaskDetailPopupController {
         deleteTaskBtn.setText(rb.getString("task_detail_delete_task"));
         saveBtn.setText(rb.getString("edit_user_save"));
 
+        editBtn.setStyle("-fx-font-size: 30px;");
+
         buildPriorityButtons();
         configureAssigneeCombo();
         playOpenAnimation();
@@ -276,6 +278,7 @@ public class TaskDetailPopupController {
         viewModeBox.setManaged(true);
         editBtn.setVisible(true);
         editBtn.setManaged(true);
+
         clearAiResults();
     }
 
