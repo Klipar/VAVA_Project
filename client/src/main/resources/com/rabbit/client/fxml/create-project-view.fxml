@@ -3,45 +3,59 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" style="-fx-background: #09263E; -fx-background-color: #09263E;"
+<ScrollPane fitToWidth="true"
+            styleClass="admin-scroll"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.rabbit.client.ui.controllers.CreateProjectController">
 
-    <VBox spacing="20" style="-fx-background-color: #09263E;">
+    <VBox spacing="20" styleClass="admin-root">
         <padding><Insets top="40" left="60" right="60" bottom="40"/></padding>
 
-        <Label text="%create_project_title" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+        <Label text="%create_project_title" styleClass="admin-page-title"/>
 
-        <VBox spacing="20" style="-fx-background-color: #0d2137; -fx-background-radius: 10; -fx-padding: 30;">
+        <VBox spacing="20" styleClass="admin-main-card">
+            <padding><Insets top="30" left="30" right="30" bottom="30"/></padding>
 
-            <Label text="%name_new_project" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
-            <TextField fx:id="nameField" style="-fx-background-color: white; -fx-background-radius: 5;"/>
+            <Label text="%name_new_project" styleClass="admin-field-label"/>
+            <TextField fx:id="nameField" styleClass="input-white"/>
 
-            <Separator style="-fx-background-color: #4a9eda;"/>
+            <Separator styleClass="divider"/>
 
-            <Label text="%description" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
-            <TextArea fx:id="descriptionField" prefHeight="120"
-                      style="-fx-background-color: white; -fx-background-radius: 5;"/>
+            <Label text="%description" styleClass="admin-field-label"/>
+            <TextArea fx:id="descriptionField" prefHeight="120" styleClass="input-white"/>
 
-            <Separator style="-fx-background-color: #4a9eda;"/>
+            <Separator styleClass="divider"/>
 
-            <Label text="%deadline" />
-            <DatePicker fx:id="deadlinePicker" promptText="%select_deadline" />
+            <Label text="%deadline" styleClass="admin-field-label"/>
+            <DatePicker fx:id="deadlinePicker" promptText="%select_deadline"
+                        maxWidth="1.7976931348623157E308" styleClass="date-input"/>
 
-            <Label text="%assigned_label" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <TextField fx:id="assignField" prefWidth="400"
-                           style="-fx-background-color: white; -fx-background-radius: 20; -fx-background-insets: 0; -fx-padding: 5 15 5 15;"/>
-                <Button fx:id="addAssignBtn" text="+" onAction="#handleAddAssign"
-                        style="-fx-background-radius: 50; -fx-min-width: 35; -fx-min-height: 35; -fx-background-color: transparent; -fx-border-color: white; -fx-border-radius: 50; -fx-text-fill: white; -fx-font-size: 18px; -fx-cursor: hand;"/>
-            </HBox>
+            <Label text="%assigned_label" styleClass="admin-field-label"/>
+
+            <VBox spacing="0">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="assignField" prefWidth="400"
+                               promptText="%assigned_label"
+                               styleClass="input-white"/>
+                    <Button fx:id="addAssignBtn" text="+" onAction="#handleAddAssign"
+                            styleClass="assign-add-btn"/>
+                </HBox>
+
+                <ListView fx:id="suggestionsListView"
+                          prefWidth="400"
+                          maxHeight="180"
+                          visible="false"
+                          managed="false"
+                          styleClass="assign-suggestions"/>
+            </VBox>
+
             <FlowPane fx:id="assignedChipsPane" hgap="10" vgap="10"/>
 
         </VBox>
 
         <Button text="%create_project_btn" onAction="#handleCreateProject"
                 maxWidth="1.7976931348623157E308"
-                style="-fx-background-color: #4a9eda; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12; -fx-background-radius: 5; -fx-cursor: hand;"/>
+                styleClass="create-project-btn"/>
 
     </VBox>
 </ScrollPane>
