@@ -15,6 +15,9 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -86,6 +89,11 @@ public class TaskDetailPopupController {
     private int selectedPriority = -1;
     private Runnable onTaskChanged;
 
+    // Іконка редагування (зображення з ефектом білого кольору)
+    private final ImageView editIcon = new ImageView(
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/rabbit/client/images/edit.png")))
+    );
+
     @FXML
     public void initialize() {
         var rb = Config.getInstance().getBundle();
@@ -103,7 +111,18 @@ public class TaskDetailPopupController {
         deleteTaskBtn.setText(rb.getString("task_detail_delete_task"));
         saveBtn.setText(rb.getString("edit_user_save"));
 
-        editBtn.setStyle("-fx-font-size: 30px;");
+        // Налаштування іконки редагування: розмір 20x20 та БІЛИЙ КОЛІР через ефект
+        editIcon.setFitWidth(20);
+        editIcon.setFitHeight(20);
+        editIcon.setPreserveRatio(true);
+
+        // Ефект, що робить зображення повністю білим
+        ColorAdjust whiteEffect = new ColorAdjust();
+        whiteEffect.setBrightness(1.0); // Максимальна яскравість → всі кольори стають білими
+        editIcon.setEffect(whiteEffect);
+
+        editBtn.setGraphic(editIcon);
+        editBtn.setText(""); // Прибираємо текстовий символ ✎
 
         buildPriorityButtons();
         configureAssigneeCombo();
@@ -278,7 +297,6 @@ public class TaskDetailPopupController {
         viewModeBox.setManaged(true);
         editBtn.setVisible(true);
         editBtn.setManaged(true);
-
         clearAiResults();
     }
 
