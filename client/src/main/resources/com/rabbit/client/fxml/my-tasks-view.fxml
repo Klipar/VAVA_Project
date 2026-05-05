@@ -3,42 +3,46 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.rabbit.client.ui.controllers.MyTasksController"
-      style="-fx-background-color: #09263E;"
-      spacing="20.0">
+<StackPane fx:id="rootStackPane"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rabbit.client.ui.controllers.MyTasksController"
+           style="-fx-background-color: #09263E;">
 
-    <padding>
-        <Insets top="30.0" bottom="30.0" left="40.0" right="40.0"/>
-    </padding>
+    <VBox style="-fx-background-color: #09263E;" spacing="20.0">
 
-    <Label text="%my_tasks_title"
-           style="-fx-text-fill: #ffffff; -fx-font-size: 36px; -fx-font-weight: bold;"/>
+        <padding>
+            <Insets top="30.0" bottom="30.0" left="40.0" right="40.0"/>
+        </padding>
 
-    <VBox style="-fx-background-color: #1a2840;
+        <Label text="%my_tasks_title"
+               style="-fx-text-fill: #ffffff; -fx-font-size: 36px; -fx-font-weight: bold;"/>
+
+        <VBox style="-fx-background-color: #1a2840;
                  -fx-background-radius: 12;
                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 4);"
-          VBox.vgrow="ALWAYS">
+              VBox.vgrow="ALWAYS">
 
-        <TableView fx:id="tasksTable"
-                   styleClass="dark-table"
-                   VBox.vgrow="ALWAYS"
-                   style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <TableView fx:id="tasksTable"
+                       styleClass="dark-table"
+                       VBox.vgrow="ALWAYS"
+                       style="-fx-background-color: transparent; -fx-border-color: transparent;">
 
-            <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-            </columnResizePolicy>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
 
-            <columns>
-                <TableColumn fx:id="titleColumn" text="%col_task_name" />
-                <TableColumn fx:id="descriptionColumn" text="%col_description" />
-                <TableColumn fx:id="statusColumn" text="%col_status" />
-                <TableColumn fx:id="projectColumn" text="%col_project_name" />
-                <TableColumn fx:id="deadlineColumn" text="%col_deadline" />
-            </columns>
-        </TableView>
+                <columns>
+                    <TableColumn fx:id="titleColumn" text="%col_task_name" />
+                    <TableColumn fx:id="descriptionColumn" text="%col_description" />
+                    <TableColumn fx:id="statusColumn" text="%col_status" />
+                    <TableColumn fx:id="projectColumn" text="%col_project_name" />
+                    <TableColumn fx:id="deadlineColumn" text="%col_deadline" />
+                </columns>
+            </TableView>
+        </VBox>
+
+        <Label fx:id="statusLabel" text=""
+               style="-fx-text-fill: #5a6a88; -fx-font-size: 12px;"/>
     </VBox>
 
-    <Label fx:id="statusLabel" text=""
-           style="-fx-text-fill: #5a6a88; -fx-font-size: 12px;"/>
-</VBox>
+</StackPane>

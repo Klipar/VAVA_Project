@@ -3,113 +3,132 @@ package com.rabbit.client.ui.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbit.client.Config;
+import com.rabbit.client.service.ApiClient;
 import com.rabbit.common.dto.TaskDto;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import lombok.Setter;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class MyTasksController {
 
+    @FXML private StackPane rootStackPane;
     @FXML private TableView<TaskDto> tasksTable;
     @FXML private TableColumn<TaskDto, String> titleColumn, descriptionColumn,
             statusColumn, projectColumn, deadlineColumn;
     @FXML private Label statusLabel;
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private final HttpClient client = HttpClient.newHttpClient();
+    private final ApiClient apiClient = ApiClient.getInstance();
     private final Map<Integer, String> projectNames = new HashMap<>();
 
     @Setter
     private MainController mainController;
+
     @FXML
     public void initialize() {
         setupColumns();
-        loadTask();
+        setupRowClickHandler();
+        loadTasksAsync();
     }
 
-    private void loadTask() {
-        String token = Config.getInstance().getToken();
-        if(token == null || token.isEmpty()){
-            statusLabel.setText(Config.getInstance().getBundle().getString("please_login"));
-            return;
-        }
+    public void loadTasksAsync() {
+        statusLabel.setText("Loading...");
+        new Thread(() -> {
+            try {
+                var projectResp = apiClient.get("/projects");
+                if (!apiClient.isSuccess(projectResp)) {
+                    Platform.runLater(() ->
+                            statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_projects")));
+                    return;
+                }
 
-        try {
-            HttpRequest projectRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:6969/projects"))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
+                List<Map<String, Object>> projects =
+                        mapper.readValue(projectResp.body(), new TypeReference<>() {});
 
-            HttpResponse<String> projectRes = client.send(projectRequest,HttpResponse.BodyHandlers.ofString());
+                projectNames.clear();
+                for (Map<String, Object> p : projects) {
+                    projectNames.put((int) p.get("id"), (String) p.get("title"));
+                }
 
-            if(projectRes.statusCode() != 200){
-                statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_projects"));
-                return;
-            }
+                Long currentUserId = Config.getInstance().getUser().getId();
+                List<TaskDto> myTasks = new ArrayList<>();
 
-            List<Map<String, Object>> projects = mapper.readValue(projectRes.body(), new TypeReference<>() {});
-
-            projectNames.clear();
-            for(Map<String, Object> project : projects){
-                projectNames.put((int) project.get("id"), (String) project.get("title"));
-            }
-
-            Long currentUserId = Config.getInstance().getUser().getId();
-            List<TaskDto> myTasks = new ArrayList<>();
-
-            for(Map<String, Object> project : projects){
-                int projectId = (int) project.get("id");
-                String projectName = (String) project.get("title");
-                HttpRequest taskRequest = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:6969/tasks/" + projectId))
-                        .header("Authorization", "Bearer " + token)
-                        .GET()
-                        .build();
-                HttpResponse<String> tasksResponce = client.send(taskRequest,HttpResponse.BodyHandlers.ofString());
-                if(tasksResponce.statusCode() == 200){
-                    List<TaskDto> tasks = mapper.readValue(tasksResponce.body(), new TypeReference<>() {});
-                    for (TaskDto task : tasks) {
-                        if (task.getAssignedTo() == currentUserId.intValue()){
-                            task.setProjectId(projectId);
-                            myTasks.add(task);
+                for (Map<String, Object> project : projects) {
+                    int projectId = (int) project.get("id");
+                    var taskResp = apiClient.get("/tasks/" + projectId);
+                    if (apiClient.isSuccess(taskResp)) {
+                        List<TaskDto> tasks =
+                                mapper.readValue(taskResp.body(), new TypeReference<>() {});
+                        for (TaskDto task : tasks) {
+                            if (task.getAssignedTo() == currentUserId.intValue()) {
+                                task.setProjectId(projectId);
+                                myTasks.add(task);
+                            }
                         }
                     }
-                }else {
-                    System.out.println("Failed to load tasks for project: " + projectName);
                 }
+
+                ObservableList<TaskDto> observable = FXCollections.observableArrayList(myTasks);
+                Platform.runLater(() -> {
+                    tasksTable.setItems(observable);
+                    statusLabel.setText(Config.getInstance().getBundle().getString("tasks_loaded"));
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() ->
+                        statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_tasks")));
             }
-            ObservableList<TaskDto> observableTasks = FXCollections.observableArrayList(myTasks);
-            tasksTable.setItems(observableTasks);
-            statusLabel.setText(Config.getInstance().getBundle().getString("tasks_loaded"));
-        }catch (Exception e){
-            e.printStackTrace();
-            statusLabel.setText(Config.getInstance().getBundle().getString("failed_load_tasks"));
-        }
+        }).start();
     }
 
+    private void setupRowClickHandler() {
+        tasksTable.setRowFactory(tv -> {
+            TableRow<TaskDto> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (!row.isEmpty() && event.getClickCount() == 1) {
+                    openTaskDetailPopup(row.getItem());
+                }
+            });
+            return row;
+        });
+    }
+
+    private void openTaskDetailPopup(TaskDto task) {
+        if (rootStackPane == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/rabbit/client/fxml/task-detail-popup.fxml"),
+                    Config.getInstance().getBundle()
+            );
+            Pane overlay = loader.load();
+            TaskDetailPopupController controller = loader.getController();
+            // My Tasks = read-only view (isMaster=false, no edit pencil)
+            controller.setup(task, false, task.getProjectId(), this::loadTasksAsync);
+            rootStackPane.getChildren().add(overlay);
+            overlay.prefWidthProperty().bind(rootStackPane.widthProperty());
+            overlay.prefHeightProperty().bind(rootStackPane.heightProperty());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private void setupColumns() {
         titleColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getTitle())
-        );
+                new SimpleStringProperty(cellData.getValue().getTitle()));
 
         descriptionColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getDescription()));
@@ -117,9 +136,14 @@ public class MyTasksController {
 
         statusColumn.setCellValueFactory(cellData -> {
             String raw = cellData.getValue().getStatus();
-            return new SimpleStringProperty(raw.toUpperCase().replace("_", " "));
+            return new SimpleStringProperty(raw != null ? raw.toUpperCase().replace("_", " ") : "");
         });
         statusColumn.setPrefWidth(110);
+
+        projectColumn.setCellValueFactory(cellData -> {
+            int pid = cellData.getValue().getProjectId();
+            return new SimpleStringProperty(projectNames.getOrDefault(pid, ""));
+        });
 
         deadlineColumn.setCellFactory(column -> new TableCell<>() {
             private final HBox container = new HBox(8);
@@ -145,19 +169,7 @@ public class MyTasksController {
                     setText(null);
                 } else {
                     String deadlineStr = getTableRow().getItem().getDeadline();
-                    String formattedDate = Config.getInstance().getBundle().getString("no_deadline");
-
-                    if (deadlineStr != null && !deadlineStr.isBlank() && !"null".equalsIgnoreCase(deadlineStr)) {
-                        try {
-                            if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) deadlineStr += "Z";
-                            java.time.ZonedDateTime zdt = java.time.ZonedDateTime.parse(deadlineStr);
-                            formattedDate = zdt.format(Config.getInstance().getDateTimeFormatter()).toUpperCase();
-                        } catch (Exception e) {
-                            formattedDate = deadlineStr.toUpperCase();
-                        }
-                    }
-
-                    dateLabel.setText(formattedDate);
+                    dateLabel.setText(formatDeadline(deadlineStr));
                     container.getChildren().clear();
                     if (warningIcon != null) container.getChildren().add(warningIcon);
                     container.getChildren().add(dateLabel);
@@ -166,5 +178,18 @@ public class MyTasksController {
             }
         });
         deadlineColumn.setPrefWidth(180);
+    }
+
+    private String formatDeadline(String deadlineStr) {
+        if (deadlineStr == null || deadlineStr.isBlank() || "null".equalsIgnoreCase(deadlineStr)) {
+            return Config.getInstance().getBundle().getString("no_deadline");
+        }
+        try {
+            if (!deadlineStr.endsWith("Z") && !deadlineStr.contains("+")) deadlineStr += "Z";
+            java.time.ZonedDateTime zdt = java.time.ZonedDateTime.parse(deadlineStr);
+            return zdt.format(Config.getInstance().getDateTimeFormatter()).toUpperCase();
+        } catch (Exception e) {
+            return deadlineStr.toUpperCase();
+        }
     }
 }

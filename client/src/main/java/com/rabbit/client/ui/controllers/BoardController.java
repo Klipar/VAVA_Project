@@ -213,8 +213,8 @@ public class BoardController {
     private void openCreateTaskPopup() {
         try {
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/com/rabbit/client/fxml/create-task-popup.fxml"),
-                com.rabbit.client.Config.getInstance().getBundle()
+                    getClass().getResource("/com/rabbit/client/fxml/create-task-popup.fxml"),
+                    com.rabbit.client.Config.getInstance().getBundle()
             );
             Pane overlay = loader.load();
 
@@ -270,7 +270,7 @@ public class BoardController {
                                 TaskCardComponent card = new TaskCardComponent(task);
                                 card.setAccessibleText(String.valueOf(task.getId()));
                                 setupDragSource(card, task);
-                                setupDragSource(card, task);
+                                setupClickToDetail(card, task);
                                 columnContainers.get(status).getChildren().add(card);
                             }
                         }
@@ -304,6 +304,32 @@ public class BoardController {
             card.setOpacity(1.0);
             event.consume();
         });
+    }
+
+    private void setupClickToDetail(TaskCardComponent card, TaskDto task) {
+        card.setOnMouseClicked(event -> {
+            if (event.isStillSincePress() && event.getClickCount() == 1) {
+                openTaskDetailPopup(task);
+            }
+            event.consume();
+        });
+    }
+
+    private void openTaskDetailPopup(TaskDto task) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/com/rabbit/client/fxml/task-detail-popup.fxml"),
+                    com.rabbit.client.Config.getInstance().getBundle()
+            );
+            Pane overlay = loader.load();
+            TaskDetailPopupController controller = loader.getController();
+            controller.setup(task, isProjectAdmin, currentProjectId, this::loadTasksFromServer);
+            rootStackPane.getChildren().add(overlay);
+            overlay.prefWidthProperty().bind(rootStackPane.widthProperty());
+            overlay.prefHeightProperty().bind(rootStackPane.heightProperty());
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupDropTarget(VBox target, TaskStatus targetStatus) {
