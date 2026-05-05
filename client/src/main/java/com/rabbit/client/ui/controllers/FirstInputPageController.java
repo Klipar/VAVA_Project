@@ -52,14 +52,12 @@ public class FirstInputPageController
                     fullName, nickname, user_email, skills
             );
 
-            // Using ApiClient for updates
             HttpResponse<String> updateResponse = apiClient.put(
                     String.format("/users/%d/update", user_id),
                     updateBody
             );
             System.out.println("Update status: " + updateResponse.statusCode());
 
-            // Using ApiClient for obtaining user
             HttpResponse<String> getUserResponse = apiClient.get(
                     String.format("/users/%d", user_id)
             );

@@ -11,20 +11,16 @@ import com.rabbit.common.enums.UserRole;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import lombok.Setter;
 
-import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class HomePageController {
 
@@ -84,7 +80,6 @@ public class HomePageController {
             }
         });
 
-        // ВИПРАВЛЕНИЙ ФОРМАТ ДАТИ В ТАБЛИЦІ
         colDueDate.setCellFactory(column -> new TableCell<>() {
             private final HBox container = new HBox(8);
             private final Label dateLabel = new Label();
@@ -109,7 +104,6 @@ public class HomePageController {
 
                     if (rawDeadline != null && !rawDeadline.isEmpty()) {
                         try {
-                            // Сервер присилає LocalDateTime.toString(), парсимо його
                             java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(rawDeadline);
                             formattedDate = ldt.format(Config.getInstance().getDateTimeFormatter()).toUpperCase();
                         } catch (Exception e) {
@@ -166,7 +160,7 @@ public class HomePageController {
                         }
                     }
                 }
-                
+
                 myTasks.sort((t1, t2) -> {
                     if (t1.getDeadline() == null && t2.getDeadline() == null) return 0;
                     if (t1.getDeadline() == null) return 1;

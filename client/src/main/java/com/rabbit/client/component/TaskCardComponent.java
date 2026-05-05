@@ -2,7 +2,7 @@ package com.rabbit.client.component;
 
 import com.rabbit.client.Config;
 import com.rabbit.common.dto.TaskDto;
-import com.rabbit.common.enums.Priority; // Імпортуємо наш енум
+import com.rabbit.common.enums.Priority;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;

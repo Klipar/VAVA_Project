@@ -13,7 +13,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -167,10 +166,8 @@ public class SidebarController {
         double btnX = languageBtn.localToScreen(0, 0).getX();
         double btnY = languageBtn.localToScreen(0, 0).getY();
 
-        // Спочатку показуємо поза екраном щоб JavaFX прорахував розміри
         languagePopup.show(languageBtn.getScene().getWindow(), btnX, btnY);
 
-        // Тепер висота відома — переміщуємо над кнопкою
         double popupHeight = languagePopup.getHeight();
         languagePopup.setX(btnX - 16);
         languagePopup.setY(btnY - popupHeight + 12);

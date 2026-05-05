@@ -9,7 +9,7 @@ def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     norm = np.linalg.norm(vec1) * np.linalg.norm(vec2)
     if norm == 0:
         return 0.0
-    
+
     return dot_product / norm
 
 

@@ -28,7 +28,6 @@
                     </HBox>
 
                     <VBox spacing="15" styleClass="admin-main-body">
-                        <!-- Покращена панель пошуку -->
                         <HBox spacing="15" alignment="CENTER_LEFT" styleClass="admin-search-panel-inline">
                             <Label text="Search by:" styleClass="admin-inline-label" style="-fx-font-size: 14px;"/>
                             <HBox spacing="16" alignment="CENTER_LEFT">
@@ -49,12 +48,10 @@
 
                         <VBox spacing="6" styleClass="admin-summary-card">
                             <TableView fx:id="usersTable" styleClass="admin-users-table" VBox.vgrow="ALWAYS" prefHeight="550">
-                                <!-- Це змушує таблицю займати всю ширину контейнера -->
                                 <columnResizePolicy>
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                                 </columnResizePolicy>
                                 <columns>
-                                    <!-- prefWidth тепер працює як відносна вага -->
                                     <TableColumn fx:id="loginColumn" text="Login" prefWidth="150"/>
                                     <TableColumn fx:id="nameColumn" text="Full name" prefWidth="220"/>
                                     <TableColumn fx:id="emailColumn" text="Email" prefWidth="250"/>

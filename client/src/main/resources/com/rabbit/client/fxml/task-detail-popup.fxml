@@ -10,7 +10,6 @@
            styleClass="overlay"
            onMouseClicked="#handleOverlayClick">
 
-    <!-- ДОДАНО: Проміжна обгортка, яка не дає StackPane розтягувати картку -->
     <VBox alignment="CENTER" pickOnBounds="false">
 
         <VBox fx:id="popupCard"
@@ -200,5 +199,5 @@
 
         </VBox>
 
-    </VBox> <!-- Кінець проміжної обгортки -->
+    </VBox>
 </StackPane>

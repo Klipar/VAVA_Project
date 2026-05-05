@@ -40,8 +40,8 @@ def score_worker(new_task: dict, worker: dict, weights: dict=None) -> dict:
 
     final_score = (weights["similarity"] * text_similarity +
                    weights["skill_overlap"] * skill_overlap_result["skill_overlap_score"] +
-                   weights["workload"] * workload_result["workload_score"]) 
-    
+                   weights["workload"] * workload_result["workload_score"])
+
     breakdown = {
         "text_similarity": round(text_similarity, 4),
         "most_similar_task": similarity_result.get("most_similar_task"),

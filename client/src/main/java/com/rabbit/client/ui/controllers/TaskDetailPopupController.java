@@ -25,7 +25,6 @@ import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -89,7 +88,6 @@ public class TaskDetailPopupController {
     private int selectedPriority = -1;
     private Runnable onTaskChanged;
 
-    // Іконка редагування (зображення з ефектом білого кольору)
     private final ImageView editIcon = new ImageView(
             new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/rabbit/client/images/edit.png")))
     );
@@ -111,18 +109,16 @@ public class TaskDetailPopupController {
         deleteTaskBtn.setText(rb.getString("task_detail_delete_task"));
         saveBtn.setText(rb.getString("edit_user_save"));
 
-        // Налаштування іконки редагування: розмір 20x20 та БІЛИЙ КОЛІР через ефект
         editIcon.setFitWidth(20);
         editIcon.setFitHeight(20);
         editIcon.setPreserveRatio(true);
 
-        // Ефект, що робить зображення повністю білим
         ColorAdjust whiteEffect = new ColorAdjust();
-        whiteEffect.setBrightness(1.0); // Максимальна яскравість → всі кольори стають білими
+        whiteEffect.setBrightness(1.0);
         editIcon.setEffect(whiteEffect);
 
         editBtn.setGraphic(editIcon);
-        editBtn.setText(""); // Прибираємо текстовий символ ✎
+        editBtn.setText("");
 
         buildPriorityButtons();
         configureAssigneeCombo();

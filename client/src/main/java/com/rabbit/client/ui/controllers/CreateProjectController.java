@@ -59,7 +59,7 @@ public class CreateProjectController {
                 }
             }
         });
-        
+
         suggestionsListView.setOnMouseClicked(event -> {
             String selected = suggestionsListView.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -84,7 +84,7 @@ public class CreateProjectController {
                 .map(UserDto::getNickname)
                 .limit(8)
                 .collect(Collectors.toList());
- 
+
             if (matches.isEmpty()) {
                 hideSuggestions();
             } else {
@@ -94,7 +94,7 @@ public class CreateProjectController {
                 showSuggestions();
             }
         });
- 
+
         // Hide on focus lost
         assignField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
@@ -106,12 +106,12 @@ public class CreateProjectController {
             }
         });
     }
- 
+
     private void showSuggestions() {
         suggestionsListView.setVisible(true);
         suggestionsListView.setManaged(true);
     }
- 
+
     private void hideSuggestions() {
         suggestionsListView.setVisible(false);
         suggestionsListView.setManaged(false);
@@ -124,7 +124,7 @@ public class CreateProjectController {
             u.getId().longValue() == user.getId().longValue()
         );
     }
- 
+
     /** Fetch all users once so autocomplete works offline/fast. */
     private void loadAllUsers() {
         new Thread(() -> {
@@ -147,32 +147,32 @@ public class CreateProjectController {
 
     private void addUserByNickname(String name) {
         java.util.ResourceBundle rb = Config.getInstance().getBundle();
- 
+
         boolean alreadyAdded = assignedUsers.stream()
             .anyMatch(u -> u.getNickname() != null && u.getNickname().equalsIgnoreCase(name));
         if (alreadyAdded) {
             showAlert(rb.getString("user_already_assigned") + ": " + name);
             return;
         }
- 
+
         UserDto currentUser = Config.getInstance().getUser();
         if (currentUser.getNickname() != null && currentUser.getNickname().equalsIgnoreCase(name)) {
             showAlert(rb.getString("creator_auto_added"));
             return;
         }
- 
+
         // Try to resolve from already-loaded list first (fast path)
         UserDto cached = allUsers.stream()
             .filter(u -> u.getNickname() != null && u.getNickname().equalsIgnoreCase(name))
             .findFirst()
             .orElse(null);
- 
+
         if (cached != null) {
             addChip(cached);
             assignField.clear();
             return;
         }
- 
+
         // Fallback: fetch from server
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:6969/users/nickname/" + name))
@@ -193,11 +193,11 @@ public class CreateProjectController {
             showAlert(rb.getString("error_fetch_user"));
         }
     }
- 
+
     private void addChip(UserDto user) {
         assignedPeople.add(user.getNickname());
         assignedUsers.add(user);
- 
+
         HBox chip = new HBox(5);
         chip.getStyleClass().add("assign-chip");
         Label nameLabel = new Label(user.getNickname());
@@ -281,7 +281,7 @@ public class CreateProjectController {
                     showAlert(Config.getInstance().getBundle().getString("not_logged_in"));
                     return false;
                 }
-                
+
                 //POST /projects/{projectId}/users/{userId}/add
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create("http://localhost:6969/projects/" + projectId + "/users/" + user.getId() + "/add"))
@@ -289,16 +289,16 @@ public class CreateProjectController {
                         .header("Authorization", "Bearer " + token.trim())
                         .POST(HttpRequest.BodyPublishers.ofString("{}"))
                         .build();
-    
+
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-    
+
                 int status = response.statusCode();
                 String responseBody = response.body();
-    
+
                 // Debug logs for terminal
                 System.out.println("[FetchUser] status=" + status);
                 System.out.println("[FetchUser] body=" + responseBody);
-    
+
                 if (status == 200 || status == 201) {
                     return true;
                 } else if (status == 401) {

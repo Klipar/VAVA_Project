@@ -37,7 +37,7 @@ public class TaskRepository {
     public boolean updateStatus(int taskId, String newStatus) throws SQLException {
         return db.update("""
         UPDATE tasks SET
-            status = ?::task_status 
+            status = ?::task_status
         WHERE id = ?
     """,
                 newStatus,

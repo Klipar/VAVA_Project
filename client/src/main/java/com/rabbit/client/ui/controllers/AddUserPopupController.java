@@ -96,7 +96,7 @@ public class AddUserPopupController {
 
                 Platform.runLater(() -> {
                     if (apiClient.isSuccess(response)) {
-                        
+
                         if (onCreated != null) {
                             onCreated.run();
                         }

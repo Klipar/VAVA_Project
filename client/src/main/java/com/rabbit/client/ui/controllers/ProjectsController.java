@@ -32,7 +32,7 @@ public class ProjectsController {
     @FXML
     public void initialize() {
         List<ProjectDto> projects = getProjects();
-    
+
         int recentCount = Math.min(3, projects.size());
         List<ProjectDto> recentProjects = projects.subList(0, recentCount);
         List<ProjectDto> yourProjects = projects;
@@ -43,7 +43,7 @@ public class ProjectsController {
         for (ProjectDto p : yourProjects) {
             yourProjectsPane.getChildren().add(createProjectCard(p));
         }
-        
+
         for (ProjectDto p : projects) {
             System.out.println("[Project] id=" + p.getId() + " title=" + p.getTitle());
         }

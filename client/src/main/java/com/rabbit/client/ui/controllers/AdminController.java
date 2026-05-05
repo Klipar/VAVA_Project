@@ -15,7 +15,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -30,14 +29,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.control.ScrollBar;
 import lombok.Setter;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Objects;
 
 public class AdminController {
@@ -94,10 +90,8 @@ public class AdminController {
     }
 
     private void configureTable() {
-        // ВИПРАВЛЕННЯ: Розтягуємо колонки на всю доступну ширину
         usersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // ВИПРАВЛЕННЯ: Збільшуємо загальний розмір тексту в таблиці
         usersTable.setStyle("-fx-font-size: 14px; -fx-selection-bar: rgba(127, 214, 255, 0.1);");
 
         loginColumn.setCellValueFactory(data -> new SimpleStringProperty(valueOrDash(data.getValue().getNickname())));
@@ -159,17 +153,11 @@ public class AdminController {
                 super.updateItem(item, empty);
                 setGraphic(empty ? null : actionsBox);
             }
-
-            private UserDto getCurrentTableRow() {
-                if (getIndex() < 0 || getIndex() >= usersTable.getItems().size()) return null;
-                return usersTable.getItems().get(getIndex());
-            }
         });
 
         usersTable.setItems(users);
     }
 
-    // Решта методів (handleSearchUser, loadAllUsers тощо) залишаються без змін...
 
     @FXML
     private void handleSearchUser() {

@@ -22,7 +22,6 @@ public enum Priority {
         for (Priority p : values()) {
             if (p.level == level) return p;
         }
-        // Якщо прийшло значення поза межами (наприклад, стара база), повертаємо MEDIUM за замовчуванням
         return MEDIUM;
     }
 }

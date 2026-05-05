@@ -13,4 +13,4 @@ public class WorkerResultDto {
     private float final_score;
     private String explanation;
     private ScoreBreakdownDto breakdown;
-}   
+}
