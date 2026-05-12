@@ -151,7 +151,10 @@ public class CreateTaskPopupController {
     @FXML
     private void handleAiSuggest() {
         String skills = skillsField.getText().trim();
-        if (skills.isBlank()) { showAiError(com.rabbit.client.Config.getInstance().getBundle().getString("enter_skill")); return; }
+        if (skills.isBlank()) {
+            showAiError(com.rabbit.client.Config.getInstance().getBundle().getString("enter_skill"));
+            return;
+        }
 
         setAiLoading(true);
         clearAiResults();
@@ -159,36 +162,67 @@ public class CreateTaskPopupController {
         new Thread(() -> {
             try {
                 var usersResp = apiClient.get("/projects/" + currentProjectId + "/users");
-                if (!apiClient.isSuccess(usersResp)) { Platform.runLater(() -> setAiLoading(false)); return; }
+                if (!apiClient.isSuccess(usersResp)) {
+                    Platform.runLater(() -> { setAiLoading(false); showAiError("Failed to load project users."); });
+                    return;
+                }
 
                 List<UserDto> users = mapper.readValue(usersResp.body(), new TypeReference<>() {});
+
                 List<String> requiredSkills = Arrays.stream(skills.split(","))
-                        .map(String::trim).filter(s -> !s.isBlank()).toList();
+                        .map(String::trim)
+                        .filter(s -> !s.isBlank())
+                        .toList();
 
                 List<Map<String, Object>> workers = users.stream().map(u -> {
-                    Map<String, Object> w = new HashMap<>();
+                    Map<String, Object> w = new LinkedHashMap<>();
                     w.put("id",   u.getId());
                     w.put("name", u.getNickname() != null ? u.getNickname() : u.getName());
-                    w.put("skills", List.of());
+
+                    List<String> userSkills = new ArrayList<>();
+                    if (u.getSkills() != null && !u.getSkills().isBlank()) {
+                        userSkills = Arrays.stream(u.getSkills().split(","))
+                                .map(String::trim)
+                                .filter(s -> !s.isBlank())
+                                .toList();
+                    }
+                    w.put("skills", userSkills);
                     w.put("active_tasks", 0);
                     w.put("max_tasks", 5);
                     w.put("past_tasks", List.of());
                     return w;
                 }).toList();
 
-                Map<String, Object> body = Map.of(
-                    "description",     descriptionField.getText().trim(),
-                    "required_skills", requiredSkills,
-                    "workers",         workers
-                );
+                Map<String, Object> body = new LinkedHashMap<>();
+                body.put("description",     descriptionField.getText().trim());
+                body.put("required_skills", requiredSkills);
+                body.put("workers",         workers);
 
                 var aiResp = apiClient.post("/ai/suggest", mapper.writeValueAsString(body));
+
                 if (apiClient.isSuccess(aiResp)) {
                     Map<String, Object> result = mapper.readValue(aiResp.body(), new TypeReference<>() {});
-                    List<Map<String, Object>> top3 =
-                        ((List<Map<String, Object>>) result.get("ranked_workers")).stream().limit(3).toList();
 
-                    Platform.runLater(() -> { setAiLoading(false); renderAiResults(top3, users); });
+                    List<Map<String, Object>> ranked;
+
+                    if (result.containsKey("ranked_workers")) {
+                        ranked = ((List<Map<String, Object>>) result.get("ranked_workers"))
+                                .stream().limit(3).toList();
+                    } else if (result.containsKey("suggested_worker_id")) {
+                        Map<String, Object> single = new LinkedHashMap<>();
+                        single.put("worker_id",   result.get("suggested_worker_id"));
+                        single.put("worker_name", result.getOrDefault("suggested_worker_name", "Unknown"));
+                        single.put("explanation", result.getOrDefault("reason", ""));
+                        single.put("final_score", result.getOrDefault("confidence_score", 0.0));
+                        ranked = List.of(single);
+                    } else {
+                        Platform.runLater(() -> { setAiLoading(false); showAiError("Unexpected AI response format."); });
+                        return;
+                    }
+
+                    final List<Map<String, Object>> finalRanked = ranked;
+                    Platform.runLater(() -> { setAiLoading(false); renderAiResults(finalRanked, users); });
+
                 } else {
                     Platform.runLater(() -> { setAiLoading(false); showAiError("AI error: " + aiResp.statusCode()); });
                 }
@@ -203,32 +237,45 @@ public class CreateTaskPopupController {
         users.forEach(u -> userMap.put(u.getId(), u));
 
         for (int i = 0; i < ranked.size(); i++) {
-            var entry      = ranked.get(i);
-            long id        = ((Number) entry.get("worker_id")).longValue();
-            String name    = (String) entry.getOrDefault("worker_name", "Unknown");
-            String expl    = (String) entry.getOrDefault("explanation", "");
+            var entry = ranked.get(i);
+
+            long id = ((Number) entry.get("worker_id")).longValue();
+            String name  = (String) entry.getOrDefault("worker_name", "Unknown");
+            String expl  = (String) entry.getOrDefault("explanation", "");
+
+            Object scoreObj = entry.get("final_score");
+            if (scoreObj == null) scoreObj = entry.get("confidence_score");
+            String scoreText = scoreObj != null
+                    ? String.format("%.0f%%", ((Number) scoreObj).doubleValue() * 100)
+                    : "";
+
             UserDto target = userMap.get(id);
 
             Label rankLbl = new Label((i + 1) + ".");
             rankLbl.setStyle("-fx-text-fill:white;-fx-font-weight:bold;-fx-font-size:14px;-fx-min-width:20;");
+
             Label nameLbl = new Label(name);
             nameLbl.setStyle("-fx-text-fill:white;-fx-font-weight:bold;-fx-font-size:14px;");
             HBox.setHgrow(nameLbl, Priority.ALWAYS);
+
+            Label scoreLbl = new Label(scoreText);
+            scoreLbl.setStyle("-fx-text-fill:#6aa896;-fx-font-size:12px;-fx-font-weight:bold;");
+
             Label avatar = new Label("\uD83D\uDC64");
             avatar.setStyle("-fx-font-size:18px;-fx-opacity:0.7;");
 
-            HBox left = new HBox(10, rankLbl, nameLbl, avatar);
+            HBox left = new HBox(8, rankLbl, nameLbl, scoreLbl, avatar);
             left.setAlignment(Pos.CENTER_LEFT);
             left.setPadding(new Insets(12, 14, 12, 14));
-            left.setStyle("-fx-background-color:#0a1f33;-fx-background-radius:9 0 0 9;-fx-min-width:170;-fx-cursor:hand;");
+            left.setStyle("-fx-background-color:#0a1f33;-fx-background-radius:9 0 0 9;-fx-min-width:190;-fx-cursor:hand;");
 
             if (target != null) {
                 left.setOnMouseClicked(e -> assigneeCombo.setValue(target));
-                left.setOnMouseEntered(e -> left.setStyle("-fx-background-color:#1a3a56;-fx-background-radius:9 0 0 9;-fx-min-width:170;-fx-cursor:hand;"));
-                left.setOnMouseExited(e  -> left.setStyle("-fx-background-color:#0a1f33;-fx-background-radius:9 0 0 9;-fx-min-width:170;-fx-cursor:hand;"));
+                left.setOnMouseEntered(e -> left.setStyle("-fx-background-color:#1a3a56;-fx-background-radius:9 0 0 9;-fx-min-width:190;-fx-cursor:hand;"));
+                left.setOnMouseExited(e  -> left.setStyle("-fx-background-color:#0a1f33;-fx-background-radius:9 0 0 9;-fx-min-width:190;-fx-cursor:hand;"));
             }
 
-            Label explLbl = new Label("• " + expl);
+            Label explLbl = new Label(expl.isBlank() ? "No explanation provided." : "• " + expl);
             explLbl.setStyle("-fx-text-fill:#333;-fx-font-size:13px;");
             explLbl.setWrapText(true);
             explLbl.setMaxWidth(Double.MAX_VALUE);
@@ -252,19 +299,15 @@ public class CreateTaskPopupController {
                     Platform.runLater(() -> {
                         explLbl.applyCss();
                         double availableWidth = right.getWidth() - (right.getPadding().getLeft() + right.getPadding().getRight());
-                        if (availableWidth <= 0) {
-                            availableWidth = popupCard.getWidth() - 200;
-                        }
+                        if (availableWidth <= 0) availableWidth = popupCard.getWidth() - 220;
                         explLbl.setPrefWidth(availableWidth);
 
                         Text measureText = new Text(explLbl.getText());
                         measureText.setFont(explLbl.getFont());
                         measureText.setWrappingWidth(availableWidth);
 
-                        double explanationHeight = Math.ceil(measureText.getLayoutBounds().getHeight());
-                        Insets padding = right.getPadding();
                         double targetH = Math.max(
-                                explanationHeight + padding.getTop() + padding.getBottom() + 4,
+                                Math.ceil(measureText.getLayoutBounds().getHeight()) + right.getPadding().getTop() + right.getPadding().getBottom() + 4,
                                 COLLAPSED_HEIGHT
                         );
                         explLbl.setMinHeight(targetH);
@@ -294,7 +337,6 @@ public class CreateTaskPopupController {
             HBox row = new HBox(left, right);
             row.setStyle("-fx-border-color:#3E6273;-fx-border-radius:10;-fx-border-width:2;-fx-background-radius:10;");
             VBox.setMargin(row, new Insets(i == 0 ? 4 : 8, 0, 0, 0));
-
             aiResultsBox.getChildren().add(row);
         }
 
@@ -309,9 +351,6 @@ public class CreateTaskPopupController {
         aiResultsBox.setVisible(false);
         aiResultsBox.setManaged(false);
     }
-
-
-    
 
     private void showAiResults() {
         aiResultsBox.setVisible(true);
