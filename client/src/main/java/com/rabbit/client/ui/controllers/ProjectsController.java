@@ -1,5 +1,6 @@
 package com.rabbit.client.ui.controllers;
 
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -8,19 +9,20 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbit.client.Config;
 import com.rabbit.common.dto.ProjectDto;
 import com.rabbit.common.dto.UserDto;
 import com.rabbit.common.enums.UserRole;
-import com.rabbit.client.Config;
-
-import java.net.URI;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -101,8 +103,26 @@ public class ProjectsController {
             });
             card.getChildren().add(deleteBtn);
 
-            Button editBtn = new Button("✎");
-            editBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #8ab0c2; -fx-padding: 0; -fx-cursor: hand; -fx-font-size: 20px;");
+            ImageView icon = new ImageView(
+                new Image(getClass().getResourceAsStream(
+                    "/com/rabbit/client/images/edit.png"
+                ))
+            );
+
+            icon.setFitWidth(16);
+            icon.setFitHeight(16);
+
+            ColorAdjust makeWhite = new ColorAdjust();
+            makeWhite.setBrightness(1.0);
+            icon.setEffect(makeWhite);
+
+
+            Button editBtn = new Button("Edit project");
+            editBtn.setGraphic(icon);
+
+            editBtn.getStyleClass().add("edit-btn");
+
+            editBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #8ab0c2; -fx-padding: 0; -fx-cursor: hand;");
             editBtn.setOnAction(e -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/project-edit-popup.fxml"), Config.getInstance().getBundle());
