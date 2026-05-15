@@ -47,7 +47,7 @@ def generate_explanation(breakdown: dict) -> str:
     sim = breakdown["text_similarity"]
     if sim >= 0.8:
         parts.append(f"Their past work is very similar to this task (\"{breakdown['most_similar_task']}\").")
-    elif sim >= 0.5:
+    elif sim >= 0.4:
         parts.append(f"They have some relevant past experience (\"{breakdown['most_similar_task']}\").")
     elif breakdown["most_similar_task"] is None:
         parts.append("They have no recorded past tasks to compare against.")
