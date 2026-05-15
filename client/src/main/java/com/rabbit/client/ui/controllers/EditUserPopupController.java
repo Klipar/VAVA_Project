@@ -29,6 +29,7 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 public class EditUserPopupController {
     @FXML private StackPane overlayPane;
@@ -46,6 +47,7 @@ public class EditUserPopupController {
 
     private final ApiClient apiClient = ApiClient.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     @Setter
     private MainController mainController;
@@ -98,6 +100,11 @@ public class EditUserPopupController {
         if (nickname.isBlank() || fullName.isBlank() || email.isBlank()) {
             var rb = Config.getInstance().getBundle();
             showAlert(rb.getString("validation_error"), rb.getString("edit_user_validation"));
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showAlert(Config.getInstance().getBundle().getString("validation_error"), "Please enter a valid email address.");
             return;
         }
 
@@ -183,6 +190,10 @@ public class EditUserPopupController {
         } catch (Exception e) {
             return Config.getInstance().getBundle().getString("add_user_unknown_error");
         }
+    }
+
+    private static boolean isValidEmail(String email) {
+        return email != null && !email.isBlank() && EMAIL_PATTERN.matcher(email).matches();
     }
 
     private void closePopup() {

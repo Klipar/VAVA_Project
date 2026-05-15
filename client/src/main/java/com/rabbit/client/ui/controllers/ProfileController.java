@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class ProfileController {
 
@@ -33,6 +34,7 @@ public class ProfileController {
     private final UserService userService = UserService.getInstance();
     private final ApiClient apiClient = ApiClient.getInstance();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     @FXML
     public void initialize() {
@@ -70,9 +72,19 @@ public class ProfileController {
             emailField.setEditable(true);
             emailField.requestFocus();
         } else {
-            saveField("email", emailField.getText());
+            String email = emailField.getText().trim();
+            if (!isValidEmail(email)) {
+                showAlert("Invalid email", "Please enter a valid email address.");
+                emailField.requestFocus();
+                return;
+            }
+            saveField("email", email);
             emailField.setEditable(false);
         }
+    }
+
+    private static boolean isValidEmail(String email) {
+        return email != null && !email.isBlank() && EMAIL_PATTERN.matcher(email).matches();
     }
 
     @FXML
