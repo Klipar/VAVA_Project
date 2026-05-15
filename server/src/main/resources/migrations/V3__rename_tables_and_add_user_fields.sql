@@ -57,3 +57,11 @@ ALTER TABLE users
 
 -- RENAME COLUMN
 ALTER TABLE users RENAME COLUMN password TO password_hash;
+
+-- USER SKILLS (use 'users' not '"user"' — table was renamed above)
+UPDATE users SET skills = 'team management, project planning, stakeholder communication, agile, budgeting' WHERE id = 1;
+UPDATE users SET skills = 'team leadership, code review, sprint planning, mentoring, system design' WHERE id = 2;
+UPDATE users SET skills = 'PostgreSQL, database design, query optimization, migrations, indexing, Docker' WHERE id = 3;
+UPDATE users SET skills = 'React, Figma, CSS, UI/UX design, accessibility, component libraries' WHERE id = 4;
+UPDATE users SET skills = 'Java, Spring Boot, REST API, JWT, OAuth, unit testing, CI/CD' WHERE id = 5;
+ 
