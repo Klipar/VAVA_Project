@@ -43,7 +43,7 @@ public class AiProxyService {
                         t.description
                         FROM
                         tasks AS t
-                        WHERE t.assigned_to = ?
+                        WHERE t.assigned_to = ? AND t.status = 'done'
                         """, worker.getId())
                         .stream()
                         .map(row -> new PastTaskDto(
