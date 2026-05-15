@@ -16,13 +16,7 @@ Rabbit is a student Java project composed of:
 - `client` — JavaFX client application for the graphical interface
 - `common` — shared models and DTOs for both client and server
 
-## Screenshots
-
-Add a few UI screenshots here:
-
-- `screenshots/desktop-1.png`
-- `screenshots/desktop-2.png`
-
+## Demo
 ![Main screen](media/Screenshot_20260515_152734.png)
 <div align="center">
   <img src="media/Screenshot_20260515_152826.png" width="45%">
@@ -100,6 +94,14 @@ After the server is running, check the basic endpoint:
 ```bash
 curl http://localhost:6969/hello
 ```
+
+And open documentation:
+```bash
+http://localhost:6969/swagger
+```
+For using endpoint you need to login throw auth request and add it as bearerAuth.
+
+Password for all seed users is `qwerty`.
 
 ## PGAdmin Setup (optional)
 
