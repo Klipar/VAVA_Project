@@ -59,9 +59,6 @@
                        -fx-font-size: 15px;
                        -fx-font-weight: bold;
                        -fx-background-radius: 6;"/>
-
-        <Label text="%contact_us"
-               style="-fx-text-fill: #b0b0b0; -fx-font-size: 12px;"/>
     </VBox>
 
 </HBox>
