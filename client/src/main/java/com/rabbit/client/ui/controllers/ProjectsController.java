@@ -16,11 +16,13 @@ import com.rabbit.client.Config;
 import java.net.URI;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 public class ProjectsController {
@@ -98,6 +100,30 @@ public class ProjectsController {
                 }
             });
             card.getChildren().add(deleteBtn);
+
+            Button editBtn = new Button("✎");
+            editBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #8ab0c2; -fx-padding: 0; -fx-cursor: hand; -fx-font-size: 20px;");
+            editBtn.setOnAction(e -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rabbit/client/fxml/project-edit-popup.fxml"), Config.getInstance().getBundle());
+                    Pane overlay = loader.load();
+                    ProjectEditPopupController controller = loader.getController();
+                    controller.setup(project, () -> {
+                        recentProjectsPane.getChildren().clear();
+                        yourProjectsPane.getChildren().clear();
+                        initialize();
+                    });
+                    MainController mc = MainController.getInstance();
+                    if (mc != null) {
+                        mc.getOverlayPane().getChildren().add(overlay);
+                        overlay.prefWidthProperty().bind(mc.getOverlayPane().widthProperty());
+                        overlay.prefHeightProperty().bind(mc.getOverlayPane().heightProperty());
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+            card.getChildren().add(editBtn);
         }
         return card;
     }

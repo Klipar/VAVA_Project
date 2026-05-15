@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="overlayPane"
+           fx:controller="com.rabbit.client.ui.controllers.ProjectEditPopupController"
+           styleClass="overlay"
+           onMouseClicked="#handleOverlayClick">
+
+    <VBox alignment="CENTER" pickOnBounds="false">
+
+        <VBox fx:id="popupCard"
+              maxWidth="620"
+              prefWidth="580"
+              maxHeight="680"
+              spacing="0"
+              onMouseClicked="#consumeClick"
+              styleClass="popup-card">
+
+            <HBox alignment="CENTER_LEFT" spacing="12" styleClass="popup-header">
+                <Label fx:id="projectTitleLabel" styleClass="popup-title" text="%edit_project_title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="%cancel_btn" onAction="#handleClose" styleClass="close-btn"/>
+            </HBox>
+
+            <VBox VBox.vgrow="ALWAYS" spacing="0">
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="popup-scroll">
+                    <VBox spacing="18" styleClass="popup-body">
+                        <padding><Insets top="24" left="24" right="24" bottom="16"/></padding>
+
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Label text="%project_name" styleClass="field-label" minWidth="120"/>
+                            <TextField fx:id="editTitleField" HBox.hgrow="ALWAYS" styleClass="input-white"/>
+                        </HBox>
+
+                        <VBox spacing="6">
+                            <Label text="%description" styleClass="field-label"/>
+                            <TextArea fx:id="editDescriptionField" wrapText="true" prefHeight="120" styleClass="input-white"/>
+                        </VBox>
+
+                        <Label text="%assigned_label" styleClass="admin-field-label"/>
+
+                        <VBox spacing="0">
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <TextField fx:id="assignField" prefWidth="400"
+                                           promptText="%assigned_label"
+                                           styleClass="input-white"/>
+                                <Button fx:id="addAssignBtn" text="+" onAction="#handleAddAssign"
+                                        styleClass="assign-add-btn"/>
+                            </HBox>
+
+                            <ListView fx:id="suggestionsListView"
+                                      prefWidth="400"
+                                      maxHeight="180"
+                                      visible="false"
+                                      managed="false"
+                                      styleClass="assign-suggestions"/>
+                        </VBox>
+
+                        <FlowPane fx:id="assignedChipsPane" hgap="10" vgap="10"/>
+
+                        <Separator styleClass="divider"/>
+
+                        <HBox spacing="12" alignment="CENTER_LEFT"
+                              style="-fx-background-color: #0a1f33; -fx-background-radius: 10; -fx-padding: 12 20; -fx-border-color: #3E6273; -fx-border-radius: 10; -fx-border-width: 2.5;">
+                            <ImageView fitWidth="20" fitHeight="20">
+                                <Image url="@../images/calendar.png"/>
+                            </ImageView>
+                            <DatePicker fx:id="editDeadlinePicker" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" styleClass="date-input"/>
+                        </HBox>
+
+                    </VBox>
+                </ScrollPane>
+            </VBox>
+
+            <HBox styleClass="popup-footer" spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="cancelBtn" onAction="#handleCancel" styleClass="btn-cancel" text="%cancel_btn"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="deleteBtn" onAction="#handleDelete" styleClass="btn-danger" text="%delete"/>
+                <Button fx:id="saveBtn" onAction="#handleSaveChanges" styleClass="btn-create" text="%edit_user_save"/>
+            </HBox>
+
+        </VBox>
+
+    </VBox>
+</StackPane>

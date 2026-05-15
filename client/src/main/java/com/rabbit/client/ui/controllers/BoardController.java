@@ -174,9 +174,17 @@ public class BoardController {
             );
         }
         if (tasksBtn != null) {
-            tasksBtn.setOnAction(e ->
-                    mainController.loadView("my-tasks-view.fxml")
-            );
+            com.rabbit.common.dto.UserDto user = com.rabbit.client.Config.getInstance().getUser();
+            if (user != null && user.getRole() == com.rabbit.common.enums.UserRole.MANAGER) {
+                tasksBtn.setVisible(false);
+                tasksBtn.setManaged(false);
+            } else {
+                tasksBtn.setVisible(true);
+                tasksBtn.setManaged(true);
+                tasksBtn.setOnAction(e ->
+                        mainController.loadView("my-tasks-view.fxml")
+                );
+            }
         }
     }
 

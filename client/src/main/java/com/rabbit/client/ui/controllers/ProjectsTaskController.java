@@ -59,18 +59,26 @@ public class ProjectsTaskController {
                     mainController.loadView("board-page.fxml", currentProjectId, currentProjectTitle));
             listBtn.setOnAction(e ->
                     mainController.loadView("project-tasks-view.fxml", currentProjectId, currentProjectTitle));
-            tasksBtn.setOnAction(e -> mainController.loadView("my-tasks-view.fxml"));
+            var currentUser = UserService.getInstance().getCurrentUser();
+            if (currentUser != null && currentUser.getRole() == UserRole.MANAGER) {
+                tasksBtn.setVisible(false);
+                tasksBtn.setManaged(false);
+            } else {
+                tasksBtn.setVisible(true);
+                tasksBtn.setManaged(true);
+                tasksBtn.setOnAction(e -> mainController.loadView("my-tasks-view.fxml"));
+            }
         }
         boardBtn.getStyleClass().remove("active-nav-button");
         listBtn.getStyleClass().add("active-nav-button");
         tasksBtn.getStyleClass().remove("active-nav-button");
 
-        boolean isAdmin = UserService.getInstance().getCurrentUser().getRole() == UserRole.MANAGER ||
-                UserService.getInstance().getCurrentUser().getRole() == UserRole.TEAM_LEADER;
-        topCreateTaskBtn.setVisible(isAdmin);
-        topCreateTaskBtn.setManaged(isAdmin);
+        var currentUser = UserService.getInstance().getCurrentUser();
+        boolean initiallyVisible = currentUser != null && currentUser.getRole() == UserRole.TEAM_LEADER;
+        topCreateTaskBtn.setVisible(initiallyVisible);
+        topCreateTaskBtn.setManaged(initiallyVisible);
+        topCreateTaskBtn.setOnAction(e -> openCreateTaskPopup());
 
-        // Check project-level role asynchronously
         new Thread(() -> {
             try {
                 var resp = apiClient.get("/projects/" + projectId + "/role");
@@ -78,7 +86,15 @@ public class ProjectsTaskController {
                     @SuppressWarnings("unchecked")
                     Map<String, String> result = mapper.readValue(resp.body(), Map.class);
                     String role = result.getOrDefault("role", "none");
-                    Platform.runLater(() -> this.isMaster = "master".equals(role));
+                    boolean master = "master".equals(role);
+                    Platform.runLater(() -> {
+                        this.isMaster = master;
+                        if (master) {
+                            topCreateTaskBtn.setVisible(true);
+                            topCreateTaskBtn.setManaged(true);
+                            topCreateTaskBtn.setOnAction(ev -> openCreateTaskPopup());
+                        }
+                    });
                 }
             } catch (Exception ignored) {}
         }).start();
@@ -217,6 +233,28 @@ public class ProjectsTaskController {
             return zdt.format(Config.getInstance().getDateTimeFormatter()).toUpperCase();
         } catch (Exception e) {
             return deadlineStr.toUpperCase();
+        }
+    }
+
+    private void openCreateTaskPopup() {
+        if (rootStackPane == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/rabbit/client/fxml/create-task-popup.fxml"),
+                    Config.getInstance().getBundle()
+            );
+            Pane overlay = loader.load();
+
+            CreateTaskPopupController controller = loader.getController();
+            controller.setup(currentProjectId, this::loadTasksForProject);
+
+            rootStackPane.getChildren().add(overlay);
+
+            overlay.prefWidthProperty().bind(rootStackPane.widthProperty());
+            overlay.prefHeightProperty().bind(rootStackPane.heightProperty());
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
